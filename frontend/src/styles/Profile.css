@@ -1,0 +1,208 @@
+/* Conteneur principal du profil */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: rgb(0, 11, 77);
+  padding-top: 80px;
+  padding-bottom: 50px;
+  
+}
+
+/* Carte du profil */
+.profile-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 90%; /* Eviter que le contenu dépasse de la carte */
+  margin: 0 auto;
+  margin-bottom: 30px;
+  position: relative;
+  padding-left: 10%;
+  padding-right: 5%;
+  padding-top: 5%;
+  padding-bottom: 3%;
+  color:#ead3d3;
+  box-shadow: 7px 10px 15px rgb(0, 0, 0);
+  background-color: rgba(18, 18, 18, 0.613);
+  border: 2px solid rgb(156, 155, 254);
+  border-radius: 10px;
+  max-width: 1920px; /* Limiter la largeur maximale */
+}
+
+/* Carte du profil avec les informations */
+.profile-card-body {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  gap: 20px;
+  
+}
+
+/* Sur petits écrans, placer les informations en haut et le carousel en bas */
+@media (min-width: 900px) {
+  .profile-card-body {
+    flex-direction: column; /* Les éléments sont en colonne sur petits écrans */
+    gap: 10px;
+  }
+
+  .carousel {
+    width: 100%;
+    height: 250px; /* Hauteur réduite pour les petits écrans */
+  }
+}
+
+/* Sur petits écrans, placer les informations en haut et le carousel en bas */
+@media (min-width: 768px) {
+  .profile-card-body {
+    flex-direction: column; /* Les éléments sont en colonne sur petits écrans */
+    gap: 10px;
+  }
+
+  .carousel {
+    width: 100%;
+    height: 250px; /* Hauteur réduite pour les petits écrans */
+  }
+}
+
+/* Conteneur du carousel avec des dimensions fixes */
+.carousel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Carrousel */
+.carousel {
+  width: 100%;
+  height: 450px; /* Taille réduite pour le carousel sur mobile/tablette */
+  display: flex;
+  justify-content: center;
+  position: relative;
+  background-color: #ead3d3;
+  border-radius: 10px;
+  box-shadow: 5px 5px 20px rgba(28, 78, 216, 0.5);
+}
+
+/* Ajuster l'image pour ne pas être coupée */
+.carousel-item {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Redimensionner les images à l'intérieur du carousel */
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Remplissage sans déformation et sans espace vide */
+  transition: transform 0.3s ease;
+  border-radius: 10px;
+}
+
+/* Effet zoom au survol */
+.carousel-item:hover img {
+  transform: scale(1.05); /* Effet zoom lors du survol */
+  border-radius: 10px;
+}
+
+/* Légende du carousel */
+.carousel-item .carousel-caption {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ead3d3;
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+/* Informations du profil à droite */
+.profile-info {
+  flex: 1;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  max-width: 100%;
+}
+
+/* Responsivité et contenu qui ne coupe pas */
+.profile-info h1,
+.profile-info p {
+  word-wrap: break-word; /* Autoriser le retour à la ligne */
+  word-break: break-word;
+  overflow-wrap: break-word;
+  margin-bottom: 10px;
+}
+
+/* Largeur des titres */
+.profile-info h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  word-break: normal;
+}
+
+/* Ajustement sur petit écran */
+@media (max-width: 768px) {
+  .profile-info h1 {
+    font-size: 1.8rem; /* Réduire la taille du titre */
+  }
+
+  .profile-info p {
+    font-size: 1rem; /* Réduire la taille du texte */
+  }
+}
+
+/* Message d'erreur */
+.profile-error {
+  color: red;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+/* Liens des détails du profil */
+.profile-details {
+  margin-top: 20px;
+}
+
+.profile-details a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.profile-details a:hover {
+  text-decoration: underline;
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 5;
+}
+
+.profile-list button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.profile-list button:hover {
+  background-color: #0056b3;
+}

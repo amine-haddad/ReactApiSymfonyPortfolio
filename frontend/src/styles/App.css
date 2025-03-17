@@ -1,0 +1,48 @@
+.app {
+  z-index: 0;
+  color: #ead3d3;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+h1, h2{
+  font-family: 'Irish Grover', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  max-width: 1920px;
+  color: #ead3d3;
+  padding-bottom: 3rem;
+  text-shadow:3px 4px 0px rgb(27, 55, 193);
+}
+
+.dynamic-shapes-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+/*
+//afficher la bordure de tout les elements existant
+
+* {
+    border: 1px solid red;
+  }
+*/

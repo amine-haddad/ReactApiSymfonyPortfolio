@@ -1,0 +1,35 @@
+.dynamic-shapes-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: url('/assets/clavierFondBleuter.jpeg') no-repeat center/cover;
+  z-index: 0;
+}
+
+.dynamic-shapes-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  z-index: -1;
+}
+:root {
+  --gradient-start: rgba(18, 242, 235, 0.386);
+  --gradient-end: rgb(0, 12, 77);
+}
+
+.dynamic-shapes-container::before {
+  background: linear-gradient(var(--gradient-start), var(--gradient-end));
+}
+
+  .dynamic-shapes-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }

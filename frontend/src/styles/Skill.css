@@ -1,0 +1,147 @@
+/* Conteneur principal */
+.SkillFrame {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  overflow: visible; /* Assurer que rien ne bloque */
+  padding-bottom: 50px;
+  padding-top: 70px;
+  background-color: rgb(0, 11, 77);
+}
+
+/* Conteneur des compétences */
+.skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 30px 5px;
+  justify-content: flex-start;
+  gap: 0.5vw;
+  width: 90%;
+  max-width: 1920px;
+  margin: 0 auto;
+  position: relative;
+  overflow: visible; /* Permettre l'effet hover */
+  z-index: 1;
+  box-shadow: 7px 10px 15px rgb(0, 0, 0);
+  background-color: rgba(18, 18, 18, 0.613);
+  border: 2px solid rgb(156, 155, 254);
+  border-radius: 10px;
+}
+
+/* Médaillons des compétences */
+.skill-medallion {
+  position: relative;
+  width: 8vw;
+  height: 8vw;
+  text-align: center;
+  border-radius: 50%;
+  border: 2px solid #29292a;
+  overflow: hidden;
+  padding: 5px;
+  background-color: #f3ebeb;
+  transition: transform 0.3s ease-in-out, z-index 0.3s ease-in-out;
+  will-change: transform;
+  transform-origin: center;
+  z-index: 1; /* Position de base */
+}
+
+/* Effet Hover */
+.skill-medallion:hover {
+  transform: scale(1.3); /* Zoom au survol */
+  z-index: 10; /* Assurer qu'il passe au-dessus */
+}
+/* Assurer que l'effet hover est accessible et bien visible sur mobile */
+  .skill-medallion:hover {
+    transform: scale(1.2); /* Moins agressif sur mobile pour le zoom */
+  }
+/* Image dans le médaillon */
+.skill-medallion img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+}
+
+/* Texte dans le médaillon */
+.skill-medallion p {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.8vw;
+  font-weight: bold;
+  background-color: rgba(244, 219, 172, 0.733);
+  color: rgb(0, 11, 77);
+  padding: 0.1vw 0.4vw;
+  border-radius: 10px;
+  z-index: 5; /* Assurer que le texte soit au-dessus de l'image */
+}
+
+/* Pourcentage de la compétence */
+.skill-medallion span {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55vw;
+  font-weight: bold;
+  background-color: rgba(235, 233, 122, 0.887);
+  color: rgb(16, 50, 219);
+  padding: 0.1vw 0.4vw;
+  border-radius: 10px;
+  z-index: 5; /* Assurer que le pourcentage soit au-dessus de l'image */
+}
+
+/* Responsive : Ajuster la taille des médaillons */
+@media (max-width: 768px) {
+  .skill-medallion {
+    width: 80px; /* Réduire la taille des médaillons sur mobile */
+    height: 80px;
+  }
+
+  .skill-medallion p {
+    font-size: 1em; /* Utiliser des unités relatives pour une meilleure lisibilité */
+    bottom: 18%; /* Placer le nom plus bas */
+  }
+
+  .skill-medallion span {
+    font-size: 1em; /* Augmenter la taille pour le pourcentage */
+    top: 20%; /* Placer le pourcentage un peu plus bas */
+  }
+
+  /* Assurer que l'effet hover est accessible et bien visible sur mobile */
+  .skill-medallion:hover {
+    transform: scale(1.2); /* Moins agressif sur mobile pour le zoom */
+  }
+}
+
+/* Pour les écrans plus larges */
+@media (max-width: 1024px) {
+  .skills-container {
+    justify-content: center;
+    gap: 0.8vw;
+  }
+
+  .skill-medallion {
+    width: 80px; /* Réduire la taille des médaillons sur mobile */
+    height: 80px;
+  }
+
+  .skill-medallion p {
+    font-size: 0.7em; /* Taille plus adaptée à la taille des écrans */
+    bottom: 18%; /* Placer le nom plus bas */
+  }
+
+  .skill-medallion span {
+    font-size: 0.6em; /* Taille plus grande pour le pourcentage */
+    top: 20%; /* Placer le pourcentage un peu plus bas */
+  }
+
+  /* Assurer que l'effet hover est accessible et bien visible sur mobile */
+  .skill-medallion:hover {
+    transform: scale(1.2); /* Moins agressif sur mobile pour le zoom */
+  }
+}
