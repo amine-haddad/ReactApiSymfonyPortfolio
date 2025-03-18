@@ -72,19 +72,19 @@ class Profile
     #[Groups(['read:Profile'])]
     private Collection $experiences;
 
-    /**
-     * @var Collection<int, Skill>
-     */
-    #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: 'profiles')]
-    #[Groups(['read:Profile'])]
-    private Collection $skills;
-
+   
     /**
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile')]
     #[Groups(['read:Profile'])]
     private Collection $images;
+
+    /**
+     * @var Collection<int, ProfileSkill>
+     */
+    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile')]
+    private Collection $profileSkills;
 
     public function __construct()
     {
@@ -94,6 +94,7 @@ class Profile
         $this->images = new ArrayCollection();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->profileSkills = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -270,30 +271,6 @@ class Profile
     }
 
     /**
-     * @return Collection<int, Skill>
-     */
-    public function getSkills(): Collection
-    {
-        return $this->skills;
-    }
-
-    public function addSkill(Skill $skill): static
-    {
-        if (!$this->skills->contains($skill)) {
-            $this->skills->add($skill);
-        }
-
-        return $this;
-    }
-
-    public function removeSkill(Skill $skill): static
-    {
-        $this->skills->removeElement($skill);
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Image>
      */
     public function getImages(): Collection
@@ -317,6 +294,36 @@ class Profile
             // set the owning side to null (unless already changed)
             if ($image->getProfile() === $this) {
                 $image->setProfile(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProfileSkill>
+     */
+    public function getProfileSkills(): Collection
+    {
+        return $this->profileSkills;
+    }
+
+    public function addProfileSkill(ProfileSkill $profileSkill): static
+    {
+        if (!$this->profileSkills->contains($profileSkill)) {
+            $this->profileSkills->add($profileSkill);
+            $profileSkill->setProfile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfileSkill(ProfileSkill $profileSkill): static
+    {
+        if ($this->profileSkills->removeElement($profileSkill)) {
+            // set the owning side to null (unless already changed)
+            if ($profileSkill->getProfile() === $this) {
+                $profileSkill->setProfile(null);
             }
         }
 

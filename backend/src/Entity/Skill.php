@@ -29,10 +29,6 @@ class Skill
     #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
-    #[ORM\Column]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile"])]
-    private ?int $level = null;
-
     #[ORM\Column(length: 255)]
     #[Gedmo\Slug(fields: ['name'])]
     #[Groups(['read:Skill', 'write:Skill',"read:Profile"])]
@@ -50,17 +46,18 @@ class Skill
     #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'skills')]
     private Collection $projects;
 
-    /**
-     * @var Collection<int, Profile>
-     */
-    #[ORM\ManyToMany(targetEntity: Profile::class, mappedBy: 'skills')]
-    private Collection $profiles;
 
     /**
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills')]
     private Collection $images;
+
+    /**
+     * @var Collection<int, ProfileSkill>
+     */
+    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill')]
+    private Collection $profileSkills;
 
     public function __construct()
     {
@@ -69,6 +66,7 @@ class Skill
         $this->projects = new ArrayCollection();
         $this->profiles = new ArrayCollection();
         $this->images = new ArrayCollection();
+        $this->profileSkills = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,18 +82,6 @@ class Skill
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getLevel(): ?int
-    {
-        return $this->level;
-    }
-
-    public function setLevel(int $level): static
-    {
-        $this->level = $level;
 
         return $this;
     }
@@ -163,32 +149,6 @@ class Skill
         return $this;
     }
 
-    /**
-     * @return Collection<int, Profile>
-     */
-    public function getProfiles(): Collection
-    {
-        return $this->profiles;
-    }
-
-    public function addProfile(Profile $profile): static
-    {
-        if (!$this->profiles->contains($profile)) {
-            $this->profiles->add($profile);
-            $profile->addSkill($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProfile(Profile $profile): static
-    {
-        if ($this->profiles->removeElement($profile)) {
-            $profile->removeSkill($this);
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Image>
@@ -214,6 +174,36 @@ class Skill
             // set the owning side to null (unless already changed)
             if ($image->getSkills() === $this) {
                 $image->setSkills(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProfileSkill>
+     */
+    public function getProfileSkills(): Collection
+    {
+        return $this->profileSkills;
+    }
+
+    public function addProfileSkill(ProfileSkill $profileSkill): static
+    {
+        if (!$this->profileSkills->contains($profileSkill)) {
+            $this->profileSkills->add($profileSkill);
+            $profileSkill->setSkill($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfileSkill(ProfileSkill $profileSkill): static
+    {
+        if ($this->profileSkills->removeElement($profileSkill)) {
+            // set the owning side to null (unless already changed)
+            if ($profileSkill->getSkill() === $this) {
+                $profileSkill->setSkill(null);
             }
         }
 
