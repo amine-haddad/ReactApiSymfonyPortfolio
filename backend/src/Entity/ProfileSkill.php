@@ -27,6 +27,7 @@ class ProfileSkill
     private ?Skill $skill = null;
 
     #[ORM\Column]
+    #[Groups(['read:ProfileSkills','write:ProfileSkills',"read:Profile"])]
     private ?int $level = null;
 
     public function getId(): ?int

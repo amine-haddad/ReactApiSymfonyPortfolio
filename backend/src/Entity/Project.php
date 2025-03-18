@@ -20,6 +20,7 @@ class Project
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:Project',"read:Profile"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

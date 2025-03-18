@@ -58,7 +58,7 @@ const CustomNavbar = ({ profile, error }) => {
           {error && <span className="error">{error}</span>}
           {profile ? (
             <span className="navbar-name">
-              {profile.name} <span className="navbar-title">/ Senior Touco {profile.title}</span>
+              {profile.name} <span className="navbar-title">{profile.title}</span>
             </span>
           ) : (
             <span>Loading...</span>

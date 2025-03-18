@@ -62,11 +62,10 @@ const Project = () => {
                       </div>
                     </div>
                   )}
-
                   {/* Lien vers le projet s'il existe */}
                   {project.id && (
                     <a
-                      href={project.name}
+                      href={project.project_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-primary w-100"
