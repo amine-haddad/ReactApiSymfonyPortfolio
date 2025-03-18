@@ -1,15 +1,16 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom"; // Import de useLocation pour la gestion de la route
+import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "../pages/Home"; 
 import Projects from "../pages/Projects";
 import About from "../pages/About";
 import Experiences from "../pages/Experiences";
-import CustomNavBar from "../components/CustomNavBar";  // Assurez-vous d'importer la Navbar
+import CustomNavBar from "../components/CustomNavBar";
 
 const AppRouter = ({ profile, error }) => {
-  const location = useLocation();  // Permet de récupérer la route actuelle
+  const location = useLocation();
 
-  // Vérifie si l'on est sur la page d'accueil
+  /**  est-ce la Home ? = le chemin sur lequel est la page,
+   *  est elle la meme quel index a l adresse ->'/'(le slash) */
   const isHomePage = location.pathname === "/";
 
   return (

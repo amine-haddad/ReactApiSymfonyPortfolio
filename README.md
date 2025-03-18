@@ -19,8 +19,8 @@ Assurez-vous que Docker est en cours d'exécution sur votre machine.
 
 1. Clonez le projet sur votre machine locale :
     ```bash
-    git clone https://github.com/amine-haddad/MyAppCo.git
-    cd MyAppCo
+    git clone https://github.com/amine-haddad/ReactApiSymfonyPortfolio.git
+    cd ReactApiSymfonyPortfolio
     ```
 
 2. Construisez et démarrez les conteneurs Docker :
@@ -32,9 +32,9 @@ Assurez-vous que Docker est en cours d'exécution sur votre machine.
     - **Frontend React** : [http://localhost:5173](http://localhost:5173)
     - **Backend Symfony** : [http://localhost:8000](http://localhost:8000)
     - **API Symfony** : [http://localhost:8000/api](http://localhost:8000/api)
-    - **PHPMyAdmin** : [http://localhost:8080](http://localhost:8080) (si vous avez besoin d'accéder à la base de données via l'interface web)
+    - **PHPMyAdmin** : [http://localhost:8081](http://localhost:8080) (si vous avez besoin d'accéder à la base de données via l'interface web)
 
-4. Pour accéder à la base de données MySQL, vous pouvez utiliser PHPMyAdmin à l'adresse [http://localhost:8080](http://localhost:8080), avec les identifiants suivants :
+4. Pour accéder à la base de données MySQL, vous pouvez utiliser PHPMyAdmin à l'adresse [http://localhost:8081](http://localhost:8080), avec les identifiants suivants :
     - **Hôte** : `mysql`
     - **Utilisateur** : `root`
     - **Mot de passe** : `example`

@@ -86,11 +86,8 @@ function Home({ profile, error }) {
       <div className="Home-container">
         {profile && (
           <>
-            <Profile profile={profile} />
-
-            {/* Envoi des compétences au composant Skill */}
-            <Skill skills={skills} />
-
+            {<Profile profile={profile} />}
+            {<Skill skills={skills} />}
             {profile.projects && profile.projects.length > 0 && <Project projects={profile.projects} />}
             {profile.experiences && profile.experiences.length > 0 && <Experience experiences={profile.experiences} />}
           </>
