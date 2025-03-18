@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
@@ -9,8 +8,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
-
 
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 #[ApiResource(
@@ -55,13 +52,13 @@ class Profile
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type : Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $created_at = null;
 
     /**
      * @var Collection<int, Project>
      */
-    #[ORM\OneToMany(targetEntity: Project::class, mappedBy: 'profile')]
+    #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile')]
     #[Groups(['read:Profile'])]
     private Collection $projects;
 
@@ -72,7 +69,6 @@ class Profile
     #[Groups(['read:Profile'])]
     private Collection $experiences;
 
-   
     /**
      * @var Collection<int, Image>
      */
@@ -88,12 +84,12 @@ class Profile
 
     public function __construct()
     {
-        $this->projects = new ArrayCollection();
-        $this->experiences = new ArrayCollection();
-        $this->skills = new ArrayCollection();
-        $this->images = new ArrayCollection();
-        $this->created_at = new \DateTime();
-        $this->updated_at = new \DateTime();
+        $this->projects      = new ArrayCollection();
+        $this->experiences   = new ArrayCollection();
+        $this->skills        = new ArrayCollection();
+        $this->images        = new ArrayCollection();
+        $this->created_at    = new \DateTime();
+        $this->updated_at    = new \DateTime();
         $this->profileSkills = new ArrayCollection();
     }
 
@@ -191,7 +187,7 @@ class Profile
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updated_at): static
+    public function setUpdatedAt( ? \DateTimeInterface $updated_at): static
     {
         $this->updated_at = $updated_at;
 
@@ -220,7 +216,7 @@ class Profile
 
     public function addProject(Project $project): static
     {
-        if (!$this->projects->contains($project)) {
+        if (! $this->projects->contains($project)) {
             $this->projects->add($project);
             $project->setProfile($this);
         }
@@ -250,7 +246,7 @@ class Profile
 
     public function addExperience(Experience $experience): static
     {
-        if (!$this->experiences->contains($experience)) {
+        if (! $this->experiences->contains($experience)) {
             $this->experiences->add($experience);
             $experience->setProfile($this);
         }
@@ -280,7 +276,7 @@ class Profile
 
     public function addImage(Image $image): static
     {
-        if (!$this->images->contains($image)) {
+        if (! $this->images->contains($image)) {
             $this->images->add($image);
             $image->setProfile($this);
         }
@@ -310,7 +306,7 @@ class Profile
 
     public function addProfileSkill(ProfileSkill $profileSkill): static
     {
-        if (!$this->profileSkills->contains($profileSkill)) {
+        if (! $this->profileSkills->contains($profileSkill)) {
             $this->profileSkills->add($profileSkill);
             $profileSkill->setProfile($this);
         }

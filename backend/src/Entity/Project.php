@@ -23,24 +23,24 @@ class Project
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:ProJect', 'write:ProJect'])]
+    #[Groups(['read:Project', 'write:Project',"read:Profile"])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['read:ProJect', 'write:ProJect'])]
+    #[Groups(['read:Project', 'write:Project'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:ProJect', 'write:ProJect'])]
+    #[Groups(['read:Project', 'write:Project'])]
     private ?string $project_url = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:ProJect', 'write:ProJect'])]
+    #[Groups(['read:Project', 'write:Project'])]
     private ?string $image_url = null;
 
     #[ORM\Column(length: 255)]
     private ?string $slug = null;
-    #[Groups(['read:ProJect', 'write:ProJect'])]
+    #[Groups(['read:Project', 'write:Project'])]
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updated_at = null;
@@ -56,14 +56,14 @@ class Project
      * @var Collection<int, Skill>
      */
     #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: 'projects')]
-    #[Groups(['read:ProJect', 'write:ProJect','read:Profile'])]
-    private Collection $skills;
+    #[Groups(['read:Project', 'write:Project','read:Profile','read:Skill'])]
+    private Collection $technologies;
 
     /**
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'projects')]
-    #[Groups(['read:ProJect', 'write:ProJect','read:Profile'])]
+    #[Groups(['read:Project', 'write:Project','read:Profile'])]
     private Collection $images;
 
     public function __construct()
@@ -178,23 +178,23 @@ class Project
     /**
      * @return Collection<int, Skill>
      */
-    public function getSkills(): Collection
+    public function getTechnologies(): Collection
     {
-        return $this->skills;
+        return $this->technologies;
     }
 
-    public function addSkill(Skill $skill): static
+    public function addTechnologies(Skill $technologies): static
     {
-        if (!$this->skills->contains($skill)) {
-            $this->skills->add($skill);
+        if (!$this->technologies->contains($technologies)) {
+            $this->technologies->add($technologies);
         }
 
         return $this;
     }
 
-    public function removeSkill(Skill $skill): static
+    public function removeTechnologies(Skill $technologies): static
     {
-        $this->skills->removeElement($skill);
+        $this->technologies->removeElement($technologies);
 
         return $this;
     }

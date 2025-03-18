@@ -25,13 +25,13 @@ class Skill
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile"])]
+    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project'])]
     #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Gedmo\Slug(fields: ['name'])]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile"])]
+    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]

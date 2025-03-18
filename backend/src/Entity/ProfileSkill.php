@@ -5,9 +5,13 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProfileSkillRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProfileSkillRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read:ProfileSkills']],
+    denormalizationContext: ['groups' => ['write:ProfileSkills']]
+)]
 class ProfileSkill
 {
     #[ORM\Id]
@@ -16,8 +20,9 @@ class ProfileSkill
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
+    #[Groups(['read:ProfileSkills', 'write:ProfileSkills',"read:Profile"])]
     private ?Profile $profile = null;
-
+    #[Groups(['read:ProfileSkills','write:ProfileSkills',"read:Profile"])]
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
     private ?Skill $skill = null;
 
