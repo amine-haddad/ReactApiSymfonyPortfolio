@@ -25,18 +25,26 @@ class ProjectFixtures extends Fixture implements DependentFixtureInterface
             $title      = $faker->sentences(3, true);
             $decription = $faker->realText(70,2);
             $projectUrl = $faker->url;
-            //$randomSkillIndex = rand(0, 9);
-            $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE.rand(1, 10), Skill::class);
-            
-            //$imageUrl   = $faker->imageUrl;
+        
             $project->setTitle($title)
                 ->setDescription($decription)
                 ->setProjectUrl($projectUrl)
                 ->setSlug($title . '-' .  uniqid())
-                ->addTechnologies($skill)
                 ->setProfile($profile)
                 ;
-
+                $numberOfTechnologies = rand(1, 5);
+                $usedSkills = [];
+                for ($j = 0; $j < $numberOfTechnologies; $j++) {
+                    $randomSkillIndex = rand(1, 10);
+                    if (!in_array($randomSkillIndex, $usedSkills)) {
+                        $usedSkills[] = $randomSkillIndex;
+                        $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . $randomSkillIndex, Skill::class);
+                        $project->addTechnologies($skill);
+                    } else {
+                        // Si compétence déjà utilisée, recommencer
+                        $j--;
+                    }
+                }
                 $this->addReference(self::PROJECT_REFERENCE.$i, $project);
                 $manager->persist($project);
             }
