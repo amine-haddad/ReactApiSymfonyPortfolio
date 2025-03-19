@@ -1,5 +1,4 @@
 <?php
-
 namespace App\DataFixtures;
 
 use App\Entity\Skill;
@@ -16,13 +15,13 @@ class SkillFixtures extends Fixture
 
         for ($i = 1; $i <= 10; $i++) {
             $skill = new Skill();
-            $name = $faker->word;
+            $name  = $faker->word;
             $skill->setName($name)
                 ->setUpdatedAt(new \DateTime())
-                ->setSlug($name.'-'.(string)$i)
-                ; 
+                ->setSlug($name . '-' . (string) $i)
+            ;
             $manager->persist($skill);
-            $this->addReference(self::SKILL_REFERENCE.$i, $skill); 
+            $this->addReference(self::SKILL_REFERENCE . $i, $skill);
         }
 
         $manager->flush();

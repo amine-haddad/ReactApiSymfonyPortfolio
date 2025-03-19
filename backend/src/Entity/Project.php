@@ -69,10 +69,10 @@ class Project
 
     public function __construct()
     {
-        $this->skills = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
+        $this->technologies = new ArrayCollection();
     }
 
     public function getId(): ?int

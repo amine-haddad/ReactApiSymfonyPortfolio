@@ -1,5 +1,4 @@
 <?php
-
 namespace App\DataFixtures;
 
 use App\Entity\Profile;
@@ -14,20 +13,19 @@ class ProfileSkillFixtures extends Fixture implements DependentFixtureInterface
     public const PROFILE_SKILL_REFERENCE = 'profile_skill_';
     public function load(ObjectManager $manager): void
     {
-        $profile = $this->getReference(ProfileFixtures::PROFILE_REFERENCE,Profile::class);
+        $profile = $this->getReference(ProfileFixtures::PROFILE_REFERENCE, Profile::class);
         for ($i = 1; $i <= 5; $i++) {
-            
-            
-                $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . rand(1, 10), Skill::class);
 
-                $profileSkill = new ProfileSkill();
-                $profileSkill->setLevel(mt_rand(45, 100))
-                             ->setProfile($profile)
-                             ->setSkill($skill);
+            $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . rand(1, 10), Skill::class);
 
-                $manager->persist($profileSkill);
-                $this->addReference(self::PROFILE_SKILL_REFERENCE . $i, $profileSkill);
-            
+            $profileSkill = new ProfileSkill();
+            $profileSkill->setLevel(mt_rand(45, 100))
+                ->setProfile($profile)
+                ->setSkill($skill);
+
+            $manager->persist($profileSkill);
+            $this->addReference(self::PROFILE_SKILL_REFERENCE . $i, $profileSkill);
+
         }
 
         $manager->flush();
