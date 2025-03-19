@@ -28,6 +28,7 @@
   background-color: rgba(18, 18, 18, 0.613);
   border: 2px solid rgb(156, 155, 254);
   border-radius: 10px;
+  width: 90%;
   max-width: 1920px; /* Limiter la largeur maximale */
 }
 
