@@ -31,7 +31,8 @@ class Skill
 
     #[ORM\Column(length: 255)]
     #[Gedmo\Slug(fields: ['name'])]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project'])]
+    #[Groups(['read:Skill',"read:Profile",'read:Project'])]
+    #[Gedmo\Slug(fields: ['name'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -134,7 +135,7 @@ class Skill
     {
         if (!$this->projects->contains($project)) {
             $this->projects->add($project);
-            $project->addSkill($this);
+            $project->addTechnologies($this);
         }
 
         return $this;
@@ -143,7 +144,7 @@ class Skill
     public function removeProject(Project $project): static
     {
         if ($this->projects->removeElement($project)) {
-            $project->removeSkill($this);
+            $project->removeTechnologies($this);
         }
 
         return $this;
