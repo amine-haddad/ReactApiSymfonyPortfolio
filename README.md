@@ -42,11 +42,23 @@ Assurez-vous que Docker est en cours d'exécution sur votre machine.
 ## Interaction avec les conteneurs
 
 Pour interagir avec les conteneurs Docker, vous pouvez utiliser les commandes suivantes pour entrer dans un conteneur particulier :
-
+    
 - **Backend Symfony (PHP)** :
     ```bash
     docker exec -it symfony_php bash
     ```
+Pour relancer les fixtures il faut a chaque fois drop la bdd et ralncer le tout, procédez comme ici:
+- symfony console doctrine:database:drop --force
+- symfony console doctrine:database:create
+- symfony console doctrine:migration:migrate
+- symfony console doctrine:fixtures:load
+ou 
+- symfony console d:d:d --force
+- symfony console d:d:c
+- symfony console d:m:m
+- symfony console d:f:l
+
+
 
 - **Frontend React** :
     ```bash
