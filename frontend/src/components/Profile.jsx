@@ -44,6 +44,7 @@ const Profile = ({ profile, error }) => {
                 <strong>LinkedIn:</strong>{" "}
                 <a href={profile.linkedin_url}>{profile.linkedin_url}</a>
               </p>
+              
             </div>
 
             {/* Carousel in the right side of the card */}

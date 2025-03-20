@@ -47,7 +47,7 @@ Pour interagir avec les conteneurs Docker, vous pouvez utiliser les commandes su
     ```bash
     docker exec -it symfony_php bash
     ```
-Pour relancer les fixtures il faut a chaque fois drop la bdd et ralncer le tout, procédez comme ici:
+Pour relancer les fixtures il faut a chaque fois drop la bdd et relancer le tout, procédez ainsi:
 - symfony console doctrine:database:drop --force
 - symfony console doctrine:database:create
 - symfony console doctrine:migration:migrate
