@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['read:Profile']],
     denormalizationContext: ['groups' => ['write:Profile']]
 )]
+#[ORM\HasLifecycleCallbacks]
 class Profile
 {
     #[ORM\Id]
@@ -58,28 +59,28 @@ class Profile
     /**
      * @var Collection<int, Project>
      */
-    #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile')]
+    #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile'])]
     private Collection $projects;
 
     /**
      * @var Collection<int, Experience>
      */
-    #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'profile')]
+    #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile'])]
     private Collection $experiences;
 
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile')]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile'])]
     private Collection $images;
 
     /**
      * @var Collection<int, ProfileSkill>
      */
-    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile')]
+    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     private Collection $profileSkills;
 
     public function __construct()

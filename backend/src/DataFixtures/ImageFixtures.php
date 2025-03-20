@@ -54,7 +54,7 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
           ): void
     {
         $image = new Image();
-        $image->setName($faker->imageUrl(640, 480, 'business', true)) // Génère une URL d'image
+        $image->setName($faker->imageUrl(640, 480, 'nature', true))
               ->setProfile($profile)
               ->setProjects($project)
               ->setSkills($skill)

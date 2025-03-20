@@ -1,0 +1,20 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        profile_file:
+            uri_prefix: /images/profiles
+            upload_destination: '%upload_directories[profiles]%'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        project_file:
+            uri_prefix: /images/projects
+            upload_destination: '%upload_directories[projects]%'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        skill_file:
+            uri_prefix: /images/skills
+            upload_destination: '%upload_directories[skills]%'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        experience_file:
+            uri_prefix: /images/experiences
+            upload_destination: '%upload_directories[experiences]%'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

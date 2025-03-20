@@ -9,7 +9,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
@@ -17,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['read:Skill']],
     denormalizationContext: ['groups' => ['write:Skill']]
 )]
+#[ORM\HasLifecycleCallbacks]
 class Skill
 {
     #[ORM\Id]
@@ -29,35 +29,33 @@ class Skill
     #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    #[Gedmo\Slug(fields: ['name'])]
+    #[ORM\Column(length: 255, nullable:true)]
     #[Groups(['read:Skill',"read:Profile",'read:Project'])]
-    #[Gedmo\Slug(fields: ['name'])]
     private ?string $slug = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $created_at = null;
 
     /**
      * @var Collection<int, Project>
      */
-    #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'skills')]
+    #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
     private Collection $projects;
 
 
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills')]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
     private Collection $images;
 
     /**
      * @var Collection<int, ProfileSkill>
      */
-    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill')]
+    #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
     private Collection $profileSkills;
 
     public function __construct()
@@ -65,7 +63,6 @@ class Skill
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
         $this->projects = new ArrayCollection();
-        $this->profiles = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->profileSkills = new ArrayCollection();
     }
@@ -78,7 +75,9 @@ class Skill
     public function getName(): ?string
     {
         return $this->name;
+        
     }
+
 
     public function setName(string $name): static
     {
