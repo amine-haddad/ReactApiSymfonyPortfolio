@@ -17,10 +17,11 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:Image', 'write:Image','read:Profile'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Image', 'write:Image'])]
+    #[Groups(['read:Image', 'write:Image','read:Profile'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
@@ -28,14 +29,18 @@ class Image
     private ?Profile $profile = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
+    #[Groups(['read:Image', 'write:Image'])]
     private ?Project $projects = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
+    #[Groups(['read:Image', 'write:Image'])]
     private ?Skill $skills = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
+    #[Groups(['read:Image', 'write:Image'])]
     
     private ?Experience $experiences = null;
+    #[Groups(['read:Image', 'write:Image'])]
 
     public function getId(): ?int
     {

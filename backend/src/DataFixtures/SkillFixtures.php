@@ -13,7 +13,7 @@ class SkillFixtures extends Fixture
     {
         $faker = Factory::create();
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 0; $i <= 10; $i++) {
             $skill = new Skill();
             $name  = $faker->word;
             $skill->setName($name)

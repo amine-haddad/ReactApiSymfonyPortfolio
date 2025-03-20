@@ -14,7 +14,7 @@ class ProfileSkillFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $profile = $this->getReference(ProfileFixtures::PROFILE_REFERENCE, Profile::class);
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
 
             $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . rand(1, 10), Skill::class);
 
