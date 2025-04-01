@@ -1,5 +1,4 @@
 <?php
-
 namespace App\EventSubscriber;
 
 use App\Service\SluggerService;
@@ -25,21 +24,34 @@ class SlugSubscriber implements EventSubscriber
     // Méthode qui s'exécute avant la persistance d'une entité
     public function prePersist(LifecycleEventArgs $args): void
     {
+        $entity = $args->getObject();
+        dump('SlugSubscriber triggered for:', $entity);
         $this->handleEvent($args->getObject());
     }
 
     // Méthode qui s'exécute avant la mise à jour d'une entité
     public function preUpdate(LifecycleEventArgs $args): void
     {
-        $this->handleEvent($args->getObject());
+        $entityManager = $args->getObjectManager();
+        $entity        = $args->getObject();
+
+        $this->handleEvent($entity);
+
+        // Indique à Doctrine qu'un changement a été fait sur l'entité
+        $meta = $entityManager->getClassMetadata(get_class($entity));
+        $entityManager->getUnitOfWork()->recomputeSingleEntityChangeSet($meta, $entity);
     }
 
     // Fonction qui traite l'entité, et gère la création du slug
     private function handleEvent(object $entity): void
     {
         // Vérifie si l'entité a bien la méthode `getSlug`
-        if (!method_exists($entity, 'getSlug')) {
+        if (! method_exists($entity, 'getSlug')) {
             return;
+        }
+
+        if ($entity->getSlug()) {
+            return; // Ne change pas le slug s'il est déjà défini
         }
 
         // Cas où l'entité a une propriété 'name' (par exemple, une entité "Skill")

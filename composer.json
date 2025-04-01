@@ -1,0 +1,6 @@
+{
+    "require": {
+        "easycorp/easyadmin-bundle": "^4.24",
+        "symfony/ux-twig-component": "^2.23"
+    }
+}

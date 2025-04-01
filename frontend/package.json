@@ -15,6 +15,7 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "jquery": "^3.7.1",
+    "jwt-decode": "^4.0.0",
     "popper.js": "^1.16.1",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.9",

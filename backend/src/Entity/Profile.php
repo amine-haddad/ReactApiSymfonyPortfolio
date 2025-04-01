@@ -20,36 +20,37 @@ class Profile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?string $bio = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     private ?string $github_url = null;
-
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    
     private ?string $linkedin_url = null;
-
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile'])]
+    
     private ?string $slug = null;
-
+    #[Groups(['read:Profile', 'write:Profile','read:User'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updated_at = null;
 
@@ -60,29 +61,33 @@ class Profile
      * @var Collection<int, Project>
      */
     #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Profile'])]
+    #[Groups(['read:Profile','read:User'])]
     private Collection $projects;
 
     /**
      * @var Collection<int, Experience>
      */
     #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Profile'])]
+    #[Groups(['read:Profile','read:User'])]
     private Collection $experiences;
 
     /**
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Profile'])]
+    #[Groups(['read:Profile','read:User'])]
     private Collection $images;
 
     /**
      * @var Collection<int, ProfileSkill>
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Profile','read:User'])]
     private Collection $profileSkills;
-
+    
+    #[ORM\ManyToOne(inversedBy: 'userProfiles', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Profile'])]
+    private ?User $user = null;
     public function __construct()
     {
         $this->projects      = new ArrayCollection();
@@ -323,6 +328,18 @@ class Profile
                 $profileSkill->setProfile(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

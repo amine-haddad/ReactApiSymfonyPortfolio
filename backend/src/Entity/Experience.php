@@ -1,7 +1,9 @@
 <?php
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\ExperienceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,45 +17,47 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['read:Experience']],
     denormalizationContext: ['groups' => ['write:Experience']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['profile.id' => 'exact'])]
 #[ORM\HasLifecycleCallbacks]
 class Experience
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Experience', 'write:Experience', 'read:Profile'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotBlank(message: "Role cannot be blank")]
     #[Assert\Length(min: 3, max: 255, minMessage: "Role must be at least {{ limit }} characters long", maxMessage: "Role cannot be longer than {{ limit }} characters")]
     private ?string $role = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Experience', 'write:Experience', 'read:Profile'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotBlank(message: "Company cannot be blank")]
     private ?string $compagny = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['read:Experience', 'write:Experience', 'read:Profile'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotNull(message: "Start date cannot be null")]
     #[Assert\Date(message: "Start date must be a valid date")]
     private ?\DateTimeInterface $start_date = null;
 
     #[ORM\Column(type : Types::DATE_MUTABLE)]
-    #[Groups(['read:Experience', 'write:Experience'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
     #[Assert\NotNull(message: "End date cannot be null")]
     #[Assert\Date(message: "End date must be a valid date")]
     #[Assert\GreaterThan(propertyPath: "start_date", message: "End date must be after the start date")]
     private ?\DateTimeInterface $end_date = null;
 
     #[ORM\Column(type : Types::TEXT)]
-    #[Groups(['read:Experience', 'write:Experience'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
     #[Assert\NotBlank(message: "Description cannot be blank")]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Experience', 'write:Experience'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -70,6 +74,7 @@ class Experience
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'experiences', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Experience', 'write:Experience','read:User'])]
     private Collection $images;
 
     public function __construct()

@@ -17,17 +17,19 @@ class ProfileSkill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:ProfileSkills'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
-    #[Groups(['read:ProfileSkills', 'write:ProfileSkills',"read:Profile"])]
+    #[Groups(['read:ProfileSkills', 'write:ProfileSkills','read:Skill'])]
     private ?Profile $profile = null;
-    #[Groups(['read:ProfileSkills','write:ProfileSkills',"read:Profile"])]
+
+    #[Groups(['read:ProfileSkills','write:ProfileSkills','read:Profile','read:Skill','read:User'])]
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
     private ?Skill $skill = null;
 
     #[ORM\Column]
-    #[Groups(['read:ProfileSkills','write:ProfileSkills',"read:Profile"])]
+    #[Groups(['read:ProfileSkills','write:ProfileSkills','read:Profile','read:User'])]
     private ?int $level = null;
 
     public function getId(): ?int

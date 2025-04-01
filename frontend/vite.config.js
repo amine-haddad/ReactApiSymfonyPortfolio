@@ -16,7 +16,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://symfony_php:8000',
+        target: 'http://symfony_nginx:80',
         changeOrigin: true,
         secure: false
       }

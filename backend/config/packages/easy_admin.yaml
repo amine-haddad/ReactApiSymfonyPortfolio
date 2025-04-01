@@ -1,0 +1,10 @@
+# config/packages/easy_admin.yaml
+easy_admin:
+    entities:
+        # Ajoute ici tes entités
+        - App\Entity\Profile
+        - App\Entity\Project
+        - App\Entity\Skill
+        - App\Entity\Experience
+        - App\Entity\Images
+        

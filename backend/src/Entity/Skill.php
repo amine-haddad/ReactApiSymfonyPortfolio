@@ -22,10 +22,11 @@ class Skill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project'])]
+    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
@@ -42,7 +43,8 @@ class Skill
     /**
      * @var Collection<int, Project>
      */
-    #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
+    #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'technologies', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Skill'])]
     private Collection $projects;
 
 
@@ -56,6 +58,7 @@ class Skill
      * @var Collection<int, ProfileSkill>
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Skill', 'write:Skill'])]
     private Collection $profileSkills;
 
     public function __construct()

@@ -1,20 +1,23 @@
 vich_uploader:
     db_driver: orm
 
+    metadata:
+        type: attribute
+
     mappings:
         profile_file:
             uri_prefix: /images/profiles
-            upload_destination: '%upload_directories[profiles]%'
+            upload_destination: '%upload_profiles%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         project_file:
             uri_prefix: /images/projects
-            upload_destination: '%upload_directories[projects]%'
+            upload_destination: '%upload_projects%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         skill_file:
             uri_prefix: /images/skills
-            upload_destination: '%upload_directories[skills]%'
+            upload_destination: '%upload_skills%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         experience_file:
             uri_prefix: /images/experiences
-            upload_destination: '%upload_directories[experiences]%'
+            upload_destination: '%upload_experiences%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

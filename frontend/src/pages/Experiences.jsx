@@ -1,9 +1,9 @@
-import Experience from "../components/Experience";
+import ProfileExperience from "../components/experience/ProfileExperience";
 
 const Experiences = () => {
   return (
     <>
-      <Experience />
+      <ProfileExperience />
     </>
   );
 };

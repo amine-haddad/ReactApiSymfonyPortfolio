@@ -1,30 +1,63 @@
-import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
-import Home from "../pages/Home"; 
-import Projects from "../pages/Projects";
-import About from "../pages/About";
+import { createBrowserRouter } from "react-router-dom";
+import Layout from "../layouts/Layouts";
 import Experiences from "../pages/Experiences";
-import CustomNavBar from "../components/CustomNavBar";
+import UserHome from "../pages/UserHome";
+import LoginPage from "../pages/LoginPage";
+import Dashboard from "../pages/Dashboard";
+import NotFound from "../pages/NotFund";
+import ProtectedRoute from "../components/ProtectedRoute";
+import ProjectPage from "../pages/ProjectPage";
+import ProjectDetails from "../components/projet/ProjectDetails";
+import ProfilePage from "../pages/ProfilePage";
+import Projects from "../components/projet/Projects";
+import ProfileExperiences from "../components/profile/ProfileExperiences";
 
-const AppRouter = ({ profile, error }) => {
-  const location = useLocation();
 
-  /**  est-ce la Home ? = le chemin sur lequel est la page,
-   *  est elle la meme quel index a l adresse ->'/'(le slash) */
-  const isHomePage = location.pathname === "/";
+// Crée le routeur ici avec l'utilisation de `createBrowserRouter`
+const Router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { index: true, element: <UserHome /> },
+      { path: "/login", element: <LoginPage /> },
+      { 
+        path: "/dashboard", 
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute>, // Protège la route Dashboard
+      },
+      { 
+        path: "/", 
+        element: <UserHome /> 
+      },
+      {
+        path:"/user/profiles/" ,
+        element:<ProfilePage /> 
+       },
+     {
+      path:"/profile/:id" ,
+      element:<ProfilePage /> 
+     },
+     { 
+      path: "/profile/projects", 
+      element: <ProjectPage /> 
+    },
+     { 
+      path: "/projects", 
+      element: <Projects /> 
+    },
+    { 
+      path: "projectsDetail/:id", 
+      element: <ProjectDetails /> 
+    },
+    { 
+      path: "/experiences", 
+      element: <ProfileExperiences/>
+    },
+    ],
+    
+  },
+  { path: "*", element: <NotFound /> }, // Route 404
+]);
 
-  return (
-    <div className="app">
-      {/* Affiche la Navbar seulement si on n'est pas sur la page d'accueil */}
-      {!isHomePage && <CustomNavBar profile={profile} error={error} />} 
-      <Routes>
-        <Route path="/" element={<Home profile={profile} error={error} />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/experiences" element={<Experiences />} />
-      </Routes>
-    </div>
-  );
-};
-
-export default AppRouter;
+// Exporter le router pour l'utiliser dans App.jsx
+export default Router;

@@ -1,41 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter } from "react-router-dom";
-import AppRouter from "./routes/Router";  // Remplacer Router par AppRouter
-import Footer from "./components/Footer";
-import axios from "axios";
-import './styles/CustomNavBar.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/Profile.css';
+import { RouterProvider } from "react-router-dom";
+import Router from "./routes/Router"; // Vérifie le chemin
+import "./styles/App.css"; // Import de styles globaux (si besoin)
+import { AuthProvider } from "./contexts/AuthContext"; // Le contexte d'authentification
+import { NavbarProvider } from "./contexts/NavbarContext"; // ✅ Import du provider
 
-function App() {
-  const [profile, setProfile] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios
-      .get(
-        `http://localhost:8000/api/profiles/1?expand=skills,experiences,projects`,
-        {
-          headers: {
-            Accept: "application/ld+json",
-          },
-        }
-      )
-      .then((response) => {
-        setProfile(response.data);
-      })
-      .catch(() => {
-        setError("Error fetching user profile");
-      });
-  }, []);
-
+const App = () => {
+  
   return (
-    <BrowserRouter>
-      {/* Passons profile et error à AppRouter */}
-      <AppRouter profile={profile} error={error} />
-      <Footer />
-    </BrowserRouter>
+    <AuthProvider >
+    <div className="app-container">
+    <NavbarProvider> {/* ✅ Le provider englobe toute l'app */}
+      <RouterProvider  router={Router} />
+      </NavbarProvider>
+    </div>
+    </AuthProvider>
   );
-}
+};
 
 export default App;
