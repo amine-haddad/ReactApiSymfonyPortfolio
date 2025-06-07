@@ -1,0 +1,30 @@
+.profileLoading {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #007bff57;
+  margin-top: 2rem;
+}
+
+.profileError {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #ff0000a1;
+  margin-top: 2rem;
+}
+
+.profileNotFound {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #999;
+  margin-top: 2rem;
+}
+.profileOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

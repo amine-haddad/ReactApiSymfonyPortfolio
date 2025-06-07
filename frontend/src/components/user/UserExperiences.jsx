@@ -1,4 +1,8 @@
-function UserExperiences({ profiles }) {
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+
+function UserExperiences() {
+  const { isAuthenticated, user, profiles, activeProfile, loading, error } = useContext(AuthContext);
   return (
     <div className="user-profile">
       <h1>Liste des composants Expériences</h1>

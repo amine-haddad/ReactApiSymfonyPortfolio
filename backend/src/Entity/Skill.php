@@ -22,16 +22,16 @@ class Skill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
+    #[Groups(['read:Skill','project:read', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Skill', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
+    #[Groups(['read:Skill', 'write:Skill','project:read',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable:true)]
-    #[Groups(['read:Skill',"read:Profile",'read:Project'])]
+    #[Groups(['read:Skill',"read:Profile",'read:Project','project:read'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -52,6 +52,7 @@ class Skill
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Skill',"read:Profile",'read:Project','project:read'])]
     private Collection $images;
 
     /**

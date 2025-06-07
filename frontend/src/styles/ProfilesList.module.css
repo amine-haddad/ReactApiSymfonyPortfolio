@@ -1,0 +1,35 @@
+.sectionListProfiles {
+  padding: 20px;
+  background-color: var(--background-color);
+  min-height: 100vh;
+}
+
+.profilesListContainer {
+  width: 90%;
+  max-width: 1980px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--primary-color);
+  border-radius: 5px;
+}
+
+.profileCardList {
+  background-color: var(--secondary-color);
+  border-radius: 5px;
+  box-shadow: 0px 2px 6px var(--accent-color);
+  transition: transform 0.3s ease-in-out;
+  overflow: hidden;
+  height: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileCardList:hover {
+  transform: translateY(-10px);
+  box-shadow: 1px 5px 10px var(--accent-color);
+}
+
+html {
+  scroll-behavior: smooth;
+}

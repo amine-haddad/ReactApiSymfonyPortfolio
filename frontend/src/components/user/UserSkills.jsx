@@ -1,4 +1,8 @@
-function UserSkills({ profiles }) {
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+
+function UserSkills() {
+  const { isAuthenticated, user, profiles, activeProfile, loading, error } = useContext(AuthContext);
   return (
     <div className="user-profile">
       <h1>Liste des skills des utilisateurs</h1>

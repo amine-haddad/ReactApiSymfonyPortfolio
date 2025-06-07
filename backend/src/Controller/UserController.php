@@ -14,8 +14,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class UserController extends AbstractController
 {
-    #[Route('/api/me', name: 'api_me', methods: ['GET'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')] // 🔒 Protège l'accès
+    // #[Route('/api/me', name: 'api_me', methods: ['GET'])]
+    // #[IsGranted('IS_AUTHENTICATED_FULLY')] // 🔒 Protège l'accès
     public function me(): JsonResponse
     {
         $user = $this->getUser();

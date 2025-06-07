@@ -1,0 +1,101 @@
+/* ===============================
+   SECTION EXPÉRIENCE
+================================ */
+.experienceFrame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: var(--background-color);
+  padding-top: 80px;
+  padding-bottom: 50px;
+  width: 100%;
+  max-width: 1920px;
+}
+
+/* ===============================
+   CARTE D’EXPÉRIENCE
+================================ */
+.experienceCardContainer {
+  max-width: 1920px;
+  width: 90%;
+}
+
+.experienceCard {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 auto 30px;
+  padding: 1%;
+  position: relative;
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0px 2px 6px var(--accent-color);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.experienceCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 1px 5px 10px var(--accent-color);
+}
+
+/* Cadre intérieur */
+.cardFrame {
+  width: 100%;
+  background-color: var(--primary-color);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* ===============================
+   IMAGE ENTREPRISE
+================================ */
+.experienceCard img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--border-color);
+  margin-bottom: 1rem;
+}
+
+/* ===============================
+   TEXTE DE L’EXPÉRIENCE
+================================ */
+.experienceCard h2 {
+  font-size: 1.25rem;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.experienceCard .text-muted {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.experienceCard p {
+  font-size: 1rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+================================ */
+@media (min-width: 768px) {
+  .experienceCard {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  .experienceCard img {
+    margin-right: 1rem;
+  }
+}

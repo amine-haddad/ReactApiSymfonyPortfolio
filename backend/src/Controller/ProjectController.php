@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 class ProjectController extends AbstractController
 {
@@ -21,22 +23,36 @@ class ProjectController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/api/projects/{profileId}', name: 'api_projects_by_profile', methods: ['GET'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')] // Protège l'accès à cette API
+    /**
+ * @OA\Get(
+ *     path="/api/profiles/{profileId}/projects",
+ *     summary="Liste des projets d'un profil",
+ *     @OA\Parameter(
+ *         name="profileId",
+ *         in="path",
+ *         required=true,
+ *         description="Identifiant du profil",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Retourne la liste des projets",
+ *         @OA\JsonContent(
+ *             type="array",
+ *             @OA\Items(ref=@Model(type=Project::class, groups={"read:Project"}))
+ *         )
+ *     )
+ * )
+ */
+
+    #[Route('/api/profiles/{profileId}/projects', name: 'api_projects_by_profile', methods: ['GET'])]
     public function getProjectsByProfile($profileId): JsonResponse
     {
-        // Récupère l'utilisateur connecté
-        $user = $this->getUser();  
-
-        if (!$user) {
-            return new JsonResponse(['error' => 'Utilisateur non authentifié'], 401);
-        }
-
-        // Recherche du profil par son ID et s'assurer qu'il appartient à l'utilisateur connecté
+        // Recherche du profil par son ID
         $profile = $this->entityManager->getRepository(Profile::class)->find($profileId);
 
-        if (!$profile || $profile->getUser() !== $user) {
-            return new JsonResponse(['error' => 'Profil non trouvé ou non autorisé'], 403);
+        if (!$profile) {
+            return new JsonResponse(['error' => 'Profil non trouvé'], 404);
         }
 
         // Recherche des projets associés à ce profil
@@ -44,10 +60,32 @@ class ProjectController extends AbstractController
             ->getRepository(Project::class)
             ->findBy(['profile' => $profile]);
 
-        if (!$projects) {
-            return new JsonResponse(['message' => 'Aucun projet trouvé pour ce profil'], 404);
+        // Retourne les projets associés
+        return $this->json($projects, 200, [], ['groups' => 'read:Project']);
+    }
+
+    #[Route('/api/profiles/{profileId}/projects/{projectId}', name: 'api_project_by_profile', methods: ['GET'])]
+    
+    public function getProjectByProfile($profileId, $projectId): JsonResponse
+    {
+        // Check if the profile exists
+        $profile = $this->entityManager->getRepository(Profile::class)->find($profileId);
+
+        if (!$profile) {
+            return new JsonResponse(['error' => 'Profil non trouvé'], 404);
         }
 
-        return $this->json($projects, 200, [], ['groups' => 'project:read']);
+        // Check if the project exists and belongs to the profile
+        $project = $this->entityManager->getRepository(Project::class)->findOneBy([
+            'id' => $projectId,
+            'profile' => $profile
+        ]);
+
+        if (!$project) {
+            return new JsonResponse(['error' => 'Projet non trouvé ou n\'appartient pas au profil'], 404);
+        }
+
+
+        return $this->json($project, 200, [], ['groups' => 'read:Project']);
     }
 }

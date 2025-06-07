@@ -38,18 +38,18 @@ class Experience
     #[Assert\NotBlank(message: "Company cannot be blank")]
     private ?string $compagny = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: "start_date", type: Types::DATE_MUTABLE)]
     #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotNull(message: "Start date cannot be null")]
     #[Assert\Date(message: "Start date must be a valid date")]
-    private ?\DateTimeInterface $start_date = null;
+    private ?\DateTimeInterface $startDate = null;
 
-    #[ORM\Column(type : Types::DATE_MUTABLE)]
+    #[ORM\Column(name: "end_date", type: Types::DATE_MUTABLE)]
     #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
     #[Assert\NotNull(message: "End date cannot be null")]
     #[Assert\Date(message: "End date must be a valid date")]
-    #[Assert\GreaterThan(propertyPath: "start_date", message: "End date must be after the start date")]
-    private ?\DateTimeInterface $end_date = null;
+    #[Assert\GreaterThan(propertyPath: "startDate", message: "End date must be after the start date")]
+    private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type : Types::TEXT)]
     #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
@@ -74,7 +74,7 @@ class Experience
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'experiences', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Experience', 'write:Experience','read:User'])]
+    #[Groups(['read:Experience', 'write:Experience','read:User','read:Profile'])]
     private Collection $images;
 
     public function __construct()
@@ -121,25 +121,23 @@ class Experience
 
     public function getStartDate(): ?\DateTimeInterface
     {
-        return $this->start_date;
+        return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $start_date): static
+    public function setStartDate(\DateTimeInterface $startDate): static
     {
-        $this->start_date = $start_date;
-
+        $this->startDate = $startDate;
         return $this;
     }
 
     public function getEndDate(): ?\DateTimeInterface
     {
-        return $this->end_date;
+        return $this->endDate;
     }
 
-    public function setEndDate(\DateTimeInterface $end_date): static
+    public function setEndDate(\DateTimeInterface $endDate): static
     {
-        $this->end_date = $end_date;
-
+        $this->endDate = $endDate;
         return $this;
     }
 

@@ -1,90 +1,53 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import "../../styles/Experience.css";
-import { useParams } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+import styles from "../../styles/Experience.module.css";
 
-const ProfileExperiences = () => {
-  const { id } = useParams(); // Récupération de l'ID du profil actif
-  const [experiences, setExperiences] = useState([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchExperiences = async () => {
-      if (!id) {
-        setError("ID du profil manquant");
-        return;
-      }
-
-      console.log({ profil_id: id });
-
-      try {
-        const token = localStorage.getItem("jwt_token");
-        if (!token) {
-          setError("Token manquant");
-          return;
-        }
-
-        // Utilisation du bon paramètre pour filtrer par profile.id
-        const response = await axios.get(
-          `http://localhost:8000/api/experiences?profile.id=${id}`, // Filtrage par profil
-          {
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setExperiences(response.data);
-        setError("");
-      } catch (err) {
-        setExperiences([]);
-        setError("Erreur lors du chargement des expériences");
-      }
-    };
-
-    fetchExperiences();
-  }, [id]); // Dépendance sur l'ID du profil
+const ProfileExperiences = ({ experiences, error }) => {
+  if (!experiences || experiences.length === 0) {
+    return (
+      <div className={styles.experienceFrame}>
+        <h2 className="text-center title-h2 display-1">Expériences</h2>
+        <p className="text-center mt-4">Aucune expérience trouvée.</p>
+      </div>
+    );
+  }
 
   const formatDate = (date) => {
     if (!date) return "";
     const formattedDate = new Date(date);
-    return formattedDate.toISOString().split("T")[0]; // Formatée sous le format YYYY-MM-DD
+    return formattedDate.toISOString().split("T")[0];
   };
 
   return (
-    <div className="experience-frame">
-      <h2 className="text-center title-h2 display-1">Profile Experiences</h2>
+    <div className={styles.experienceFrame}>
+      <h2 className="text-center title-h2 display-1">Expériences</h2>
       {error && <p className="text-danger">{error}</p>}
-      {experiences.length > 0 ? (
-        <div className="gap-4 experience-card">
-          {experiences.map((experience, index) => (
-            // Ajoute la prop key ici pour chaque élément
-            <div
-              key={experience.id || `experience-${index}`}
-              className="d-flex align-items-center p-3 border rounded shadow-sm card-cadre"
-            >
-              {/* Vérification de l'existence de l'image associée */}
+
+      {experiences.map((experience, index) => (
+        <div className={styles.experienceCardContainer} key={experience.id || index}>
+          <div className={`${styles.experienceCard} ${styles.cardFrame}`}>
+            <div className="d-flex align-items-center">
               <img
-                src={experience.images && experience.images[0] ? experience.images[0].url : "/assets/defaultImgageCode.jpg"} 
+                src={
+                  experience.images && experience.images[0]
+                    ? experience.images[0].url
+                    : "/assets/defaultImgageCode.jpg"
+                }
                 alt={experience.compagny}
-                className="me-4 rounded-circle" // Style de l'image (arrondie et espacement à gauche)
-                style={{ width: "80px", height: "80px", objectFit: "cover" }}
+                className="me-4 rounded-circle"
               />
-              <div className="card-info">
-                <p>{experience.compagny}</p>
-                <span>{experience.role}</span>
-                <span>
+              <div className={styles.cardInfo}>
+                <p className="fw-bold mb-1">{experience.compagny}</p>
+                <span className="d-block mb-1">{experience.role}</span>
+                <span className="d-block mb-2">
                   {formatDate(experience.start_date)} - {formatDate(experience.end_date)}
                 </span>
-                <p>{experience.description}</p>
+                <p className="mb-0">{experience.description}</p>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      ) : (
-        <p>Aucune expérience trouvée.</p>
-      )}
+      ))}
     </div>
   );
 };

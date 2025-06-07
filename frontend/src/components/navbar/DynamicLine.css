@@ -1,20 +1,18 @@
 .dynamic-line {
-    position: absolute;
-    bottom: 0; /* Positionne la ligne au bas du lien */
-    left: 0;
-    height: 2px;
-    width: 0; /* La largeur commence à 0 */
-    background-color:rgba(0, 11, 77, 0.6);;
-    transition: width 0.4s ease-in-out;
-    
-  }
-  
-  .nav-link {
-    position: relative; /* Le parent (le lien) doit être positionné */
-    display: inline-block; /* Pour que la ligne s'adapte à la taille du lien */
-  }
-  
-  .nav-link:hover .dynamic-line {
-    width: 100%; /* La ligne se déploie en largeur à 100% lors du hover */
-  }
-  
+  position: absolute;
+  bottom: 0; /* Positionne la ligne au bas du lien */
+  left: 0;
+  height: 2px;
+  width: 0; /* La largeur commence à 0 */
+  background-color: var(--highlight-color);
+  transition: width 0.4s ease-in-out;
+}
+
+.nav-link {
+  position: relative; /* Le parent (le lien) doit être positionné */
+  display: inline-block; /* Pour que la ligne s'adapte à la taille du lien */
+}
+
+.nav-link:hover .dynamic-line {
+  width: 100%; /* La ligne se déploie en largeur à 100% lors du hover */
+}

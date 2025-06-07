@@ -5,18 +5,26 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\ProjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\ApiResource\ProjectProvider;
+use App\Controller\ProjectController;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read:Project']],
-    denormalizationContext: ['groups' => ['write:Project']]
+    denormalizationContext: ['groups' => ['write:Project']],
 )]
+
 #[ApiFilter(SearchFilter::class, properties: ['profile.id' => 'exact'])]
 #[ORM\HasLifecycleCallbacks]
 class Project
@@ -24,51 +32,51 @@ class Project
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:Project',"read:Profile",'read:User'])]
+    #[Groups(['read:Project', 'write:Project',"read:Profile",'read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Project', 'write:Project',"read:Profile",'read:User'])]
+    #[Groups(['read:Project', 'write:Project','project:read',"read:Profile",'read:User'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
     private ?string $project_url = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
     private ?string $image_url = null;
 
     #[ORM\Column(length: 255)]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    #[Groups(['read:Project', 'write:Project'])]
+    #[Groups(['read:Project', 'write:Project','project:read'])]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'projects')]
-    #[Groups(['read:Project'])]
+    #[Groups(['read:Project', 'write:Project'])]
     private ?Profile $profile = null;
 
     /**
      * @var Collection<int, Skill>
      */
     #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: 'projects')]
-    #[Groups(['read:Project', 'write:Project','read:Profile'])]
+    #[Groups(['read:Project', 'write:Project','read:Profile','project:read'])]
     private Collection $technologies;
 
     /**
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'projects')]
-    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project','read:Profile','read:User','project:read'])]
     private Collection $images;
 
     public function __construct()

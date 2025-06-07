@@ -1,0 +1,147 @@
+/* SECTION PROJECT */
+.sectionProject {
+  background-color: var(--background-color);
+  padding-top: 80px;
+  padding-bottom: 3vw;
+}
+h1,
+h2 {
+  color: var(--text-color);
+}
+
+/* WRAPPER CARROUSEL */
+.carouselWrapper {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 20px;
+  padding: 15px 0;
+  width: 90%;
+  max-width: 1920px;
+  margin: 0 auto;
+  justify-content: start;
+  background-color: var(--background-color);
+
+  border-radius: 10px;
+  scroll-behavior: smooth;
+}
+
+/* STYLE DES CARTES (PROJET) */
+.projectCard {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 250px;
+  height: 500px;
+  margin: 0 6px;
+  aspect-ratio: 5 / 8;
+  background-color: var(--background-color);
+  border-radius: 5px;
+  box-shadow: 0px 2px 6px var(--accent-color);
+  min-height: 350px;
+  transition: transform 0.3s ease-in-out;
+  padding: 0;
+  overflow: hidden;
+}
+
+.projectCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 1px 5px 10px var(--accent-color);
+}
+
+/* IMAGE DU PROJET */
+.projectImgTop {
+  object-fit: cover;
+  height: 200px;
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+}
+
+/* CORPS DE LA CARTE */
+.projectBody {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-color);
+  background-color: var(--primary-color);
+  padding: 5px;
+  flex-grow: 1;
+}
+
+/* TEXTE DE DESCRIPTION */
+.projectText {
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+
+/* FOOTER DE LA CARTE (LIEN VERS LE PROJET) */
+.projectFooter {
+  padding: 5px;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  margin-top: auto;
+  border-radius: 5px;
+}
+
+.projectFooter a {
+  display: block;
+  text-align: center;
+  padding: 5px;
+  margin-top: auto;
+  background-color: #007bff; /* Tu peux aussi créer une --link-color si besoin */
+  color: var(--text-color);
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.projectFooter a:hover {
+  background-color: #0056b3;
+}
+
+/* RESPONSIVE */
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .carouselWrapper {
+    gap: 10px;
+  }
+
+  .projectCard {
+    width: 100%;
+  }
+}
+
+/* TABLETTE */
+@media (max-width: 768px) {
+  .carouselWrapper {
+    gap: 15px;
+  }
+
+  .projectCard {
+    width: 250px;
+  }
+}
+
+/* BUREAU */
+@media (min-width: 992px) {
+  .projectCard {
+    width: 250px;
+  }
+}
+
+/* GRAND ÉCRAN */
+@media (min-width: 1200px) {
+  .carouselWrapper {
+    gap: 30px;
+  }
+
+  .projectCard {
+    width: 250px;
+  }
+}

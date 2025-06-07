@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -23,20 +23,12 @@ class ErrorBoundary extends Component {
     });
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.log('Erreur attrapée:', error);
-    console.log('Infos sur l\'erreur:', errorInfo);
-    this.setState({
-      errorMessage: error.toString(),
-    });
-  }
-  
   render() {
     if (this.state.hasError) {
       // Retourner un message d'erreur si une erreur est capturée
       return (
         <div>
-          <h2>Quelque chose s'est mal passé!</h2>
+          <h2>Quelque chose s&apos;est mal passé!</h2>
           <p>{this.state.errorMessage}</p>
         </div>
       );

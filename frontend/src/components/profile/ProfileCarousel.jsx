@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Import Bootstrap JS
-import "../../styles/Profile.css"; // Import du fichier CSS
+import styles from "../../styles/ProfileCarousel.module.css"; // Import du fichier CSS
 
 const ProfileCarousel = ({ profile, error }) => {
   return (
@@ -13,38 +13,38 @@ const ProfileCarousel = ({ profile, error }) => {
           data-bs-ride="carousel"
         >
           <div className="carousel-inner">
-            <div className="carousel-item active">
+            <div className={`carousel-item active ${styles.carouselItem}`}>
               <a href="#projects">
                 <img
                   src="/assets/cannon_old_weapon.svg"
-                  className="carousel-img"
+                  className={styles.carousel}
                   alt="Projets"
                 />
-                <div className="carousel-caption d-none d-md-block">
+                <div className={`carousel-caption ${styles.carouselCaption}`}>
                   <h5>Projets</h5>
                 </div>
               </a>
             </div>
-            <div className="carousel-item">
+            <div className={`carousel-item ${styles.carouselItem}`}>
               <a href="#experiences">
                 <img
                   src="/assets/clavierFondBleuter.jpeg"
-                  className="carousel-img"
+                  className={styles.carousel}
                   alt="Experiences"
                 />
-                <div className="carousel-caption d-none d-md-block">
+                <div className={`carousel-caption ${styles.carouselCaption}`}>
                   <h5>Expériences</h5>
                 </div>
               </a>
             </div>
-            <div className="carousel-item">
+            <div className={`carousel-item ${styles.carouselItem}`}>
               <a href="#aboutme">
                 <img
                   src="/assets/defaultImgageCode.jpg"
-                  className="carousel-img"
+                  className={styles.carousel}
                   alt="About Me"
                 />
-                <div className="carousel-caption d-none d-md-block">
+                <div className={`carousel-caption ${styles.carouselCaption}`}>
                   <h5>About Me</h5>
                 </div>
               </a>

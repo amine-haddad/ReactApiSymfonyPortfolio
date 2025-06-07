@@ -1,0 +1,64 @@
+.notfound-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--background-color-trans);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.dynamic-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.notfound-content {
+  z-index: 1;
+  padding: 2rem;
+  backdrop-filter: blur(2px); /* facultatif : un effet flou doux */
+}
+
+.notfound-title {
+  font-size: 6rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+  text-shadow: var(--text-shadow);
+  font-family: var(--font-family-title);
+}
+
+.notfound-subtitle {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.notfound-text {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.notfound-link {
+  display: inline-block;
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: var(--box-shadow);
+  transition: background-color 0.3s ease;
+}
+
+.notfound-link:hover {
+  background-color: var(--primary-color-hover);
+}
+.notfound-link:active {
+  background-color: var(--primary-color-active);
+}

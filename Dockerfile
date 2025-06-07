@@ -27,6 +27,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copie ton code dans le conteneur
 COPY . .
 
+COPY docker/php/custom.ini /usr/local/etc/php/conf.d/
+
 # Assure-toi que le dossier /var/www/html ait les bonnes permissions
 RUN chown -R www-data:www-data /var/www/html
 

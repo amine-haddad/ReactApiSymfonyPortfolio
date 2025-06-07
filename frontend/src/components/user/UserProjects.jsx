@@ -1,7 +1,10 @@
-function UserProjects({profiles}) {
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+function UserProjects() {
+  const { isAuthenticated, user, profiles, activeProfile, loading, error } = useContext(AuthContext);
   return (
     <div className="user-profile">
-      
+
       <h1>Liste des Composants Projects</h1>
       <ul>
         {profiles.map((profile) => (

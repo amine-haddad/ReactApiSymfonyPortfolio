@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import "../styles/TypingEffect.css";
+import styles from "../styles/TypingEffect.module.css";
 
 const TypingEffect = () => {
   const texteRef = useRef(null);
   const [phase, setPhase] = useState(1);
-  const [phrase2Visible, setPhrase2Visible] = useState(false);
+  const [showSecondPhrase, setShowSecondPhrase] = useState(false);
+  const [animateSecondPhrase, setAnimateSecondPhrase] = useState(false);
 
   useEffect(() => {
     let index = 0;
     let texteAffiche = "";
     let timeout;
-    let listeTextes = [
+    let intervalleRevelation;
+
+    const textes = [
       {
         texte: "Hello, I'm Senior Touco!",
         erreurs: [
@@ -29,24 +32,30 @@ const TypingEffect = () => {
       },
     ];
 
-    let texteActuel = listeTextes[phase - 1].texte;
-    let erreurs = listeTextes[phase - 1].erreurs;
+    const texteActuel = textes[phase - 1].texte;
+    const erreurs = textes[phase - 1].erreurs;
 
     const taperLettre = () => {
       if (index < texteActuel.length) {
-        let char = texteActuel[index];
+        const char = texteActuel[index];
         const erreur = erreurs.find((e) => e.position === index);
-        if (erreur) {
+
+        if (erreur && texteRef.current) {
           texteRef.current.innerHTML = texteAffiche + erreur.erreur;
+
           setTimeout(() => {
-            texteRef.current.innerHTML = texteAffiche;
+            if (texteRef.current) {
+              texteRef.current.innerHTML = texteAffiche;
+            }
             texteAffiche += char;
             index++;
             timeout = setTimeout(taperLettre, 250);
           }, 600);
         } else {
           texteAffiche += char;
-          texteRef.current.innerHTML = texteAffiche;
+          if (texteRef.current) {
+            texteRef.current.innerHTML = texteAffiche;
+          }
           index++;
           timeout = setTimeout(taperLettre, 150);
         }
@@ -58,56 +67,68 @@ const TypingEffect = () => {
     const supprimerLettres = () => {
       if (texteAffiche.length > 0) {
         texteAffiche = texteAffiche.slice(0, -1);
-        texteRef.current.innerHTML = texteAffiche;
+        if (texteRef.current) {
+          texteRef.current.innerHTML = texteAffiche;
+        }
         timeout = setTimeout(supprimerLettres, 100);
       } else {
-        if (phase < 2) {
-          setPhase(phase + 1);
+        if (phase < textes.length) {
+          setPhase((prev) => prev + 1);
         } else {
-          setTimeout(() => revellerLettresUneParUne(), 500);
+          setTimeout(revelerLettresUneParUne, 500);
         }
       }
     };
 
-    const revellerLettresUneParUne = () => {
+    const revelerLettresUneParUne = () => {
       const phraseFinale = "I'm Senior Touco & I'm a Web Developer!";
-      let tableauCache = phraseFinale
-        .split("")
-        .map((char) => (char === " " ? " " : ""));
-      texteRef.current.innerHTML = tableauCache.join("");
+      let cache = phraseFinale.split("").map((char) => (char === " " ? " " : ""));
+      if (texteRef.current) {
+        texteRef.current.innerHTML = cache.join("");
+      }
 
-      let lettresARévéler = phraseFinale
+      let lettres = phraseFinale
         .split("")
         .map((char, i) => ({ char, index: i }))
-        .filter((item) => item.char !== " " && item.char !== "");
+        .filter(({ char }) => char.trim() !== "");
 
-      const intervalleRévélation = setInterval(() => {
-        if (lettresARévéler.length === 0) {
-          clearInterval(intervalleRévélation);
-          setPhrase2Visible(true);
+      intervalleRevelation = setInterval(() => {
+        if (lettres.length === 0) {
+          clearInterval(intervalleRevelation);
+          setShowSecondPhrase(true);
+          // Délai minimal pour laisser le DOM le monter avant de jouer l'animation
+          setTimeout(() => {
+            setAnimateSecondPhrase(true);
+          }, 50);
           return;
         }
 
-        const indexAleatoire = Math.floor(
-          Math.random() * lettresARévéler.length
-        );
-        const { char, index } = lettresARévéler.splice(indexAleatoire, 1)[0];
+        const randomIndex = Math.floor(Math.random() * lettres.length);
+        const { char, index } = lettres.splice(randomIndex, 1)[0];
+        cache[index] = char;
 
-        tableauCache[index] = char;
-        texteRef.current.innerHTML = tableauCache.join("");
+        if (texteRef.current) {
+          texteRef.current.innerHTML = cache.join("");
+        }
       }, 180);
     };
 
     taperLettre();
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(intervalleRevelation);
+    };
   }, [phase]);
 
   return (
-    <div className="typing-effect">
-      <h1 ref={texteRef} className="typing-text"></h1>
-      {phrase2Visible && (
-        <p className="second-phrase visible">
+    <div className={styles.typingEffect}>
+      <h1 ref={texteRef} className={styles.typingText}></h1>
+      {showSecondPhrase && (
+        <p
+          className={`${styles.secondPhrase} ${animateSecondPhrase ? styles.visible : ""
+            }`}
+        >
           Let's create something amazing together!
         </p>
       )}

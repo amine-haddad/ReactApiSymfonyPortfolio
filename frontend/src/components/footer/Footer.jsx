@@ -22,12 +22,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-dark text-white p-4 ">
+    <footer className="footer-section p-4 ">
       <div className="container">
         <div className="row">
           {/* Formulaire de Contact */}
           <div className="col-md-6">
-            <h4>Contactez-moi</h4>
+            <h4 className="title-footer-h4">Contactez-moi</h4>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
@@ -65,20 +65,20 @@ const Footer = () => {
 
           {/* Liens vers les Réseaux Sociaux */}
           <div className="col-md-6">
-            <h4>Suivez-moi</h4>
+            <h4 className="title-footer-h4">Suivez-moi</h4>
             <div className="d-flex">
-              <a href="https://github.com" className="text-white me-3">
+              <a href="https://github.com" className=" me-3">
                 <FaGithub size={30} />
               </a>
-              <a href="https://www.linkedin.com" className="text-white me-3">
+              <a href="https://www.linkedin.com" className=" me-3">
                 <FaLinkedin size={30} />
               </a>
-              <a href="https://twitter.com" className="text-white me-3">
+              <a href="https://twitter.com" className="me-3">
                 <FaTwitter size={30} />
               </a>
               <a
                 href="mailto:youremail@example.com"
-                className="text-white me-3"
+                className="me-3"
               >
                 <FaEnvelope size={30} />
               </a>

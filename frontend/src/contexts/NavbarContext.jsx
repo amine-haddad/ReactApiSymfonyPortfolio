@@ -1,7 +1,9 @@
+import { AuthContext } from "./AuthContext"; // Import du hook du AuthContext
 import { createContext, useContext, useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
-const NavbarContext = createContext(); // ✅ Déclaration correcte (pas redéclarée ensuite)
+const NavbarContext = createContext();
 
 export const NavbarProvider = ({ children }) => {
   const [isSticky, setIsSticky] = useState(false);
@@ -9,6 +11,14 @@ export const NavbarProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState(null);
   const [profile, setProfile] = useState(null);
   const [user, setUser] = useState(null);
+  const location = useLocation();
+
+  const { user: authUser, profile: authProfile } = AuthContext(); // Récupère l'utilisateur et le profil depuis AuthContext
+
+  useEffect(() => {
+    setUser(authUser);
+    setProfile(authProfile);
+  }, [authUser, authProfile]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,29 +32,9 @@ export const NavbarProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("jwt_token");
-        if (!token) return;
+    setCurrentPage(location.pathname);
+  }, [location.pathname]);
 
-        const response = await axios.get("/api/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setUser(response.data);
-      } catch (err) {
-        console.error("Erreur lors de la récupération de l'utilisateur", err);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    setCurrentPage(currentPath); // Met à jour la page actuelle à chaque changement
-  }, [window.location.pathname]); // Cela surveille les changements de page
   return (
     <NavbarContext.Provider
       value={{

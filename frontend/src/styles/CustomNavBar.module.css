@@ -1,0 +1,190 @@
+/* ============================
+   CustomNavBar.css - Styles spécifiques à la barre de navigation
+   -------------------------------------------------------------
+   Ce fichier contient les styles spécifiques au composant CustomNavBar.
+   - Sticky Navbar
+   - Logo
+   - Menu burger
+   - Conteneur Navbar
+   - Liens
+   - Styles responsives
+============================ */
+
+/* ============================
+   1. Navbar Sticky + Transition
+   -------------------------
+   Styles pour la navbar sticky et les transitions.
+============================ */
+.navbar.sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: var(--box-shadow);
+}
+
+.navbar {
+  background-color: var(--navbar-bg) !important;
+  color: var(--navbar-text) !important;
+  box-shadow: var(--box-shadow);
+  border: 2px solid var(--border-color);
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  font-family: var(--font-family-title);
+}
+
+.navbar.visible {
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.navbar:not(.visible) {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ============================
+   2. Logo
+   -------------------------
+   Styles pour le logo de la navbar.
+============================ */
+.navbar-logo {
+  width: 50px;
+  height: auto;
+  background-image: url("/assets/cannon_old_weapon.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: white;
+  border-radius: 50%;
+  margin: 5px;
+  border: 1px solid black;
+  box-shadow: 0px 2px 8px rgba(1, 9, 31, 0.5);
+}
+
+/* ============================
+   3. Menu burger
+   -------------------------
+   Styles pour le bouton burger de la navbar.
+============================ */
+.navbar-toggler {
+  border: none;
+  outline: none;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  z-index: 1100;
+}
+
+.navbar-toggler-icon {
+  width: 25px;
+  height: 20px;
+  background-color: transparent;
+}
+
+/* ============================
+   4. Conteneur Navbar
+   -------------------------
+   Styles pour le conteneur principal de la navbar.
+============================ */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+  z-index: 1000;
+}
+
+.navbar-center {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  flex-grow: 1;
+  z-index: 1000;
+  font-family: var(--font-family-title);
+}
+
+.navbar-name,
+.navbar-title {
+  font-family: var(--font-family-title);
+  text-transform: uppercase;
+}
+
+.navbar-title {
+  font-style: italic;
+}
+
+/* ============================
+   5. Liens
+   -------------------------
+   Styles pour les liens de la navbar.
+============================ */
+.nav-link {
+  color: var(--navbar-text) !important;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: var(--link-hover);
+}
+
+.nav-link.active {
+  font-weight: bold;
+  color: var(--link-active);
+  border-bottom: 2px solid var(--link-active);
+}
+
+/* ============================
+   6. Responsive
+   -------------------------
+   Styles responsives pour la navbar.
+============================ */
+@media (max-width: 1015px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-top: 20px;
+  }
+
+  .nav-link {
+    font-size: 1.2rem;
+    padding: 10px;
+    display: block;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-logo {
+    width: 40px;
+  }
+
+  .navbar-name {
+    font-size: 1.2rem;
+  }
+
+  .navbar-title {
+    font-size: 0.9rem;
+  }
+}

@@ -1,21 +1,21 @@
 nelmio_cors:
-    defaults:
-        origin_regex: true
-        allow_origin: ['^http://(localhost(:5173)?|nginx)$']  # Modification de l'expression régulière pour matcher localhost avec ou sans port
-        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
-        allow_headers: ['Content-Type', 'Authorization']
-        expose_headers: ['Authorization']
-        max_age: 3600
-    paths:
-        '^/api/': ~  # Applique la configuration uniquement à l'API
+  defaults:
+    origin_regex: true
+    allow_origin: ["^http://(localhost(:5173)?|nginx)$"] # Modification de l'expression régulière pour matcher localhost avec ou sans port
+    allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+    allow_headers: ["Content-Type", "Authorization"]
+    expose_headers: ["Authorization"]
+    max_age: 3600
+  paths:
+    "^/api/": ~ # Applique la configuration uniquement à l'API
 
 nelmio_api_doc:
-    documentation:
-        info:
-            title: 'Portfolio'
-            description: 'Documentation de mon API'
-            version: '1.0.0'
-        security:
-            - Bearer: []  # Utilisation de Bearer pour la sécurité JWT
-    areas:
-        - name: api
+  documentation:
+    info:
+      title: "Portfolio"
+      description: "Documentation de mon API"
+      version: "1.0.0"
+    security:
+      - Bearer: [] # Utilisation de Bearer pour la sécurité JWT
+  areas:
+    - name: api

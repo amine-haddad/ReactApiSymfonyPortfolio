@@ -2,6 +2,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiSubresource;
 use App\Repository\ProfileRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -12,7 +13,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read:Profile']],
-    denormalizationContext: ['groups' => ['write:Profile']]
+    denormalizationContext: ['groups' => ['write:Profile']],
+    paginationItemsPerPage: 10,
+    paginationEnabled: true,
+    paginationClientItemsPerPage: true
 )]
 #[ORM\HasLifecycleCallbacks]
 class Profile
@@ -62,6 +66,7 @@ class Profile
      */
     #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
+    #[ApiSubresource]
     private Collection $projects;
 
     /**
@@ -69,6 +74,7 @@ class Profile
      */
     #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
+    #[ApiSubresource]
     private Collection $experiences;
 
     /**
@@ -76,6 +82,7 @@ class Profile
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
+    #[ApiSubresource]
     private Collection $images;
 
     /**
@@ -83,6 +90,7 @@ class Profile
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
+    #[ApiSubresource]
     private Collection $profileSkills;
     
     #[ORM\ManyToOne(inversedBy: 'userProfiles', cascade: ['persist', 'remove'])]
