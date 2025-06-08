@@ -10,6 +10,7 @@ import ProfileAbout from "../../../../components/profile/ProfileAbout";
 import DynamicShapes from "../../../../components/DynamicShapes";
 import TypingEffect from "../../../../components/TypingEffect";
 import styles from "../../../../styles/ProfilePage.module.css";
+import PageLayout from "../../../../layouts/PageLayout";
 
 const Index = () => {
   const { profileId } = useParams();
@@ -22,23 +23,23 @@ const Index = () => {
 
   const profile = profiles.find((p) => p.id === Number(profileId));
 
-  if (loading) return <p className="profile-loading">Chargement du dashboard...</p>;
-  if (error) return <p className="profile-error">Erreur : {error}</p>;
-  if (!user) return <p className="profile-not-found">Non connecté.</p>;
-  if (!profile) return <p className="profile-not-found">Profil non trouvé</p>;
+  if (loading) return <p className={styles.profileLoading}>Chargement du dashboard...</p>;
+  if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
+  if (!user) return <p className={styles.profileNotFound}>Non connecté.</p>;
+  if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;
 
   return (
-    <div className="profile-page">
+    <div className={styles.profilePage}>
       {/* Effets visuels */}
-      <div className="profile-header">
+      <div className={styles.profileHeader}>
         <DynamicShapes />
-        <div className="profile-overlay">
+        <div className={styles.profileOverlay}>
           <TypingEffect />
         </div>
       </div>
 
       {/* Contenu du profil */}
-      <div className="profile-content">
+      <div className={styles.profileContent}>
         <Profile profile={profile} />
         <ProfileProjects projects={profile.projects || []} />
         <ProfileExperiences experiences={profile.experiences || []} />

@@ -1,5 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import styles from "../../styles/Profile.module.css";
 import ProfileCarousel from "./ProfileCarousel";
 import { useContext, useState, useEffect } from "react";

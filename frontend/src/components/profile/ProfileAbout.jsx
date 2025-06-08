@@ -1,5 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
-import "bootstrap/dist/js/bootstrap.bundle.min.js"; // Import Bootstrap JS
 import styles from "../../styles/Profile.module.css"; // Import du fichier CSS
 import { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";

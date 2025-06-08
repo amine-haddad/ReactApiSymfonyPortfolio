@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import PageLayout from "../../../../layouts/PageLayout";
 import styles from "../../../../styles/ExperienceId.module.css";
 
 const ExperienceId = () => {
@@ -39,51 +40,53 @@ const ExperienceId = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>{experience.role || "Titre non renseigné"}</h1>
+    <PageLayout>
+      <div className={styles.container}>
+        <h1 className={styles.title}>{experience.role || "Titre non renseigné"}</h1>
 
-      <img
-        src={imageUrl}
-        alt={`Illustration de l'expérience ${experience.image}`}
-        style={{
-          width: "100%",
-          height: "auto",
-          borderRadius: "12px",
-          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-          marginBottom: "1rem"
-        }}
-      />
+        <img
+          src={imageUrl}
+          alt={`Illustration de l'expérience ${experience.image}`}
+          style={{
+            width: "100%",
+            height: "auto",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            marginBottom: "1rem"
+          }}
+        />
 
-      <p className={styles.meta}>
-        <span className={styles.label}>Employeur:</span> {experience.compagny || "Aucune entreprise fournie."}
-      </p>
+        <p className={styles.meta}>
+          <span className={styles.label}>Employeur:</span> {experience.compagny || "Aucune entreprise fournie."}
+        </p>
 
-      <p className={styles.description}>
-        <div className={styles.label}>Descriptif :</div>
-        {experience.description || "Aucune description fournie."}
-      </p>
-      <p className={styles.meta}>
-        <span className={styles.label}>Début :</span> {formatDate(experience.startDate)}
-      </p>
-      <p className={styles.meta}>
-        <span className={styles.label}>Fin :</span>{" "}
-        {experience.endDate ? formatDate(experience.endDate) : "En cours"}
-      </p>
+        <p className={styles.description}>
+          <div className={styles.label}>Descriptif :</div>
+          {experience.description || "Aucune description fournie."}
+        </p>
+        <p className={styles.meta}>
+          <span className={styles.label}>Début :</span> {formatDate(experience.startDate)}
+        </p>
+        <p className={styles.meta}>
+          <span className={styles.label}>Fin :</span>{" "}
+          {experience.endDate ? formatDate(experience.endDate) : "En cours"}
+        </p>
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
-        <Link to={`/profiles/${profileId}/experiences`} className={styles.backLink}>
-          ← Retour aux expériences
-        </Link>
-        <a
-          href={imageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.backLink}
-        >
-          Voir l’image
-        </a>
+        <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
+          <Link to={`/profiles/${profileId}/experiences`} className={styles.backLink}>
+            ← Retour aux expériences
+          </Link>
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.backLink}
+          >
+            Voir l’image
+          </a>
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

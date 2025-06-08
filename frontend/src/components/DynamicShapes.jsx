@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import "../styles/DynamicShapes.css";
+import styles from "../styles/DynamicShapes.module.css";
 
 const DynamicShapes = () => {
   const canvasRef = useRef(null);
@@ -11,13 +11,9 @@ const DynamicShapes = () => {
 
     const points = [];
     const getNumPoints = () => {
-      if (window.innerWidth <= 480) {
-        return 25;
-      } else if (window.innerWidth <= 768) {
-        return 35;
-      } else {
-        return 55;
-      }
+      if (window.innerWidth <= 480) return 25;
+      if (window.innerWidth <= 768) return 35;
+      return 55;
     };
 
     const resizeCanvas = () => {
@@ -46,13 +42,12 @@ const DynamicShapes = () => {
       ctx.shadowColor = "rgba(205, 186, 186, 0.5)";
       ctx.shadowBlur = 5;
 
-      points.forEach((point1, index1) => {
-        points.forEach((point2, index2) => {
-          if (index1 !== index2) {
-            const distance = Math.sqrt(
-              Math.pow(point1.x - point2.x, 2) +
-              Math.pow(point1.y - point2.y, 2)
-            );
+      points.forEach((point1, i) => {
+        points.forEach((point2, j) => {
+          if (i !== j) {
+            const dx = point1.x - point2.x;
+            const dy = point1.y - point2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 160) {
               ctx.moveTo(point1.x, point1.y);
               ctx.lineTo(point2.x, point2.y);
@@ -69,12 +64,8 @@ const DynamicShapes = () => {
         point.x += point.speedX;
         point.y += point.speedY;
 
-        if (point.x <= 0 || point.x >= canvas.width) {
-          point.speedX *= -1;
-        }
-        if (point.y <= 0 || point.y >= canvas.height) {
-          point.speedY *= -1;
-        }
+        if (point.x <= 0 || point.x >= canvas.width) point.speedX *= -1;
+        if (point.y <= 0 || point.y >= canvas.height) point.speedY *= -1;
       });
     };
 
@@ -103,8 +94,8 @@ const DynamicShapes = () => {
   }, []);
 
   return (
-    <div className="dynamic-shapes-container">
-      <canvas ref={canvasRef} className="dynamic-shapes-canvas" />
+    <div className={styles.dynamicShapesContainer}>
+      <canvas ref={canvasRef} className={styles.dynamicShapesCanvas} />
     </div>
   );
 };

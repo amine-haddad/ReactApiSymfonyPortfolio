@@ -38,7 +38,7 @@ const Index = () => {
     if (profileId) fetchProfile();
   }, [profileId]);
 
-  console.log("Profil chargé :", profile);
+
   if (loading) return <p className={styles.profileLoading}>Chargement...</p>;
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
   if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;

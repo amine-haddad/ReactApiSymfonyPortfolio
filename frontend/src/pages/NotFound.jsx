@@ -12,7 +12,7 @@ function NotFound() {
       <div className="notfound-content">
         <h1 className="notfound-title">404</h1>
         <h2 className="notfound-subtitle">Page non trouvée</h2>
-        <p className="notfound-text">Oups, on dirait que tu t'es perdu.</p>
+        <p className="notfound-text">Oups Didou, on dirait que tu t'es perdu.</p>
         <Link to="/" className="notfound-link">Retour à l'accueil</Link>
       </div>
     </div>

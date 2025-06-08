@@ -1,6 +1,7 @@
 .sectionListProfiles {
   padding: 20px;
-  background-color: var(--background-color);
+  background-color: var(--background-color-trans);
+  border-radius: 12px;
   min-height: 100vh;
 }
 
@@ -28,8 +29,4 @@
 .profileCardList:hover {
   transform: translateY(-10px);
   box-shadow: 1px 5px 10px var(--accent-color);
-}
-
-html {
-  scroll-behavior: smooth;
 }

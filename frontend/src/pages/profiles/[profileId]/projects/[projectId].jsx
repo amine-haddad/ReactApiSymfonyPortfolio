@@ -1,8 +1,8 @@
 // src/pages/profiles/[profileId]/projects/[projectId].jsx
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import styles from "../../../../styles/ProjectDetail.module.css";
 import DynamicShapes from "../../../../components/DynamicShapes"; // adapte le chemin selon ton arborescence
+import styles from "../../../../styles/ProjectDetail.module.css";
 
 const ProjectDetail = () => {
   const { profileId, projectId } = useParams();

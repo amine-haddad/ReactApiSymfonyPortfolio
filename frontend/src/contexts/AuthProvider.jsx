@@ -55,11 +55,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("jwt_token");
+
     if (token) {
       loadUserData();
-    } else {
-      loadPublicProfiles();
     }
+
+    loadPublicProfiles(); // ← Toujours charger les profils publics
   }, [loadUserData, loadPublicProfiles]);
 
   useEffect(() => {

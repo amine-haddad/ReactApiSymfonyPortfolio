@@ -1,26 +1,44 @@
-.homeWrapper {
+.pageContainer {
   position: relative;
-  width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dynamicBackground {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
-  overflow: hidden;
+  pointer-events: none;
 }
 
-.content {
+.contentWrapper {
   position: relative;
   z-index: 1;
-  color: #f0f0f0;
-  text-align: center;
-  padding: 3rem 1rem;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.container {
+  display: flex;
+  background: linear-gradient(
+    135deg,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
+  padding: 2rem;
+  border-radius: 12px;
+  color: var(--text-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   max-width: 900px;
-  margin: 0 auto;
+  margin: 2rem auto;
+  animation: fadeIn 0.5s ease;
+  text-align: left;
+  justify-content: center;
 }
 
 .title {
@@ -33,70 +51,120 @@
   font-size: 1.5rem;
   margin-bottom: 2rem;
   font-style: italic;
+  text-align: center;
 }
 
 .descriptionBlock {
   background-color: rgba(0, 0, 0, 0.5);
   border-radius: 12px;
   padding: 2rem;
-  margin-bottom: 2rem;
+  margin: 0 auto 2rem auto; /* ⬅️ centrage horizontal */
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  max-width: 800px;
   text-align: left;
 }
 
 .features {
-  list-style: none;
-  padding-left: 0;
   margin-top: 1rem;
-}
-
-.features li {
-  margin-bottom: 0.75rem;
-  font-size: 1rem;
   padding-left: 1.5rem;
-  position: relative;
-}
-
-.features li::before {
-  content: "✔️";
-  position: absolute;
-  left: 0;
-  top: 0;
+  list-style-type: disc;
 }
 
 .buttonGroup {
+  margin: 2rem 0;
   display: flex;
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.btn {
-  background-color: #00c3ff;
-  color: #000;
+.btn,
+.btnOutline {
   padding: 0.75rem 1.5rem;
-  font-weight: bold;
-  text-decoration: none;
   border-radius: 8px;
-  transition: background-color 0.3s ease;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
 }
 
-.btn:hover {
-  background-color: #009ac9;
+.btn {
+  background-color: var(--accent-color);
+  color: white;
 }
 
 .btnOutline {
   background: none;
-  border: 2px solid #00c3ff;
-  color: #00c3ff;
-  padding: 0.75rem 1.5rem;
-  font-weight: bold;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 2px solid var(--accent-color);
+  color: var(--accent-color);
 }
 
+.btn:hover,
 .btnOutline:hover {
-  background-color: #00c3ff;
-  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.previewSection {
+  margin-top: 3rem;
+  text-align: center;
+  max-width: 850px;
+  margin: 0 auto 2rem auto;
+}
+
+.previewTitle {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card h3 {
+  margin-bottom: 1rem;
+}
+
+.skillsList {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.skillItem {
+  color: var(--accent-color);
+}
+
+.cardLink {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-color);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.cardLink:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -61,10 +61,17 @@ body.dark-mode {
    4. Styles globaux
 ============================ */
 body {
+  font-family: var(--font-family-body, Arial, sans-serif);
   font-size: 16px;
+  background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.6;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 body,
 h1,

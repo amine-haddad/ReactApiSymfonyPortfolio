@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import styles from "../../../../styles/ExperienceId.module.css";
+import styles from "../../../../../styles/ExperienceId.module.css";
+import PageLayout from "../../../../../layouts/PageLayout";
 
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
@@ -30,23 +31,61 @@ const ExperienceId = () => {
   if (error) return <p className={styles.error}>{error}</p>;
   if (!experience) return <p className={styles.notFound}>Expérience introuvable.</p>;
 
-  return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>{experience.title || "Titre non renseigné"}</h1>
-      <p className={styles.meta}>
-        <span className={styles.label}>ID Profil :</span> {profileId}
-      </p>
-      <p className={styles.meta}>
-        <span className={styles.label}>ID Expérience :</span> {experienceId}
-      </p>
-      <p className={styles.description}>
-        {experience.description || "Aucune description fournie."}
-      </p>
+  const imageUrl = experience.images?.[0]?.url || "/assets/defaultImgageCode.jpg";
 
-      <Link to={`/profiles/${profileId}/experiences`} className={styles.backLink}>
-        ← Retour à la liste des expériences
-      </Link>
-    </div>
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date non renseignée";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long" });
+  };
+  return (
+    <PageLayout>
+      <div className={styles.container}>
+        <h1 className={styles.title}>{experience.role || "Titre non renseigné"}</h1>
+
+        <img
+          src={imageUrl}
+          alt={`Illustration de l'expérience ${experience.image}`}
+          style={{
+            width: "100%",
+            height: "auto",
+            borderRadius: "12px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            marginBottom: "1rem"
+          }}
+        />
+
+        <p className={styles.meta}>
+          <span className={styles.label}>Employeur:</span> {experience.compagny || "Aucune entreprise fournie."}
+        </p>
+
+        <p className={styles.description}>
+          <div className={styles.label}>Descriptif :</div>
+          {experience.description || "Aucune description fournie."}
+        </p>
+        <p className={styles.meta}>
+          <span className={styles.label}>Début :</span> {formatDate(experience.startDate)}
+        </p>
+        <p className={styles.meta}>
+          <span className={styles.label}>Fin :</span>{" "}
+          {experience.endDate ? formatDate(experience.endDate) : "En cours"}
+        </p>
+
+        <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
+          <Link to={`/my/profiles/${profileId}/experiences`} className={styles.backLink}>
+            ← Retour aux expériences
+          </Link>
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.backLink}
+          >
+            Voir l’image
+          </a>
+        </div>
+      </div>
+    </PageLayout>
   );
 };
 
