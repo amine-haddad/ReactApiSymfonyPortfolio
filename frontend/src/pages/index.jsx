@@ -3,9 +3,13 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import PageLayout from "../layouts/PageLayout";
 import styles from "../styles/Home.module.css";
+import Spinner from "../components/Spinner";
 
 const Index = () => {
-  const { publicProfiles } = useContext(AuthContext);
+  const { publicProfiles, loading } = useContext(AuthContext);
+
+  if (loading) return <Spinner />;
+
   const latestProfiles = publicProfiles
     .slice()
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))

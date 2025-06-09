@@ -16,9 +16,8 @@ function User() {
 
   return (
     <div className="user-profile">
-      <h1>Bienvenue, {user.name}</h1>
+      <h1>{user.first_name} {user.last_name}</h1>
       <p>Email : {user.email}</p>
-      <p>Rôle : {user.roles}</p>
       <p>Firstname : {user.first_name}</p>
       <p>Lastname : {user.last_name}</p>
 
@@ -27,7 +26,7 @@ function User() {
         <ul>
           {user.userProfiles.map((profile) => (
             <li key={profile.id}>
-              <Link to={`/profiles/${profile.id}`}>{profile.name}</Link>
+              <Link to={`/my/profiles/${profile.id}`}>{profile.name}</Link>
 
               <p>Titre du profil : {profile.title}</p>
               <p>Bio du profil : {profile.bio}</p>

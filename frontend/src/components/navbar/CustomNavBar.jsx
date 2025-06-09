@@ -71,8 +71,21 @@ const CustomNavbar = () => {
 
   if (loading || (isAuthenticated && !user)) return null;
 
-  // Condition pour masquer navbar si sur page profil exact et invisible
-  if ((isExactProfilePage) && !isVisible) return null;
+  // Affiche la navbar minimaliste pendant le loading, sauf sur la page profil exacte et invisible
+  if (loading && !(isExactProfilePage && !isVisible)) {
+    return (
+      <Navbar className={styles.navbar}>
+        <Container>
+          <Navbar.Brand as={Link} to="/">
+            <img src="/assets/cannon_old_weapon.svg" alt="Logo" className={styles["navbar-logo"]} />
+          </Navbar.Brand>
+        </Container>
+      </Navbar>
+    );
+  }
+
+  // Masque la navbar sur la page profil exacte et invisible (avant scroll)
+  if (isExactProfilePage && !isVisible) return null;
 
   return (
     <Navbar

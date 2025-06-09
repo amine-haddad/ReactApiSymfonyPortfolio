@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Symfony\Component\HttpFoundation\Request;
 
 class ExperienceController extends AbstractController
 {
@@ -42,22 +43,39 @@ class ExperienceController extends AbstractController
      * )
      */
     #[Route('/api/profiles/{profileId}/experiences', name: 'api_experiences_by_profile', methods: ['GET'])]
-    public function getExperiencesByProfile($profileId): JsonResponse
+    public function getExperiencesByProfile($profileId, Request $request): JsonResponse
     {
-        // Recherche du profil par son ID
+        // 1️⃣ Recherche du profil par son ID
         $profile = $this->entityManager->getRepository(Profile::class)->find($profileId);
-
         if (!$profile) {
             return new JsonResponse(['error' => 'Profil non trouvé'], 404);
         }
 
-        // Recherche des expériences associées à ce profil
-        $experiences = $this->entityManager
-            ->getRepository(Experience::class)
-            ->findBy(['profile' => $profile]);
+        // 2️⃣ Récupération des paramètres de pagination depuis la requête
+        $page = max(1, (int) $request->query->get('page', 1)); // page courante, défaut 1
+        $limit = max(1, min(50, (int) $request->query->get('limit', 10))); // nombre d'items/page, max 50
+        $offset = ($page - 1) * $limit;
 
-        // Retourne les expériences associées
-        return $this->json($experiences, 200, [], ['groups' => 'read:Experience']);
+        // 3️⃣ Construction de la requête pour récupérer les expériences paginées
+        $repo = $this->entityManager->getRepository(Experience::class);
+        $qb = $repo->createQueryBuilder('e')
+            ->where('e.profile = :profile')
+            ->setParameter('profile', $profile)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        $experiences = $qb->getQuery()->getResult();
+
+        // 4️⃣ Compte total d'expériences pour ce profil (pour la pagination)
+        $total = $repo->count(['profile' => $profile]);
+
+        // 5️⃣ Retourne la réponse paginée
+        return $this->json([
+            'page' => $page,
+            'limit' => $limit,
+            'total' => $total,
+            'data' => $experiences,
+        ], 200, [], ['groups' => 'read:Experience']);
     }
 
     /**

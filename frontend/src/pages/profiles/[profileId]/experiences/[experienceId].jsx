@@ -1,31 +1,11 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import useSingleExperience from "../../../../hooks/useSingleExperience";
 import PageLayout from "../../../../layouts/PageLayout";
 import styles from "../../../../styles/ExperienceId.module.css";
 
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
-  const [experience, setExperience] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchExperience = async () => {
-      try {
-        const res = await fetch(`/api/profiles/${profileId}/experiences/${experienceId}`);
-        if (!res.ok) throw new Error("Erreur lors du chargement de l'expérience.");
-        const data = await res.json();
-        setExperience(data);
-      } catch (err) {
-        console.error("Erreur de chargement :", err);
-        setError("Une erreur est survenue lors du chargement de l'expérience.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExperience();
-  }, [profileId, experienceId]);
+  const { experience, loading, error } = useSingleExperience(profileId, experienceId);
 
   if (loading) return <div className={styles.spinner}></div>;
   if (error) return <p className={styles.error}>{error}</p>;
@@ -60,16 +40,16 @@ const ExperienceId = () => {
           <span className={styles.label}>Employeur:</span> {experience.compagny || "Aucune entreprise fournie."}
         </p>
 
-        <p className={styles.description}>
+        <div className={styles.description}>
           <div className={styles.label}>Descriptif :</div>
-          {experience.description || "Aucune description fournie."}
-        </p>
+          <p>{experience.description || "Aucune description fournie."}</p>
+        </div>
         <p className={styles.meta}>
-          <span className={styles.label}>Début :</span> {formatDate(experience.startDate)}
+          <span className={styles.label}>Début :</span> {formatDate(experience.start_date)}
         </p>
         <p className={styles.meta}>
           <span className={styles.label}>Fin :</span>{" "}
-          {experience.endDate ? formatDate(experience.endDate) : "En cours"}
+          {experience.end_date ? formatDate(experience.end_date) : "En cours"}
         </p>
 
         <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>

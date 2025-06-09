@@ -1,61 +1,30 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../../../../contexts/AuthContext";
 import styles from "../../../../../styles/ProjectList.module.css";
 import PageLayout from "../../../../../layouts/PageLayout";
+import useProjects from "../../../../../hooks/useProjects";
+import Spinner from "../../../../../components/Spinner";
 
 const ProjectList = () => {
   const { profileId } = useParams();
   const navigate = useNavigate();
   const { loading: authLoading, user, isAuthenticated } = useContext(AuthContext);
 
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Utilisation du hook centralisé avec authentification
+  const { projects, loading, error } = useProjects(profileId, true);
 
-  useEffect(() => {
-    if (authLoading || !isAuthenticated || !profileId) return;
-
-    const token = localStorage.getItem("jwt_token");
-    if (!token) {
-      setError("Vous devez être connecté pour voir ces projets.");
-      setLoading(false);
-      return;
-    }
-
-    fetch(`/api/profiles/${profileId}/projects`, {
-      headers: {
-        "Accept": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`Erreur HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        const items = Array.isArray(data)
-          ? data
-          : data["hydra:member"] ?? data.member ?? data.projects ?? [];
-        setProjects(items);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [profileId, authLoading, isAuthenticated]);
-
-  console.log('useEffect déclenché');
-
-  if (loading || authLoading) return <p className="project-message">Chargement des projets…</p>;
-  if (error) return <p className="project-error">Erreur : {error}</p>;
+  if (loading || authLoading) return <div className={styles["project-message"]}><Spinner /></div>;
+  if (error) return <p className={styles["project-error"]}>Erreur : {error}</p>;
 
   return (
     <PageLayout>
       <div className={styles["project-header"]}>
         <header className={styles["project-header"]}>
           <h1 className={styles["project-title"]}>Mes Projets</h1>
-          <p className={styles["project-subtitle"]}>Bienvenue, {user.first_name} {user.last_name} ({user.email})</p>
+          <p className={styles["project-subtitle"]}>
+            Bienvenue, {user.first_name} {user.last_name} ({user.email})
+          </p>
         </header>
 
         {projects.length === 0 ? (
@@ -66,7 +35,10 @@ const ProjectList = () => {
               <div key={project.id} className={styles["project-card"]}>
                 <h3>{project.title || project.name}</h3>
                 <p>{project.description ?? "Pas de description disponible."}</p>
-                <Link to={`/my/profiles/${profileId}/projects/${project.id}`} className={styles["project-link"]}>
+                <Link
+                  to={`/my/profiles/${profileId}/projects/${project.id}`}
+                  className={styles["project-link"]}
+                >
                   Voir le projet →
                 </Link>
               </div>
@@ -81,7 +53,7 @@ const ProjectList = () => {
           ← Retour au profil
         </button>
       </div>
-    </PageLayout >
+    </PageLayout>
   );
 };
 

@@ -1,12 +1,8 @@
 import styles from "../../styles/Profile.module.css";
 import ProfileCarousel from "./ProfileCarousel";
-import { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
-import { useParams } from "react-router-dom";
 
 const Profile = ({ profile }) => {
-  // plus besoin de useEffect ici
-  if (!profile) return <p>Profil non trouvé</p>;
+  if (!profile) return null; // Ne rien afficher si pas de profil
 
   return (
     <div className={"profileContainer" + " " + styles.profileContainer}>
@@ -32,6 +28,5 @@ const Profile = ({ profile }) => {
     </div>
   );
 };
-
 
 export default Profile;

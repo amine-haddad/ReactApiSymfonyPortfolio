@@ -1,32 +1,12 @@
 // src/pages/profiles/[profileId]/projects/[projectId].jsx
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import DynamicShapes from "../../../../components/DynamicShapes"; // adapte le chemin selon ton arborescence
+import DynamicShapes from "../../../../components/DynamicShapes";
 import styles from "../../../../styles/ProjectDetail.module.css";
+import useSingleProject from "../../../../hooks/useSingleProject";
 
 const ProjectDetail = () => {
   const { profileId, projectId } = useParams();
-  const [project, setProject] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const res = await fetch(`/api/profiles/${profileId}/projects/${projectId}`);
-        if (!res.ok) throw new Error("Erreur de chargement");
-        const data = await res.json();
-        setProject(data);
-      } catch (err) {
-        console.error("Erreur de chargement du projet :", err);
-        setError("Une erreur est survenue lors du chargement du projet.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProject();
-  }, [profileId, projectId]);
+  const { project, loading, error } = useSingleProject(profileId, projectId);
 
   if (loading) return <div className={styles.spinner}></div>;
   if (error) return <p className={styles.error}>{error}</p>;

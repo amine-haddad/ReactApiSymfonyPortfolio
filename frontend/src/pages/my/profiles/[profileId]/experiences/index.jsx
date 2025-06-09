@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, useContext } from "react";
+import useExperience from "../../../../../hooks/useExperience";
+import PageLayout from "../../../../../layouts/PageLayout";
 import styles from "../../../../../styles/ExperienceList.module.css";
-import PageLayout from '../../../../../layouts/PageLayout';
+import Spinner from "../../../../../components/Spinner";
 
 const formatDate = (isoDate) => {
   const options = { day: '2-digit', month: 'long', year: 'numeric' };
@@ -11,40 +12,18 @@ const formatDate = (isoDate) => {
 
 const ExperienceList = () => {
   const { profileId } = useParams();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { experiences, total, loading, error } = useExperience(profileId, page, limit);
   const navigate = useNavigate();
-  const [experiences, setExperiences] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/profiles/${profileId}/experiences`, {
-      headers: { "Accept": "application/json" },
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const items = Array.isArray(data)
-          ? data
-          : data["hydra:member"] ?? data.member ?? data.experiences ?? [];
-        setExperiences(items);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [profileId]);
-
-  if (loading) return <p className="loading">Chargement des expériences…</p>;
+  if (loading) return <div className={styles.experienceFrame}><Spinner /></div>;
   if (error) return <p className="error">Erreur : {error}</p>;
 
   return (
     <PageLayout>
       <div className={styles.experienceFrame}>
         <h1 className="text-center">Expériences</h1>
-
         {experiences.length === 0 ? (
           <p className={styles.noData}>Aucune expérience trouvée.</p>
         ) : (
@@ -67,6 +46,21 @@ const ExperienceList = () => {
             ))}
           </div>
         )}
+        {/* Pagination */}
+        <div className={styles.pagination}>
+          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Précédent
+          </button>
+          <span>
+            Page {page} / {Math.max(1, Math.ceil(total / limit))}
+          </span>
+          <button
+            disabled={page >= Math.ceil(total / limit)}
+            onClick={() => setPage(page + 1)}
+          >
+            Suivant
+          </button>
+        </div>
         <button
           className={styles["back-button"]}
           onClick={() => navigate(`/my/profiles/${profileId}`)}
@@ -77,6 +71,5 @@ const ExperienceList = () => {
     </PageLayout>
   );
 };
-
 
 export default ExperienceList;

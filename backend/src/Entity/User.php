@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -22,18 +23,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:User', 'write:User',"read:Profile",'read:Project','read:Skill'])]
+    #[Groups(['read:User',"read:Profile",'read:Project','read:Skill'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
     #[Groups(['read:User', 'write:User'])]
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "L'email n'est pas valide.")]
+    #[Assert\Length(max: 180, maxMessage: "L'email ne doit pas dépasser 180 caractères.")]
+    #[Assert\Unique(message: "Cet email est déjà utilisé.")]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
-    #[Groups(['read:User', 'write:User'])]
+    #[Assert\NotNull(message: "Les rôles ne doivent pas être nuls.")]
     private array $roles = [];
 
     /**
@@ -41,6 +43,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     #[Groups([ 'write:User'])]
+    #[Assert\NotBlank(message: "Le mot de passe est obligatoire.")]
+    #[Assert\Length(min: 8, minMessage: "Le mot de passe doit contenir au moins 8 caractères.")]
+    #[Assert\Regex(
+    pattern: "/^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/",
+    message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre, sans caractères spéciaux."
+)]
     private ?string $password = null;
 
     /**
@@ -51,20 +59,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $userProfiles;
 
     #[ORM\Column(length: 255)]
-    private ?string $slug = null;
-
-    #[ORM\Column(length: 255)]
     #[Groups(['read:User', 'write:User'])]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
+    #[Assert\Length(max: 255, maxMessage: "Le prénom ne doit pas dépasser 255 caractères.")]
+    #[Assert\Regex(
+    pattern: "/^[A-Za-zÀ-ÿ0-9 \-']+$/u",
+    message: "Ce champ ne doit contenir que des lettres, chiffres, espaces, tirets ou apostrophes."
+)]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['read:User', 'write:User'])]
+    #[Assert\NotBlank(message: "Le nom est obligatoire.")]
+    #[Assert\Length(max: 255, maxMessage: "Le nom ne doit pas dépasser 255 caractères.")]
+    #[Assert\Regex(
+    pattern: "/^[A-Za-zÀ-ÿ0-9 \-']+$/u",
+    message: "Ce champ ne doit contenir que des lettres, chiffres, espaces, tirets ou apostrophes."
+)]
     private ?string $last_name = null;
 
-    #[ORM\Column( options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le slug est obligatoire.")]
+    #[Assert\Length(max: 255, maxMessage: "Le slug ne doit pas dépasser 255 caractères.")]
+    #[Groups(['read:User'])]
+    private ?string $slug = null;
+
+    #[ORM\Column(options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[Assert\NotNull(message: "La date de mise à jour est obligatoire.")]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Groups(['read:User'])]
     private ?\DateTimeImmutable $updated_at = null;
 
-    #[ORM\Column( options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[Assert\NotNull(message: "La date de création est obligatoire.")]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Groups(['read:User'])]
     private ?\DateTimeImmutable $created_at = null;
 
     public function __construct()

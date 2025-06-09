@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
 
 import Profile from "../../../../components/profile/Profile";
@@ -11,6 +11,7 @@ import DynamicShapes from "../../../../components/DynamicShapes";
 import TypingEffect from "../../../../components/TypingEffect";
 import styles from "../../../../styles/ProfilePage.module.css";
 import PageLayout from "../../../../layouts/PageLayout";
+import Spinner from "../../../../components/Spinner";
 
 const Index = () => {
   const { profileId } = useParams();
@@ -21,12 +22,16 @@ const Index = () => {
     error,
   } = useContext(AuthContext);
 
-  const profile = profiles.find((p) => p.id === Number(profileId));
-
-  if (loading) return <p className={styles.profileLoading}>Chargement du dashboard...</p>;
+  if (loading || !Array.isArray(user?.userProfiles) || profiles.length === 0) {
+    return <p className={styles.profileLoading}><Spinner /></p>;
+  }
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
   if (!user) return <p className={styles.profileNotFound}>Non connecté.</p>;
-  if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;
+
+  const profile = profiles.find((p) => p.id === Number(profileId));
+  const isOwner = user.userProfiles.some(p => p.id === Number(profileId));
+
+  if (!profile || !isOwner) return <Navigate to="/NotFound" replace />;
 
   return (
     <div className={styles.profilePage}>

@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import useExperience from "../../../../hooks/useExperience";
 import PageLayout from "../../../../layouts/PageLayout";
 import styles from "../../../../styles/ExperienceList.module.css";
+import Spinner from "../../../../components/Spinner";
 
 const formatDate = (isoDate) => {
   const options = { day: '2-digit', month: 'long', year: 'numeric' };
@@ -10,33 +12,12 @@ const formatDate = (isoDate) => {
 
 const ExperienceList = () => {
   const { profileId } = useParams();
-  const [experiences, setExperiences] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { experiences, total, loading, error } = useExperience(profileId, page, limit);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/profiles/${profileId}/experiences`, {
-      headers: { "Accept": "application/json" },
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const items = Array.isArray(data)
-          ? data
-          : data["hydra:member"] ?? data.member ?? data.experiences ?? [];
-        setExperiences(items);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [profileId]);
-
-  if (loading) return <p className={styles.loading}>Chargement des expériences…</p>;
+  if (loading) return <p className={styles.loading}><Spinner /></p>;
   if (error) return <p className={styles.error}>Erreur : {error}</p>;
 
   return (
@@ -66,6 +47,23 @@ const ExperienceList = () => {
             ))}
           </div>
         )}
+
+        {/* Pagination */}
+        <div className={styles.pagination}>
+          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Précédent
+          </button>
+          <span>
+            Page {page} / {Math.max(1, Math.ceil(total / limit))}
+          </span>
+          <button
+            disabled={page >= Math.ceil(total / limit)}
+            onClick={() => setPage(page + 1)}
+          >
+            Suivant
+          </button>
+        </div>
+
         <button
           className={styles["back-button"]}
           onClick={() => navigate(`/profiles/${profileId}`)}

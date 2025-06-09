@@ -3,11 +3,12 @@ import { AuthContext } from "../../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import styles from "../../styles/Dashboard.module.css"; // à créer si tu veux styliser
 import PageLayout from "../../layouts/PageLayout";
+import Spinner from "../../components/Spinner";
 
 function AdminDashboard() {
   const { user, loading, error } = useContext(AuthContext);
 
-  if (loading) return <p>Chargement du dashboard...</p>;
+  if (loading) return <div className={styles.dashboardCard}><Spinner /></div>;
   if (error) return <p>Erreur : {error}</p>;
   if (!user) return <p>Non connecté.</p>;
 

@@ -1,13 +1,14 @@
 import { useContext } from "react";
-import { AuthContext } from "../../../contexts/AuthContext";
+import { useProfiles } from "../../../hooks/useProfiles";
 import { Link } from "react-router-dom";
 import styles from "../../../styles/ProfilesList.module.css"; // Assurez-vous que le chemin est correct
 import PageLayout from "../../../layouts/PageLayout";
+import Spinner from "../../../components/Spinner";
 
 function Index() {
-  const { user, profiles, loading, error, selectProfile } = useContext(AuthContext);
+  const { profiles, loading, error, user, selectProfile } = useProfiles("private");
 
-  if (loading) return <p>Chargement...</p>;
+  if (loading) return <div className={styles.sectionListProfiles}><Spinner /></div>;
   if (error) return <p>Erreur : {error}</p>;
   if (!user) return <p>Non connecté.</p>;
 
@@ -16,11 +17,11 @@ function Index() {
       <div className={styles.sectionListProfiles}>
         <h2 className="mb-4">Vos profils</h2>
 
-        {user.userProfiles && user.userProfiles.length === 0 ? (
+        {profiles.length === 0 ? (
           <p>Aucun profil trouvé.</p>
         ) : (
           <div className="row">
-            {user.userProfiles.map((profile) => (
+            {profiles.map((profile) => (
               <div className="col-md-4 mb-4" key={profile.id}>
                 <div className={styles.profileCardList}>
                   <div className="card-body d-flex flex-column h-100">
@@ -42,7 +43,6 @@ function Index() {
         )}
       </div>
     </PageLayout>
-
   );
 }
 

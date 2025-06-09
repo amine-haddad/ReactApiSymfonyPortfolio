@@ -45,14 +45,14 @@ class Experience
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(name: "end_date", type: Types::DATE_MUTABLE)]
-    #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotNull(message: "End date cannot be null")]
     #[Assert\Date(message: "End date must be a valid date")]
     #[Assert\GreaterThan(propertyPath: "startDate", message: "End date must be after the start date")]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(type : Types::TEXT)]
-    #[Groups(['read:Experience', 'write:Experience', 'read:User'])]
+    #[Groups(['read:Experience', 'write:Experience', 'read:Profile', 'read:User'])]
     #[Assert\NotBlank(message: "Description cannot be blank")]
     private ?string $description = null;
 
