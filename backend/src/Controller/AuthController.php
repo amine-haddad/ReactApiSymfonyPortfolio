@@ -1,42 +1,28 @@
 <?php
 
-// src/Controller/AuthController.php
-
 namespace App\Controller;
 
-use App\Security\CustomJWTPayloadFactory;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\Request;
 
 class AuthController extends AbstractController
 {
-    private CustomJWTPayloadFactory $jwtPayloadFactory;
-    private JWTTokenManagerInterface $jwtManager;
-
-    public function __construct(
-        CustomJWTPayloadFactory $jwtPayloadFactory,
-        JWTTokenManagerInterface $jwtManager
-    ) {
-        $this->jwtPayloadFactory = $jwtPayloadFactory;
-        $this->jwtManager = $jwtManager;
-    }
-
-    #[Route('/api/login_check', name: 'api_login', methods: ['POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function login(JWTTokenManagerInterface $jwtManager): JsonResponse
+    #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
+    public function logout(Request $request): JsonResponse
     {
-        $user = $this->getUser();
+        $cookie = Cookie::create('BEARER')
+            ->withValue('')
+            ->withExpires(new \DateTime('-1 hour'))
+            ->withPath('/')
+            ->withHttpOnly(true)
+            ->withSecure($request->isSecure())
+            ->withSameSite('lax');
 
-        $token = $jwtManager->create($user);
-
-        return $this->json([
-            'token' => $token,
-            'id' => $user->getId(), // Facultatif, car déjà dans le token
-            'username' => $user->getUsername(),
-            'email' => $user->getEmail(),
-        ]);
+        return new JsonResponse(null, 204, ['Set-Cookie' => (string) $cookie]);
     }
 }

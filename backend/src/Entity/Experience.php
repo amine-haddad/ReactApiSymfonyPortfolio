@@ -17,7 +17,10 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['read:Experience']],
     denormalizationContext: ['groups' => ['write:Experience']]
 )]
-#[ApiFilter(SearchFilter::class, properties: ['profile.id' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: [
+    'profile.id' => 'exact',
+    'profile.slug' => 'exact'
+])]
 #[ORM\HasLifecycleCallbacks]
 class Experience
 {

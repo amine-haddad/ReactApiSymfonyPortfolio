@@ -1,12 +1,10 @@
 <?php
 
-// src/Security/JWTCreatedEventListener.php
-
 namespace App\EventListener;
 
 use App\Entity\User;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 #[AsEventListener(event: 'lexik_jwt_authentication.on_jwt_created', method: 'onJWTCreated')]
 class JWTCreatedListener
@@ -16,15 +14,21 @@ class JWTCreatedListener
         $user = $event->getUser();
 
         if (!$user instanceof User) {
-            error_log("JWT Listener: Pas d'utilisateur trouvé.");
+            error_log("JWT Listener: Mauvais type -> " . get_class($user));
             return;
         }
-        error_log("JWT Listener: Utilisateur ID -> " . $user->getId());
 
-        // Ajouter l'ID de l'utilisateur dans le token
-        $payload = $event->getData();
-        $payload['id'] = $user->getId();
+        try {
+            error_log("JWT Listener: Utilisateur ID -> " . $user->getId());
 
-        $event->setData($payload);
+            $payload = $event->getData();
+            $payload['id'] = $user->getId();
+            $payload['email'] = $user->getEmail();
+            $payload['roles'] = $user->getRoles();
+
+            $event->setData($payload);
+        } catch (\Throwable $e) {
+            error_log('Erreur dans JWTCreatedListener : ' . $e->getMessage());
+        }
     }
 }

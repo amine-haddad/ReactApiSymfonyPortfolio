@@ -1,7 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { AuthContext } from "../../../contexts/AuthContext";
+import useProfiles from "../../../hooks/useProfiles";
 import Profile from "../../../components/profile/Profile";
 import ProfileProjects from "../../../components/profile/ProfileProjects";
 import ProfileExperiences from "../../../components/profile/ProfileExperiences";
@@ -9,35 +7,13 @@ import ProfileSkills from "../../../components/profile/ProfileSkills";
 import ProfileAbout from "../../../components/profile/ProfileAbout";
 import DynamicShapes from "../../../components/DynamicShapes";
 import TypingEffect from "../../../components/TypingEffect";
-import styles from "../../../styles/ProfilePage.module.css"; // Importation du fichier CSS dédié
+import AnimatedSection from "../../../components/AnimatedSection";
+import styles from "../../../styles/ProfilePage.module.css";
 
 const Index = () => {
   const { profileId } = useParams();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-
-
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("jwt_token");
-        const response = await axios.get(`/api/profiles/${profileId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfile(response.data);
-      } catch (err) {
-        console.error("Erreur de chargement du profil :", err);
-        setError("Impossible de charger le profil.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (profileId) fetchProfile();
-  }, [profileId]);
-
+  const { profiles, loading, error } = useProfiles();
+  const profile = profiles?.find((p) => String(p.id) === String(profileId));
 
   if (loading) return <p className={styles.profileLoading}>Chargement...</p>;
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
@@ -45,7 +21,6 @@ const Index = () => {
 
   return (
     <div className={styles.profilePage}>
-      {/* Effets DynamicShapes et TypingEffect */}
       <div className={styles.profileHeader}>
         <DynamicShapes />
         <div className={styles.profileOverlay}>
@@ -53,11 +28,24 @@ const Index = () => {
         </div>
       </div>
       <div className={styles.profileContent}>
-        <Profile profile={profile} />
-        <ProfileProjects projects={profile.projects || []} />
-        <ProfileExperiences experiences={profile.experiences || []} />
-        <ProfileSkills skills={profile.profileSkills || []} />
-        <ProfileAbout profile={profile || []} />
+        <h1 className="mt-5 underline uppercase text-center font-title font-bold">
+          Profil de {profile.name} – {profile.title} sur PortfolioHub
+        </h1>
+        <AnimatedSection>
+          <Profile profile={profile} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileProjects projects={profile.projects || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileExperiences experiences={profile.experiences || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileSkills skills={profile.profileSkills || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileAbout profile={profile} />
+        </AnimatedSection>
       </div>
     </div>
   );

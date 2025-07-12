@@ -1,5 +1,21 @@
 lexik_jwt_authentication:
-    secret_key: '%kernel.project_dir%/config/jwt/private.pem'
-    public_key: '%kernel.project_dir%/config/jwt/public.pem'
-    pass_phrase: '%env(JWT_PASSPHRASE)%'
-    token_ttl: 3600
+  secret_key: "%kernel.project_dir%/config/jwt/private.pem"
+  public_key: "%kernel.project_dir%/config/jwt/public.pem"
+  pass_phrase: "%env(JWT_PASSPHRASE)%"
+  token_ttl: 10800
+
+  token_extractors:
+    authorization_header:
+      enabled: false # si tu ne veux pas passer par Authorization: Bearer ...
+      prefix: Bearer
+      name: Authorization
+
+    cookie:
+      enabled: true
+      name: BEARER
+
+    query_parameter:
+      enabled: false
+
+    split_cookie:
+      enabled: false

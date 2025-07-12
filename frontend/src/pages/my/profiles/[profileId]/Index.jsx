@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
-
+import useProfiles from "../../../../hooks/useProfiles";
 import Profile from "../../../../components/profile/Profile";
 import ProfileProjects from "../../../../components/profile/ProfileProjects";
 import ProfileExperiences from "../../../../components/profile/ProfileExperiences";
@@ -9,47 +9,65 @@ import ProfileSkills from "../../../../components/profile/ProfileSkills";
 import ProfileAbout from "../../../../components/profile/ProfileAbout";
 import DynamicShapes from "../../../../components/DynamicShapes";
 import TypingEffect from "../../../../components/TypingEffect";
-import styles from "../../../../styles/ProfilePage.module.css";
-import PageLayout from "../../../../layouts/PageLayout";
 import Spinner from "../../../../components/Spinner";
+import AnimatedSection from "../../../../components/AnimatedSection";
+import styles from "../../../../styles/ProfilePage.module.css";
 
 const Index = () => {
   const { profileId } = useParams();
-  const {
-    user,
-    profiles,
-    loading,
-    error,
-  } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const { profiles, loading, error } = useProfiles({ mine: true });
 
-  if (loading || !Array.isArray(user?.userProfiles) || profiles.length === 0) {
-    return <p className={styles.profileLoading}><Spinner /></p>;
+  if (loading || !user || !Array.isArray(user.userProfiles) || profiles.length === 0) {
+    return (
+      <div className="text-center text-xl text-blue-500/40 mt-8">
+        <Spinner />
+      </div>
+    );
   }
-  if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
-  if (!user) return <p className={styles.profileNotFound}>Non connecté.</p>;
+
+  if (error) {
+    return (
+      <p className="text-center text-xl text-red-500/70 mt-8">
+        Erreur : {error}
+      </p>
+    );
+  }
 
   const profile = profiles.find((p) => p.id === Number(profileId));
-  const isOwner = user.userProfiles.some(p => p.id === Number(profileId));
+  const isOwner = user.userProfiles.some((p) => p.id === Number(profileId));
 
   if (!profile || !isOwner) return <Navigate to="/NotFound" replace />;
 
   return (
     <div className={styles.profilePage}>
-      {/* Effets visuels */}
       <div className={styles.profileHeader}>
         <DynamicShapes />
         <div className={styles.profileOverlay}>
           <TypingEffect />
         </div>
       </div>
-
-      {/* Contenu du profil */}
       <div className={styles.profileContent}>
-        <Profile profile={profile} />
-        <ProfileProjects projects={profile.projects || []} />
-        <ProfileExperiences experiences={profile.experiences || []} />
-        <ProfileSkills skills={profile.profileSkills || []} />
-        <ProfileAbout profile={profile} />
+        <div>
+          <h1 className="mb-5 underline uppercase text-center ">
+            Profil de {profile.name} – {profile.title} sur PortfolioHub
+          </h1>
+        </div>
+        <AnimatedSection>
+          <Profile profile={profile} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileProjects projects={profile.projects || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileExperiences experiences={profile.experiences || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileSkills skills={profile.profileSkills || []} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ProfileAbout profile={profile || []} />
+        </AnimatedSection>
       </div>
     </div>
   );

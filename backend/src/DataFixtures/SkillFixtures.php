@@ -1,37 +1,72 @@
 <?php
+
 namespace App\DataFixtures;
 
 use App\Entity\Skill;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Faker\Factory;
-use App\Service\SluggerService; // Import du service Slugger
+use App\Service\SluggerService;
 
 class SkillFixtures extends Fixture
 {
     public const SKILL_REFERENCE = 'skill_';
-    private SluggerService $slugger;
 
-    // Injection du service Slugger dans le constructeur
-    public function __construct(SluggerService $slugger)
+    public function __construct(private readonly SluggerService $slugger)
     {
-        $this->slugger = $slugger;
     }
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create();
+        $skills = [
+            'HTML',
+            'CSS',
+            'JavaScript',
+            'TypeScript',
+            'PHP',
+            'Python',
+            'SQL',
+            'Symfony',
+            'Laravel',
+            'React',
+            'Vite + React',
+            'Node.js',
+            'Express.js',
+            'Bootstrap',
+            'Tailwind CSS',
+            'Docker',
+            'Git',
+            'GitHub',
+            'PostgreSQL',
+            'MySQL',
+            'MongoDB',
+            'API REST',
+            'Postman',
+            'Linux',
+            'Debian',
+            'Nginx',
+            'Apache',
+            'Raspberry Pi',
+            'Figma',
+            'VS Code',
+            'Composer',
+            'NPM',
+            'Yarn',
+            'Mercure',
+        ];
 
-        for ($i = 0; $i <= 10; $i++) {
+        $now = new \DateTimeImmutable();
+
+        foreach ($skills as $index => $name) {
             $skill = new Skill();
-            $name  = $faker->word;
-            $slug = $this->slugger->generateSlug($name); // Utilisation du service Slugger pour générer le slug
+            $slug = $this->slugger->generateSlug($name);
+
             $skill->setName($name)
-                ->setUpdatedAt(new \DateTime())
                 ->setSlug($slug)
-            ;
+                ->setUpdatedAt($now)
+                ->setCreatedAt($now); // Si le champ existe
+
             $manager->persist($skill);
-            $this->addReference(self::SKILL_REFERENCE . $i, $skill);
+            $this->addReference(self::SKILL_REFERENCE . $index, $skill);
         }
 
         $manager->flush();

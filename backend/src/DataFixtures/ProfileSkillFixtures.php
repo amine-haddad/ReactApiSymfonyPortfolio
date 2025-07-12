@@ -1,4 +1,5 @@
 <?php
+
 namespace App\DataFixtures;
 
 use App\Entity\Profile;
@@ -14,40 +15,49 @@ class ProfileSkillFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        // Récupérer les profils spécifiques (admin ou contributeur)
-        $profileAdmin = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'admin_0', Profile::class);  // Profil admin
-        $profileContributor = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'contributor_0', Profile::class);  // Profil contributeur
-
-        // Récupérer les compétences créées dans SkillFixtures
+        // Charger toutes les compétences
         $skills = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $skills[] = $this->getReference(SkillFixtures::SKILL_REFERENCE . $i, Skill::class);
         }
-        
-        // Assigner des compétences pour l'admin
-        for ($i = 1; $i <= 6; $i++) {
-            $skill = $skills[array_rand($skills)];
 
-            $profileSkill = new ProfileSkill();
-            $profileSkill->setLevel(mt_rand(45, 100))
-                ->setProfile($profileAdmin)  // Associer au profil admin
-                ->setSkill($skill);
+        // Itérer sur tous les profils
+        $profileIndex = 0;
+        $skillReferenceIndex = 0;
 
-            $manager->persist($profileSkill);
-            $this->addReference(self::PROFILE_SKILL_REFERENCE . $i, $profileSkill);
-        }
+        while (true) {
+            $profileRef = ProfileFixtures::PROFILE_REFERENCE . $profileIndex;
 
-        // Assigner des compétences pour le contributeur
-        for ($i = 7; $i <= 12; $i++) {
-            $skill = $skills[array_rand($skills)];
+            if (!$this->hasReference($profileRef,Profile::class)) {
+                break;
+            }
 
-            $profileSkill = new ProfileSkill();
-            $profileSkill->setLevel(mt_rand(45, 100))
-                ->setProfile($profileContributor)  // Associer au profil contributeur
-                ->setSkill($skill);
+            /** @var Profile $profile */
+            $profile = $this->getReference($profileRef, Profile::class);
 
-            $manager->persist($profileSkill);
-            $this->addReference(self::PROFILE_SKILL_REFERENCE . $i, $profileSkill);
+            $usedSkillsKeys = [];
+
+            // Affecter 4 à 7 compétences par profil
+            $skillsCount = random_int(4, 7);
+            for ($i = 0; $i < $skillsCount; $i++) {
+                do {
+                    $skillKey = array_rand($skills);
+                } while (in_array($skillKey, $usedSkillsKeys, true));
+
+                $usedSkillsKeys[] = $skillKey;
+                $skill = $skills[$skillKey];
+
+                $profileSkill = new ProfileSkill();
+                $profileSkill->setLevel(random_int(50, 100))
+                    ->setProfile($profile)
+                    ->setSkill($skill);
+
+                $manager->persist($profileSkill);
+                $this->addReference(self::PROFILE_SKILL_REFERENCE . $skillReferenceIndex, $profileSkill);
+                $skillReferenceIndex++;
+            }
+
+            $profileIndex++;
         }
 
         $manager->flush();

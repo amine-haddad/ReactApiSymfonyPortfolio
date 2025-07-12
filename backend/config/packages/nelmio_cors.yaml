@@ -1,13 +1,20 @@
 nelmio_cors:
   defaults:
     origin_regex: true
-    allow_origin: ["^http://(localhost(:5173)?|nginx)$"] # Modification de l'expression régulière pour matcher localhost avec ou sans port
+    allow_origin: ["^http://(localhost(:5173)?|nginx)$"]
+    allow_credentials: true
     allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
     allow_headers: ["Content-Type", "Authorization"]
-    expose_headers: ["Authorization"]
+    expose_headers: ["Link"]
     max_age: 3600
+
   paths:
-    "^/api/": ~ # Applique la configuration uniquement à l'API
+    "^/api":
+      origin_regex: true
+      allow_origin: ["^http://(localhost(:5173)?|nginx)$"]
+      allow_credentials: true
+      allow_headers: ["Content-Type", "Authorization"]
+      allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
 
 nelmio_api_doc:
   documentation:

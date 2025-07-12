@@ -3,12 +3,20 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiSubresource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ProfileRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
 #[ApiResource(
@@ -16,44 +24,104 @@ use Symfony\Component\Serializer\Annotation\Groups;
     denormalizationContext: ['groups' => ['write:Profile']],
     paginationItemsPerPage: 10,
     paginationEnabled: true,
-    paginationClientItemsPerPage: true
+    paginationClientItemsPerPage: true,
+    security: "is_granted('IS_AUTHENTICATED_FULLY')", // Par défaut, pour toutes les opérations qui ne sont pas surchargées
+    operations: [
+        new GetCollection(
+            uriTemplate: '/profiles/light',
+            normalizationContext: ['groups' => ['read:Profile:light']],
+            security: "is_granted('true')" // ou "true" si accessible à tous
+        ),
+        new GetCollection(security: "true"), // accessible à tous, même visiteurs non connectés
+        new Get(security: "true"),           // accessible à tous, même visiteurs non connectés
+        new Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"), // création protégée
+        new Put(security: "object.getUser() == user"),              // mise à jour protégée au propriétaire
+        new Delete(security: "object.getUser() == user"),           // suppression protégée au propriétaire
+    ]
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'user.id' => 'exact',
+    'slug' => 'exact',
+    'title' => 'partial',
+    'projects.title' => 'partial',
+    'experiences.title' => 'partial'
+])]
 #[ORM\HasLifecycleCallbacks]
 class Profile
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User', 'read:Profile:light'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User', 'read:Profile:light'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/', 
+        match: false, 
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Groups(['read:Profile', 'write:Profile','read:User', 'read:Profile:light'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/', 
+        match: false, 
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 2000)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/', 
+        match: false, 
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $bio = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    #[Assert\Length(max: 255)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['read:Profile', 'write:Profile','read:User'])]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     private ?string $github_url = null;
-    #[Groups(['read:Profile', 'write:Profile','read:User'])]
+
     #[ORM\Column(length: 255, nullable: true)]
-    
-    private ?string $linkedin_url = null;
     #[Groups(['read:Profile', 'write:Profile','read:User'])]
-    #[ORM\Column(length: 255)]
-    
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
+    private ?string $linkedin_url = null;
+
+    #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['read:Profile', 'write:Profile','read:User', 'read:Profile:light'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/', 
+        match: false, 
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $slug = null;
+    
     #[Groups(['read:Profile', 'write:Profile','read:User'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updated_at = null;
@@ -81,8 +149,9 @@ class Profile
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Profile','read:User'])]
+    #[Groups(['read:Profile','read:User', 'read:Image', 'read:Profile:light'])]
     #[ApiSubresource]
+    #[\Symfony\Component\Serializer\Annotation\MaxDepth(1)]
     private Collection $images;
 
     /**
@@ -100,11 +169,21 @@ class Profile
     {
         $this->projects      = new ArrayCollection();
         $this->experiences   = new ArrayCollection();
-        $this->skills        = new ArrayCollection();
         $this->images        = new ArrayCollection();
-        $this->created_at    = new \DateTime();
-        $this->updated_at    = new \DateTime();
         $this->profileSkills = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $this->created_at = new \DateTime();
+        $this->updated_at = new \DateTime();
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int

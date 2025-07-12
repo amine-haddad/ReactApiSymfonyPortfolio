@@ -23,25 +23,25 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create();
 
-        // Récupérer toutes les références enregistrées dans les autres fixtures
+        // Charger les références depuis les autres fixtures
         $this->loadReferences();
 
-        // Ajouter des images pour chaque profil (2 à 3 images)
+        // Images pour chaque profil (2 à 3)
         foreach ($this->profiles as $profile) {
             $this->createMultipleImages($manager, $faker, random_int(2, 3), $profile, null, null, null);
         }
 
-        // Ajouter des images pour chaque expérience (1 à 2 images)
+        // Images pour chaque expérience (1 à 2)
         foreach ($this->experiences as $experience) {
             $this->createMultipleImages($manager, $faker, random_int(1, 2), null, null, null, $experience);
         }
 
-        // Ajouter des images pour chaque projet (1 à 4 images)
+        // Images pour chaque projet (1 à 4)
         foreach ($this->projects as $project) {
             $this->createMultipleImages($manager, $faker, random_int(1, 4), null, $project, null, null);
         }
 
-        // Ajouter des images pour chaque compétence (1 à 4 images)
+        // Images pour chaque compétence (1 à 4)
         foreach ($this->skills as $skill) {
             $this->createMultipleImages($manager, $faker, random_int(1, 4), null, null, $skill, null);
         }
@@ -49,37 +49,37 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
     }
 
-    /**
-     * Charge les références créées dans les autres fixtures
-     */
     private function loadReferences(): void
     {
-        // Récupérer les profils (admin & contributeurs)
-        for ($i = 0; $i < 2; $i++) { 
-            $this->profiles[] = $this->getReference(ProfileFixtures::PROFILE_REFERENCE . "admin_$i", Profile::class);
-            $this->profiles[] = $this->getReference(ProfileFixtures::PROFILE_REFERENCE . "contributor_$i", Profile::class);
+        // Chargement des profils
+        $i = 0;
+        while ($this->hasReference(ProfileFixtures::PROFILE_REFERENCE . $i,Profile::class)) {
+            $this->profiles[] = $this->getReference(ProfileFixtures::PROFILE_REFERENCE . $i,Profile::class);
+            $i++;
         }
 
-        // Récupérer les expériences
-        for ($i = 0; $i < 8; $i++) {
-            $this->experiences[] = $this->getReference(ExperienceFixtures::EXPERIENCE_REFERENCE . $i, class: Experience::class);
+        // Expériences
+        $i = 0;
+        while ($this->hasReference(ExperienceFixtures::EXPERIENCE_REFERENCE . $i,Experience::class)) {
+            $this->experiences[] = $this->getReference(ExperienceFixtures::EXPERIENCE_REFERENCE . $i,Experience::class);
+            $i++;
         }
 
-        // Récupérer les projets
-        for ($i = 0; $i < 8; $i++) {
-            $this->projects[] = $this->getReference(ProjectFixtures::PROJECT_REFERENCE . "admin_$i", Project::class);
-            $this->projects[] = $this->getReference(ProjectFixtures::PROJECT_REFERENCE . "contributor_$i", Project::class);
+        // Projets
+        $i = 0;
+        while ($this->hasReference(ProjectFixtures::PROJECT_REFERENCE . $i,Project::class)) {
+            $this->projects[] = $this->getReference(ProjectFixtures::PROJECT_REFERENCE . $i,Project::class);
+            $i++;
         }
 
-        // Récupérer les compétences
-        for ($i = 0; $i < 8; $i++) {
-            $this->skills[] = $this->getReference(SkillFixtures::SKILL_REFERENCE . $i, Skill::class);
+        // Compétences
+        $i = 0;
+        while ($this->hasReference(SkillFixtures::SKILL_REFERENCE . $i,Skill::class)) {
+            $this->skills[] = $this->getReference(SkillFixtures::SKILL_REFERENCE . $i,Skill::class);
+            $i++;
         }
     }
 
-    /**
-     * Crée plusieurs images pour une entité donnée.
-     */
     private function createMultipleImages(
         ObjectManager $manager,
         $faker,
@@ -94,27 +94,27 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
         }
     }
 
-    /**
-     * Crée une seule image.
-     */
     private function createImage(
-        ObjectManager $manager,
-        $faker,
-        ?Profile $profile,
-        ?Project $project,
-        ?Skill $skill,
-        ?Experience $experience
-    ): void {
-        $image = new Image();
-        
-        $image->setName($faker->imageUrl(640, 480, 'nature', true))
-              ->setProfile($profile)
-              ->setProjects($project)
-              ->setSkills($skill)
-              ->setExperiences($experience);
+    ObjectManager $manager,
+    $faker,
+    ?Profile $profile,
+    ?Project $project,
+    ?Skill $skill,
+    ?Experience $experience
+): void {
+    $image = new Image();
 
-        $manager->persist($image);
-    }
+    // Génération d'une URL d'image valide et unique
+    $imageUrl = "https://picsum.photos/seed/" . uniqid() . "/640/480.webp";
+
+    $image->setName($imageUrl)
+          ->setProfile($profile)
+          ->setProject($project)
+          ->setSkills($skill)
+          ->setExperiences($experience);
+
+    $manager->persist($image);
+}
 
     public function getDependencies(): array
     {

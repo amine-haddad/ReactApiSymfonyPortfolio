@@ -3,6 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Metadata\ApiSubresource;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -14,8 +18,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['read:Skill']],
-    denormalizationContext: ['groups' => ['write:Skill']]
+    denormalizationContext: ['groups' => ['write:Skill']],
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+    'name' => 'partial',
+    'projects.id' => 'exact',
+    'profileSkills.profile.id' => 'exact',
+])]
+#[ApiFilter(OrderFilter::class, properties: ['name', 'created_at'], arguments: ['orderParameterName' => 'order'])]
 #[ORM\HasLifecycleCallbacks]
 class Skill
 {
@@ -26,8 +36,12 @@ class Skill
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le nom de la compétence ne peut pas être vide.")]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: "Le nom de la compétence ne peut pas dépasser {{ limit }} caractères."
+    )]
     #[Groups(['read:Skill', 'write:Skill','project:read',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
-    #[Assert\NotBlank(message: "Skill cannot be blank")]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable:true)]
@@ -45,8 +59,8 @@ class Skill
      */
     #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'technologies', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill'])]
+    #[ApiSubresource]
     private Collection $projects;
-
 
     /**
      * @var Collection<int, Image>
@@ -60,6 +74,7 @@ class Skill
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill', 'write:Skill'])]
+    #[ApiSubresource]
     private Collection $profileSkills;
 
     public function __construct()
@@ -79,9 +94,7 @@ class Skill
     public function getName(): ?string
     {
         return $this->name;
-        
     }
-
 
     public function setName(string $name): static
     {
@@ -95,7 +108,7 @@ class Skill
         return $this->slug;
     }
 
-    public function setSlug(string $slug): static
+    public function setSlug(?string $slug): static
     {
         $this->slug = $slug;
 
@@ -153,7 +166,6 @@ class Skill
         return $this;
     }
 
-
     /**
      * @return Collection<int, Image>
      */
@@ -175,7 +187,6 @@ class Skill
     public function removeImage(Image $image): static
     {
         if ($this->images->removeElement($image)) {
-            // set the owning side to null (unless already changed)
             if ($image->getSkills() === $this) {
                 $image->setSkills(null);
             }
@@ -205,7 +216,6 @@ class Skill
     public function removeProfileSkill(ProfileSkill $profileSkill): static
     {
         if ($this->profileSkills->removeElement($profileSkill)) {
-            // set the owning side to null (unless already changed)
             if ($profileSkill->getSkill() === $this) {
                 $profileSkill->setSkill(null);
             }

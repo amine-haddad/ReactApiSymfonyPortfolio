@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
 import "../../styles/Footer.css";
+import Button from "../ui/Button";
 
 const Footer = () => {
   const [formData, setFormData] = useState({ email: "", message: "" });
 
-  // Gérer la soumission du formulaire
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Logique pour envoyer l'email ou traiter les données
-    setFormData({ email: "", message: "" }); // Réinitialiser les champs du formulaire
+    setFormData({ email: "", message: "" });
   };
 
-  // Gérer les changements dans le formulaire
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -22,12 +20,19 @@ const Footer = () => {
   };
 
   return (
-    <footer className="footer-section p-4 ">
+    <footer
+      className="mt-5 pt-5 pb-5 border-top"
+      style={{
+        backgroundColor: "var(--navbar-bg)",
+        color: "var(--navbar-text)",
+        borderColor: "var(--border-color)",
+      }}
+    >
       <div className="container">
-        <div className="row">
-          {/* Formulaire de Contact */}
+        <div className="row gy-5">
+          {/* Formulaire de contact */}
           <div className="col-md-6">
-            <h4 className="title-footer-h4">Contactez-moi</h4>
+            <h4 className="mb-3 text-center text-md-start">Contactez-moi</h4>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
@@ -39,8 +44,13 @@ const Footer = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="form-control"
                   required
+                  className="form-control"
+                  style={{
+                    backgroundColor: "var(--secondary-color)",
+                    color: "var(--navbar-text)",
+                    borderColor: "var(--border-color)",
+                  }}
                 />
               </div>
               <div className="mb-3">
@@ -52,37 +62,43 @@ const Footer = () => {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  className="form-control"
                   rows="4"
                   required
+                  className="form-control"
+                  style={{
+                    backgroundColor: "var(--secondary-color)",
+                    color: "var(--navbar-text)",
+                    borderColor: "var(--border-color)",
+                  }}
                 ></textarea>
               </div>
-              <button type="submit" className="btn btn-primary">
-                Envoyer
-              </button>
+              <Button type="submit"> Envoyer</Button>
+
             </form>
           </div>
 
-          {/* Liens vers les Réseaux Sociaux */}
-          <div className="col-md-6">
-            <h4 className="title-footer-h4">Suivez-moi</h4>
-            <div className="d-flex">
-              <a href="https://github.com" className=" me-3">
+          {/* Réseaux sociaux */}
+          <div className="col-md-6 d-flex flex-column align-items-center align-items-md-start">
+            <h4 className="mb-3 text-center text-md-start">Suivez-moi</h4>
+            <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start mb-4">
+              <a href="https://github.com" className="textReset" aria-label="GitHub">
                 <FaGithub size={30} />
               </a>
-              <a href="https://www.linkedin.com" className=" me-3">
+              <a href="https://linkedin.com" className="textReset" aria-label="LinkedIn">
                 <FaLinkedin size={30} />
               </a>
-              <a href="https://twitter.com" className="me-3">
+              <a href="https://twitter.com" className="textReset" aria-label="Twitter">
                 <FaTwitter size={30} />
               </a>
-              <a
-                href="mailto:youremail@example.com"
-                className="me-3"
-              >
+              <a href="mailto:youremail@example.com" className="textReset" aria-label="Email">
                 <FaEnvelope size={30} />
               </a>
             </div>
+
+            {/* Copyright */}
+            <p className="text-center text-md-start small" style={{ color: "var(--navbar-text)" }}>
+              © {new Date().getFullYear()} TonNom. Tous droits réservés.
+            </p>
           </div>
         </div>
       </div>

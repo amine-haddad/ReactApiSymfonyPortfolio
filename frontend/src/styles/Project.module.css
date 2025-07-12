@@ -5,6 +5,10 @@
   padding-bottom: 3vw;
 }
 
+.projectSwiper {
+  width: 100%;
+  height: auto;
+}
 /* WRAPPER CARROUSEL */
 .carouselWrapper {
   display: flex;

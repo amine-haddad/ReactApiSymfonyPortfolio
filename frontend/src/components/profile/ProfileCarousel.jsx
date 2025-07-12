@@ -1,80 +1,52 @@
-import styles from "../../styles/ProfileCarousel.module.css"; // Import du fichier CSS
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, EffectFade, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/navigation";
+
+import styles from "../../styles/ProfileCarousel.module.css";
 
 const ProfileCarousel = ({ profile, error }) => {
+  if (error) {
+    return <p>Une erreur est survenue : {error}</p>;
+  }
+  if (!profile || !profile.images || profile.images.length === 0) {
+    return <p>Aucune image à afficher.</p>;
+  }
+
+  const hasMultipleImages = profile.images.length > 1;
+
   return (
-    <>
-      {/* Carousel in the right side of the card */}
-      <div className="col-md-6">
-        <div
-          id="profile-carousel"
-          className="carousel slide"
-          data-bs-ride="carousel"
-        >
-          <div className="carousel-inner">
-            <div className={`carousel-item active ${styles.carouselItem}`}>
-              <a href="#projects">
-                <img
-                  src="/assets/cannon_old_weapon.svg"
-                  className={styles.carousel}
-                  alt="Projets"
-                />
-                <div className={`carousel-caption ${styles.carouselCaption}`}>
-                  <h5>Projets</h5>
-                </div>
-              </a>
-            </div>
-            <div className={`carousel-item ${styles.carouselItem}`}>
-              <a href="#experiences">
-                <img
-                  src="/assets/clavierFondBleuter.jpeg"
-                  className={styles.carousel}
-                  alt="Experiences"
-                />
-                <div className={`carousel-caption ${styles.carouselCaption}`}>
-                  <h5>Expériences</h5>
-                </div>
-              </a>
-            </div>
-            <div className={`carousel-item ${styles.carouselItem}`}>
-              <a href="#aboutme">
-                <img
-                  src="/assets/defaultImgageCode.jpg"
-                  className={styles.carousel}
-                  alt="About Me"
-                />
-                <div className={`carousel-caption ${styles.carouselCaption}`}>
-                  <h5>About Me</h5>
-                </div>
-              </a>
-            </div>
-          </div>
-          <button
-            className="carousel-control-prev"
-            type="button"
-            data-bs-target="#profile-carousel"
-            data-bs-slide="prev"
-          >
-            <span
-              className="carousel-control-prev-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button
-            className="carousel-control-next"
-            type="button"
-            data-bs-target="#profile-carousel"
-            data-bs-slide="next"
-          >
-            <span
-              className="carousel-control-next-icon"
-              aria-hidden="true"
-            ></span>
-            <span className="visually-hidden">Next</span>
-          </button>
-        </div>
-      </div>
-    </>
+    <div className={styles.carouselContainer}>
+      <Swiper
+        modules={[Autoplay, EffectFade, Navigation]}
+        effect="fade"
+        fadeEffect={{ crossFade: true }}
+        autoHeight={false}
+        loop={hasMultipleImages}
+        autoplay={
+          hasMultipleImages
+            ? {
+              delay: 3000,
+              disableOnInteraction: false,
+            }
+            : false
+        }
+        speed={1200}
+        navigation={hasMultipleImages}
+        className={styles.carouselContainer}
+      >
+        {profile.images.map((img, index) => (
+          <SwiperSlide key={img.id || index}>
+            <img
+              src={img.name}
+              alt={`Profile image ${index + 1}`}
+              className={styles.carouselImage}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };
 

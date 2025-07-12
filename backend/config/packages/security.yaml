@@ -14,25 +14,26 @@ security:
       security: false
 
     login:
-      pattern: ^/api/login
+      pattern: ^/api/login_check
       stateless: true
       provider: app_user_provider
       json_login:
-        check_path: /api/login_check # L'ajout de ce chemin est essentiel pour vérifier la soumission de connexion
-        success_handler: lexik_jwt_authentication.handler.authentication_success
-        failure_handler: lexik_jwt_authentication.handler.authentication_failure
-        username_path: email # Remplacer username par email
+        check_path: /api/login_check
+        username_path: email
         password_path: password
+        success_handler: App\Security\LoginSuccessHandler
 
-    # Le firewall pour l'API sécurisé par JWT
-    # api:
-    #     pattern: ^/api
-    #     stateless: true
-    #     provider: app_user_provider
-    #     jwt: ~
+    api:
+      pattern: ^/api
+      stateless: true
+      provider: app_user_provider
+      custom_authenticators:
+        - App\Security\JwtCookieAuthenticator
 
   access_control:
-    - { path: ^/api/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Accès sans authentification pour Swagger
-    - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Accès sans authentification pour login_check
-    - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Accès sans authentification pour l'enregistrement
+    - { path: ^/api/docs, roles: PUBLIC_ACCESS } # Accès sans authentification pour Swagger
+    - { path: ^/api/profiles$, roles: PUBLIC_ACCESS }
+    - { path: ^/api/login_check, roles: PUBLIC_ACCESS } # Accès sans authentification pour login_check
+    - { path: ^/api/register, roles: PUBLIC_ACCESS } # Accès sans authentification pour l'enregistrement
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent un JWT
+    - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }

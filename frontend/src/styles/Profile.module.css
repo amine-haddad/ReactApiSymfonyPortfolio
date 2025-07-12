@@ -1,113 +1,40 @@
-/* ===============================
-   CONTENEUR PRINCIPAL DU PROFIL
-================================ */
 .profileContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  background-color: var(--background-color); /* Couleur globale */
-  padding: 80px 0 50px;
-  color: var(--text-color);
-}
-
-/* ===============================
-   TITRES
-================================ */
-
-/* ===============================
-   CARTE DU PROFIL
-================================ */
-.profileCard {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  width: 90%;
-  max-width: 1920px;
-  margin: 0 auto 30px;
-  padding: 5% 5% 3% 10%;
   background-color: var(--secondary-color);
-  border: 2px solid var(--border-color);
-  border-radius: 10px;
+  color: var(--text-color);
   box-shadow: var(--box-shadow);
-  position: relative;
+  border-radius: 16px;
+  padding: 2rem 1rem;
 }
 
-/* ===============================
-   CORPS DE LA CARTE
-================================ */
+.profileCard {
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow, 0 2px 12px rgba(0, 0, 0, 0.07));
+  padding: 1.5rem;
+}
+
 .profileCardBody {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  width: 100%;
-  gap: 20px;
+  padding: 1rem 0;
 }
 
-@media (min-width: 768px) {
-  .profileCardBody {
-    flex-direction: column;
-    gap: 10px;
-  }
+a {
+  color: var(--accent-color);
 }
 
-/* ===============================
-   AUTRES STYLES
-================================ */
-.profileError {
-  color: var(--color-error);
+a:hover {
+  color: var(--accent-color-hover);
+}
+
+.profileTitle {
+  color: var(--title-color, var(--text-color));
+  font-family: var(--title-font, inherit);
   font-weight: bold;
-  margin-top: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.profileDetails {
-  margin-top: 20px;
-}
-
-.profileDetails a {
-  color: var(--primary-color);
-  text-decoration: none;
-}
-
-.profileDetails a:hover {
-  text-decoration: underline;
-}
-
-.profileList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 5;
-}
-
-.profileList button {
-  padding: 10px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.profileList button:hover {
-  background-color: var(--color-primary-hover);
-}
-
-.userProfile ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.userProfile li {
-  margin-bottom: 10px;
-}
-
-.userProfile li.active {
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-.userProfile a {
-  text-decoration: none;
-  color: inherit;
+.profileSubtitle {
+  color: var(--subtitle-color, var(--text-color));
+  font-family: var(--subtitle-font, inherit);
+  font-style: italic;
 }

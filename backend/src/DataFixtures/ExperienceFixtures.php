@@ -22,50 +22,47 @@ class ExperienceFixtures extends Fixture implements DependentFixtureInterface
         $this->slugger = $slugger;
     }
 
-    public function load(ObjectManager $manager): void
-    {
-        $faker = Factory::create();
+   public function load(ObjectManager $manager): void
+{
+    $faker = Factory::create();
+    $experienceIndex = 0;
 
-        // Récupérer les profils spécifiques (admin ou contributeur)
-        $profileAdmin = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'admin_0', Profile::class);  // Profil admin
-        $profileContributor = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'contributor_0', Profile::class);  // Profil contributeur
-        
-        // Ajouter des expériences pour l'admin
-        for ($i = 0; $i < 4; $i++) { // On crée 4 expériences pour l'admin
-            $startDate = $faker->dateTimeThisYear();
-            $endDate = $faker->dateTimeBetween($startDate, 'now');
-            $experience = new Experience();
-            $experience->setProfile($profileAdmin)
-                ->setRole($faker->jobTitle())
-                ->setCompagny($faker->company)
-                ->setStartDate($startDate)
-                ->setEndDate($endDate)
-                ->setDescription($faker->sentence())
-                ->setSlug($this->slugger->generateSlug($faker->jobTitle()));
+    for ($i = 0; $i < 5; $i++) {
+    $referenceName = ProfileFixtures::PROFILE_REFERENCE . $i;
 
-            $manager->persist($experience);
-            $this->addReference(self::EXPERIENCE_REFERENCE.$i, $experience);
-        }
-
-        // Ajouter des expériences pour le contributeur
-        for ($i = 4; $i < 8; $i++) { // On crée 4 expériences pour le contributeur
-            $startDate = $faker->dateTimeThisYear();
-            $endDate = $faker->dateTimeBetween($startDate, 'now');
-            $experience = new Experience();
-            $experience->setProfile($profileContributor)
-                ->setRole($faker->jobTitle())
-                ->setCompagny($faker->company)
-                ->setStartDate($startDate)
-                ->setEndDate($endDate)
-                ->setDescription($faker->sentence())
-                ->setSlug($this->slugger->generateSlug($faker->jobTitle()));
-
-            $manager->persist($experience);
-            $this->addReference(self::EXPERIENCE_REFERENCE.$i, $experience);
-        }
-
-        $manager->flush();
+    if (!$this->hasReference($referenceName, Profile::class)) {
+        continue;
     }
+
+    /** @var Profile $profile */
+    $profile = $this->getReference($referenceName, Profile::class);
+
+    $experienceCount = random_int(1, 4);
+
+    for ($j = 0; $j < $experienceCount; $j++) {
+        $startDate = $faker->dateTimeThisDecade();
+        $endDate = $faker->dateTimeBetween($startDate, 'now');
+        $title = $faker->jobTitle();
+
+        $experience = new Experience();
+        $experience->setProfile($profile)
+            ->setRole($title)
+            ->setCompagny($faker->company)
+            ->setStartDate($startDate)
+            ->setEndDate($endDate)
+            ->setDescription($faker->sentence())
+            ->setSlug($this->slugger->generateSlug($title));
+
+        $manager->persist($experience);
+        $this->addReference(self::EXPERIENCE_REFERENCE . $experienceIndex, $experience);
+    $experienceIndex++;
+    }
+}
+$manager->flush();
+
+}
+
+
 
     public function getDependencies(): array
     {

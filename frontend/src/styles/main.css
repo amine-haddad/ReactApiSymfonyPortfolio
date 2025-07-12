@@ -1,0 +1,5 @@
+@import "tailwindcss" important;
+
+/* Ton CSS perso peut venir ensuite */
+
+@import "./App.css";

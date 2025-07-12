@@ -1,27 +1,37 @@
+/* <weight>: Use a value from 100 to 900*/
+/* <uniquifier>: Use a unique and descriptive class name*/
+/**/
 @import url("https://fonts.googleapis.com/css2?family=Irish+Grover&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+
 /* ============================
    1. Variables globales
 ============================ */
 :root {
-  --background-color: #f5f9ff; /* fond très clair légèrement bleuté */
+  --background-color: #f5f9ff;
+  --background-color-hover: #5312eb1e; /* fond très clair légèrement bleuté */
   --background-color-trans: #f5f9ff4e;
   --text-color: #0a1a2f; /* bleu nuit très lisible */
   --primary-color: #e3f0ff; /* bleu clair très doux pour les cards/sections */
   --primary-color-hover: #0056b3;
   --secondary-color: #bcd6f7; /* bleu secondaire doux */
-  --accent-color: #0078d7; /* bleu vif boutons et liens */
+  --accent-color: #0076d77c; /* bleu vif boutons et liens */
   --navbar-bg: #c6ddff; /* navbar bleu pastel */
   --navbar-text: #001a47;
   --text-shadow: 3px 5px 5px #0076d783;
   --box-shadow: 0 4px 16px #0000001a;
-  --border-color: #a3c2f0;
+  --border-color: #09cff2;
   --gradient-start: #0076d7bc;
   --gradient-end: #e3f0ff;
   --font-family-title: "Irish Grover", sans-serif;
-  --font-family-body: "Irish Grover", sans-serif;
+  --font-family-body: "Urbanist", sans-serif;
   --highlight-color: #003d7a;
   --link-hover: #c0d8f0; /* bleu clair pour hover */
   --link-active: #a7b1f9;
+  --badge-color: #e3d4093f;
+  --border-badge: #e5e3c3a8;
+  --buton-bg: #0057b32a; /* bleu vif pour les boutons */
+  --button-bg-hover: #0078d7; /* bleu vif plus sombre pour hover */
 }
 
 /* ============================
@@ -29,6 +39,7 @@
 ============================ */
 body.dark-mode {
   --background-color: #0a0f1f; /* très sombre bleuté */
+  --background-color-hover: #09225729; /* fond sombre légèrement bleuté */
   --background-color-trans: #0a0f1f3e;
   --text-color: #f2f5ff; /* très clair */
   --primary-color: #1c263b; /* bleu nuit pour cards */
@@ -39,11 +50,15 @@ body.dark-mode {
   --text-shadow: 3px 5px 5px #5caeffde;
   --box-shadow: 0 4px 16px #fbf9f999;
   --border-color: #5caeff;
-  --gradient-start: #1c263b7c;
+  --gradient-start: #3d578dba;
   --gradient-end: #0a0f1ff5;
   --highlight-color: #8bbdff;
   --link-hover: #035070;
   --link-active: #000628;
+  --badge-color: #06618fcd;
+  --border-badge: #edde1883;
+  --buton-bg: #0078d7; /* bleu vif pour les boutons */
+  --button-bg-hover: #0057b32a;
 }
 
 /* ============================
@@ -57,44 +72,23 @@ body.dark-mode {
   box-sizing: border-box;
 }
 
+.urbanist {
+  font-family: "Urbanist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* ============================
    4. Styles globaux
 ============================ */
 body {
-  font-family: var(--font-family-body, Arial, sans-serif);
-  font-size: 16px;
   background-color: var(--background-color);
-  color: var(--text-color);
   line-height: 1.6;
   min-height: 100vh;
   margin: 0;
   padding: 0;
   transition: background-color 0.3s, color 0.3s;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-a,
-span,
-div {
-  font-family: var(--font-family-body) !important;
-}
-
-.app {
-  z-index: 0;
-}
-
-.content {
-  position: relative;
-  width: 100%;
-  height: 100vh;
 }
 
 .dynamic-shapes-canvas {
@@ -109,68 +103,12 @@ div {
 /* ============================
    5. Typographie
 ============================ */
-h1,
-h2 {
-  font-family: var(--font-family-title);
-  font-weight: bold;
-  text-align: center;
-  max-width: 1920px;
-  color: var(--text-color);
-  padding-bottom: 3rem;
-  text-shadow: var(--text-shadow);
-}
-.title-footer-h4 {
-  font-family: var(--font-family-title);
-  font-weight: bold;
-  text-align: center;
-
-  color: var(--text-color);
-  padding-bottom: 3rem;
-  text-shadow: var(--text-shadow);
-}
-
-h3 {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-/* ============================
-   6. Header & Footer
-============================ */
-header {
-  background-color: #0078d7;
-  color: white;
-}
-
-footer {
-  background-color: #333;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  bottom: 0;
-  width: 100%;
-}
+/* Ou directement dans Tailwind avec les classes */
 
 /* ============================
    7. Utilitaires
 ============================ */
-.text-center {
-  text-align: center;
-}
 
 /* ============================
    8. Responsive
 ============================ */
-@media (max-width: 768px) {
-  h1,
-  h2 {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 576px) {
-  h1,
-  h2 {
-    font-size: 1.2rem;
-  }
-}

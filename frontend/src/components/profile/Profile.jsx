@@ -2,18 +2,21 @@ import styles from "../../styles/Profile.module.css";
 import ProfileCarousel from "./ProfileCarousel";
 
 const Profile = ({ profile }) => {
-  if (!profile) return null; // Ne rien afficher si pas de profil
+  if (!profile) return null;
 
   return (
-    <div className={"profileContainer" + " " + styles.profileContainer}>
-      <h2 className="text-center mb-2 col-10 mx-auto title-h2 display-1">
-        Welcome to my Portfolio
+    <div className="container-fluid d-flex flex-column align-items-center justify-content-center">
+      <h1 className={styles.profileTitle}>
+        Profil de {profile.name} – {profile.title} sur PortfolioHub
+      </h1>
+      <h2 className={styles.profileSubtitle}>
+        {profile.title}
       </h2>
-      <div className={styles.profileCard}>
+      <div className={`${styles.profileContainer} my-5 col-10`}>
         <div className={styles.profileCardBody}>
           <div className="row">
             <div className="col-md-6">
-              <h1 className={styles.profileCardTitle}>{profile.name}</h1>
+              <h2 className="m-5">{profile.name}</h2>
               <p><strong>Title:</strong> {profile.title}</p>
               <p><strong>Bio:</strong> {profile.bio}</p>
               <p><strong>Email:</strong> {profile.email}</p>
@@ -21,7 +24,9 @@ const Profile = ({ profile }) => {
               <p><strong>GitHub:</strong> <a href={profile.github_url}>{profile.github_url}</a></p>
               <p><strong>LinkedIn:</strong> <a href={profile.linkedin_url}>{profile.linkedin_url}</a></p>
             </div>
-            <ProfileCarousel profile={profile} error={null} />
+            <div className="col-md-6 p-4 m-auto">
+              <ProfileCarousel profile={profile} error={null} />
+            </div>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ const PageLayout = ({ children }) => {
       </div>
 
       <div className={styles.contentWrapper}>
-        <div className={styles.container}>
+        <div className={styles.containerPageLayout}>
           {children}
         </div>
       </div>

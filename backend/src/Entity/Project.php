@@ -2,63 +2,93 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Metadata\Delete;
 use App\Repository\ProjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use App\ApiResource\ProjectProvider;
-use App\Controller\ProjectController;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use ApiPlatform\Metadata\Get;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 #[ApiResource(
     normalizationContext: ['groups' => ['read:Project']],
     denormalizationContext: ['groups' => ['write:Project']],
 )]
-
 #[ApiFilter(SearchFilter::class, properties: ['profile.id' => 'exact'])]
-#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['slug'], message: 'Ce slug est déjà utilisé.')]
+/*#[Get(
+    uriTemplate: '/profiles/{profileId}/projects',
+    provider: ProjectProvider::class,
+    normalizationContext: ['groups' => ['read:Project']]
+)]*/
 class Project
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:Project', 'write:Project',"read:Profile",'read:User'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:Project', 'write:Project','project:read',"read:Profile",'read:User'])]
+    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/',
+        match: false,
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 2000)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/',
+        match: false,
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     private ?string $project_url = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:Project', 'write:Project','project:read','read:Profile','read:User'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     private ?string $image_url = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:Project', 'write:Project','read:Profile','read:User'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 2000)]
+    #[Assert\Type('string')]
+    #[Assert\Regex(
+        pattern: '/<[^>]*>/',
+        match: false,
+        message: 'Les balises HTML ne sont pas autorisées.'
+    )]
     private ?string $slug = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    #[Groups(['read:Project', 'write:Project','project:read'])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['read:Project'])]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['read:Project'])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\ManyToOne(inversedBy: 'projects')]
@@ -69,22 +99,33 @@ class Project
      * @var Collection<int, Skill>
      */
     #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: 'projects')]
-    #[Groups(['read:Project', 'write:Project','read:Profile','project:read'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile'])]
     private Collection $technologies;
 
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'projects')]
-    #[Groups(['read:Project', 'write:Project','read:Profile','read:User','project:read'])]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'project', cascade: ['persist', 'remove'])]
+    #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
     private Collection $images;
 
     public function __construct()
     {
-        $this->images = new ArrayCollection();
-        $this->created_at = new \DateTime();
-        $this->updated_at = new \DateTime();
         $this->technologies = new ArrayCollection();
+        $this->images = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $this->created_at = new \DateTimeImmutable();
+        $this->updated_at = new \DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -97,10 +138,9 @@ class Project
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): self
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -109,10 +149,9 @@ class Project
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $description): self
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -121,10 +160,9 @@ class Project
         return $this->project_url;
     }
 
-    public function setProjectUrl(?string $project_url): static
+    public function setProjectUrl(?string $project_url): self
     {
         $this->project_url = $project_url;
-
         return $this;
     }
 
@@ -133,10 +171,9 @@ class Project
         return $this->image_url;
     }
 
-    public function setImageUrl(?string $image_url): static
+    public function setImageUrl(?string $image_url): self
     {
         $this->image_url = $image_url;
-
         return $this;
     }
 
@@ -145,10 +182,9 @@ class Project
         return $this->slug;
     }
 
-    public function setSlug(string $slug): static
+    public function setSlug(string $slug): self
     {
         $this->slug = $slug;
-
         return $this;
     }
 
@@ -157,10 +193,9 @@ class Project
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updated_at): static
+    public function setUpdatedAt(?\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
-
         return $this;
     }
 
@@ -169,10 +204,9 @@ class Project
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): self
     {
         $this->created_at = $created_at;
-
         return $this;
     }
 
@@ -181,10 +215,9 @@ class Project
         return $this->profile;
     }
 
-    public function setProfile(?Profile $profile): static
+    public function setProfile(?Profile $profile): self
     {
         $this->profile = $profile;
-
         return $this;
     }
 
@@ -196,18 +229,18 @@ class Project
         return $this->technologies;
     }
 
-    public function addTechnologies(Skill $technologies): static
+    public function addTechnology(Skill $technology): self
     {
-        if (!$this->technologies->contains($technologies)) {
-            $this->technologies->add($technologies);
+        if (!$this->technologies->contains($technology)) {
+            $this->technologies->add($technology);
         }
 
         return $this;
     }
 
-    public function removeTechnologies(Skill $technologies): static
+    public function removeTechnology(Skill $technology): self
     {
-        $this->technologies->removeElement($technologies);
+        $this->technologies->removeElement($technology);
 
         return $this;
     }
@@ -220,22 +253,21 @@ class Project
         return $this->images;
     }
 
-    public function addImage(Image $image): static
+    public function addImage(Image $image): self
     {
         if (!$this->images->contains($image)) {
             $this->images->add($image);
-            $image->setProjects($this);
+            $image->setProject($this);
         }
 
         return $this;
     }
 
-    public function removeImage(Image $image): static
+    public function removeImage(Image $image): self
     {
         if ($this->images->removeElement($image)) {
-            // set the owning side to null (unless already changed)
-            if ($image->getProjects() === $this) {
-                $image->setProjects(null);
+            if ($image->getProject() === $this) {
+                $image->setProject(null);
             }
         }
 

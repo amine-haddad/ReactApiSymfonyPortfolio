@@ -10,13 +10,13 @@ function Layout() {
   if (loading) return <Spinner />;
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <CustomNavbar />
-      <main>
+      <main className="flex-grow">
         <Outlet />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 

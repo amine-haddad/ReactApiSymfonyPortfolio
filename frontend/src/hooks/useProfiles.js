@@ -1,24 +1,59 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
-export function useProfiles(type = "public") {
-  const ctx = useContext(AuthContext);
+function useProfiles({ mine = false } = {}) {
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (type === "public") {
-    return {
-      profiles: ctx.publicProfiles,
-      loading: ctx.loading,
-      error: ctx.error,
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (mine) {
+      if (user && Array.isArray(user.userProfiles)) {
+        setProfiles(user.userProfiles);
+        setLoading(false);
+      } else {
+        setProfiles([]);
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Sinon, requête API classique
+    const fetchProfiles = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch("/api/profiles", {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const profilesArray = Array.isArray(data["hydra:member"])
+          ? data["hydra:member"]
+          : Array.isArray(data.member)
+          ? data.member
+          : [];
+
+        setProfiles(profilesArray);
+      } catch (err) {
+        setError("Impossible de charger les profils.");
+      } finally {
+        setLoading(false);
+      }
     };
-  }
-  if (type === "private") {
-    return {
-      profiles: ctx.user?.userProfiles || [],
-      loading: ctx.loading,
-      error: ctx.error,
-      user: ctx.user,
-      selectProfile: ctx.selectProfile,
-    };
-  }
-  return {};
+
+    fetchProfiles();
+  }, [authLoading, user, mine]);
+
+  return { profiles, loading, error };
 }
+
+export default useProfiles;

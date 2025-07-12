@@ -11,27 +11,34 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
+use App\Entity\Traits\TimestampableTrait;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity('email', message: 'Cet email est déjà utilisé.')]
 #[ApiResource(
     normalizationContext: ['groups' => ['read:User','read:profile']],
     denormalizationContext: ['groups' => ['write:User']],
 )]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use TimestampableTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:User',"read:Profile",'read:Project','read:Skill'])]
+    #[Groups(['read:User',"read:Profile", 'read:Profile:light', 'read:Project','read:Skill'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     #[Groups(['read:User', 'write:User'])]
     #[Assert\NotBlank(message: "L'email est obligatoire.")]
     #[Assert\Email(message: "L'email n'est pas valide.")]
     #[Assert\Length(max: 180, maxMessage: "L'email ne doit pas dépasser 180 caractères.")]
-    #[Assert\Unique(message: "Cet email est déjà utilisé.")]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -54,7 +61,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Profile>
      */
-    #[ORM\OneToMany(targetEntity: Profile::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: Profile::class, mappedBy: 'user')]
     #[Groups(['read:User'])]
     private Collection $userProfiles;
 
@@ -84,24 +91,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['read:User'])]
     private ?string $slug = null;
 
-    #[ORM\Column(options: ['default' => 'CURRENT_TIMESTAMP'])]
-    #[Assert\NotNull(message: "La date de mise à jour est obligatoire.")]
-    #[Assert\Type("\DateTimeInterface")]
-    #[Groups(['read:User'])]
-    private ?\DateTimeImmutable $updated_at = null;
-
-    #[ORM\Column(options: ['default' => 'CURRENT_TIMESTAMP'])]
-    #[Assert\NotNull(message: "La date de création est obligatoire.")]
-    #[Assert\Type("\DateTimeInterface")]
-    #[Groups(['read:User'])]
-    private ?\DateTimeImmutable $created_at = null;
 
     public function __construct()
     {
         $this->userProfiles = new ArrayCollection();
-        $this->created_at = new \DateTimeImmutable();
-        $this->updated_at = new \DateTimeImmutable();
     }
+
 
     public function getId(): ?int
     {
@@ -147,10 +142,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
+        if (!in_array('ROLE_USER', $roles, true)) {
         $roles[] = 'ROLE_USER';
+        }
 
-        return array_unique($roles);
+        return $roles;
     }
 
     /**
@@ -253,27 +249,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
-    {
-        $this->updated_at = $updated_at;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
 }

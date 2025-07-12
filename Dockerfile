@@ -9,11 +9,15 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
+    tzdata \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd \
     && docker-php-ext-install intl \
     && docker-php-ext-install pdo pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure le fuseau horaire
+ENV TZ=Europe/Paris
 
 # Installation du Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash

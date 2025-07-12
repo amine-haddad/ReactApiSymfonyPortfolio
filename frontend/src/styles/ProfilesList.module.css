@@ -1,32 +1,38 @@
 .sectionListProfiles {
-  padding: 20px;
-  background-color: var(--background-color-trans);
-  border-radius: 12px;
-  min-height: 100vh;
+  flex-direction: column;
+  padding-top: 60px;
+  color: var(--text-color);
+  background: var(--background-color-trans);
+  border-radius: 0.8em;
 }
-
+.titlePortfoliohub {
+  font-family: var(--font-family-title);
+  letter-spacing: 0.08em;
+}
+.profileTitle {
+  color: var(--navbar-text);
+}
 .profilesListContainer {
-  width: 90%;
-  max-width: 1980px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: var(--primary-color);
-  border-radius: 5px;
+  padding: 30px;
+  border-radius: 12px;
+  background-color: var(--background-color-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .profileCardList {
-  background-color: var(--secondary-color);
-  border-radius: 5px;
-  box-shadow: 0px 2px 6px var(--accent-color);
-  transition: transform 0.3s ease-in-out;
+  background: linear-gradient(
+    135deg,
+    var(--gradient-end),
+    var(--gradient-start)
+  );
+  border-radius: 8px;
+  box-shadow: 0px 3px 6px var(--accent-color);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   overflow: hidden;
-  height: 100%;
-  padding: 15px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-}
-
-.profileCardList:hover {
-  transform: translateY(-10px);
-  box-shadow: 1px 5px 10px var(--accent-color);
+  height: 100%;
 }

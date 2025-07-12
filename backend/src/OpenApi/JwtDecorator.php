@@ -1,5 +1,6 @@
 <?php
-
+// jwtdecorator 	Personnalise la doc OpenAPI pour expliquer comment fonctionne
+//  /api/login_check et le token
 declare(strict_types=1);
 
 namespace App\OpenApi;

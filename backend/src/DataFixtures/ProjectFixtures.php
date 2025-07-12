@@ -1,4 +1,5 @@
 <?php
+
 namespace App\DataFixtures;
 
 use App\Entity\Profile;
@@ -13,6 +14,7 @@ use Faker\Factory;
 class ProjectFixtures extends Fixture implements DependentFixtureInterface
 {
     public const PROJECT_REFERENCE = 'project_';
+
     private SluggerService $slugger;
 
     public function __construct(SluggerService $slugger)
@@ -23,81 +25,78 @@ class ProjectFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create();
+        $projectIndex = 0;
+        $profileIndex = 0;
 
-        // Récupération des profils admin et contributeur
-        $profileAdmin = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'admin_0', Profile::class);  // Profil admin
-        $profileContributor = $this->getReference(ProfileFixtures::PROFILE_REFERENCE.'contributor_0', Profile::class);  // Profil contributeur
+        // Boucle tant qu'on trouve une référence de profil
+        while (true) {
+            $refKey = ProfileFixtures::PROFILE_REFERENCE . $profileIndex;
 
-        // Créer des projets pour l'admin
-        for ($i = 0; $i < 10; $i++) {
-            $project = new Project();
-            $title = $faker->sentences(3, true);
-            $description = $faker->realText(70, 2);
-            $projectUrl = $faker->url();
-            $slug = $this->slugger->generateSlug($title);
+            if (!$this->hasReference($refKey,Profile::class)) {
+                break;
+            }
 
-            $project->setTitle($title)
-                ->setDescription($description)
-                ->setProjectUrl($projectUrl)
-                ->setSlug($slug)
-                ->setProfile($profileAdmin);  // Associer le profil admin
+            /** @var Profile $profile */
+            $profile = $this->getReference($refKey, Profile::class);
 
-            // Ajouter des technologies au projet
-            $this->addSkillsToProject($project);
+            // Créer 5 à 10 projets par profil
+            $projectsPerProfile = random_int(5, 10);
+            for ($j = 0; $j < $projectsPerProfile; $j++) {
+                $project = new Project();
+                $title = $faker->sentence(3);
+                $description = $faker->realText(70, 2);
+                $projectUrl = $faker->url();
+                $slug = $this->slugger->generateSlug($title);
 
-            $this->addReference(self::PROJECT_REFERENCE.'admin_'.$i, $project);
-            $manager->persist($project);
-        }
+                $project->setTitle($title)
+                    ->setDescription($description)
+                    ->setProjectUrl($projectUrl)
+                    ->setSlug($slug)
+                    ->setProfile($profile);
 
-        // Créer des projets pour le contributeur
-        for ($i = 0; $i < 10; $i++) {
-            $project = new Project();
-            $title = $faker->sentences(3, true);
-            $description = $faker->realText(70, 2);
-            $projectUrl = $faker->url();
-            $slug = $this->slugger->generateSlug($title);
+                $this->addSkillsToProject($project);
+                $this->addReference(self::PROJECT_REFERENCE . $projectIndex, $project);
+                $manager->persist($project);
 
-            $project->setTitle($title)
-                ->setDescription($description)
-                ->setProjectUrl($projectUrl)
-                ->setSlug($slug)
-                ->setProfile($profileContributor);  // Associer le profil contributeur
+                $projectIndex++;
+            }
 
-            // Ajouter des technologies au projet
-            $this->addSkillsToProject($project);
-
-            $this->addReference(self::PROJECT_REFERENCE.'contributor_'.$i, $project);
-            $manager->persist($project);
+            $profileIndex++;
         }
 
         $manager->flush();
     }
 
-    // Fonction pour ajouter des compétences au projet
-    private function addSkillsToProject(Project $project)
-    {
-        $numberOfTechnologies = rand(1, 5);
-        $usedSkills = [];
-        
-        for ($j = 0; $j < $numberOfTechnologies; $j++) {
-            $randomSkillIndex = rand(1, 10);
-            
-            if (!in_array($randomSkillIndex, $usedSkills)) {
-                $usedSkills[] = $randomSkillIndex;
-                $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . $randomSkillIndex, Skill::class);
-                $project->addTechnologies($skill);
-            } else {
-                // Si compétence déjà utilisée, recommencer
-                $j--;
-            }
-        }
+    private function addSkillsToProject(Project $project): void
+{
+    $numberOfTechnologies = random_int(1, 5);
+    $usedSkillIndices = [];
+
+    // Compter le nombre total de skills ajoutés dans SkillFixtures
+    $totalSkills = 0;
+    while ($this->hasReference(SkillFixtures::SKILL_REFERENCE . $totalSkills, Skill::class)) {
+        $totalSkills++;
     }
+
+    for ($j = 0; $j < $numberOfTechnologies; $j++) {
+        do {
+            $randomIndex = random_int(0, $totalSkills - 1);
+        } while (in_array($randomIndex, $usedSkillIndices, true));
+
+        $usedSkillIndices[] = $randomIndex;
+
+        /** @var Skill $skill */
+        $skill = $this->getReference(SkillFixtures::SKILL_REFERENCE . $randomIndex, Skill::class);
+        $project->addTechnology($skill);
+    }
+}
+    
 
     public function getDependencies(): array
     {
         return [
-            SkillFixtures::class,  // Assure-toi que les compétences sont chargées avant les projets
-            ProfileFixtures::class, // Assure-toi que les profils sont chargés avant les projets
+            SkillFixtures::class,
+            ProfileFixtures::class,
         ];
     }
 }

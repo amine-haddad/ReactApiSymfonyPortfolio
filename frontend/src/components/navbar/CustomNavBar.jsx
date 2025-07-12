@@ -7,7 +7,8 @@ import DynamicLine from "./DynamicLine";
 import { AuthContext } from "../../contexts/AuthContext";
 
 const CustomNavbar = () => {
-  const { isAuthenticated, user, profiles, loading, error } = useContext(AuthContext);
+  const { isAuthenticated, user, loading, error } = useContext(AuthContext);
+  const profiles = user?.userProfiles || [];
   const location = useLocation();
 
   // Une seule regex pour profil public ou privé

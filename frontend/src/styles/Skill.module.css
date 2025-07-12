@@ -10,6 +10,10 @@
   background-color: var(--background-color);
 }
 
+.skillImage {
+  transition: opacity 1.2s ease-in-out;
+}
+
 /* Conteneur des compétences */
 .skillsContainer {
   display: flex;
@@ -102,6 +106,12 @@
   padding: 0.1vw 0.4vw;
   border-radius: 10px;
   z-index: 5;
+}
+.skillSwiper {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 /* Responsive : Ajuster la taille des médaillons */

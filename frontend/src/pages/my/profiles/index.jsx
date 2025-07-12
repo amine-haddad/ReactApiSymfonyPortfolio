@@ -1,46 +1,50 @@
 import { useContext } from "react";
-import { useProfiles } from "../../../hooks/useProfiles";
-import { Link } from "react-router-dom";
-import styles from "../../../styles/ProfilesList.module.css"; // Assurez-vous que le chemin est correct
+import { AuthContext } from "../../../contexts/AuthContext";
+import useProfiles from "../../../hooks/useProfiles";
 import PageLayout from "../../../layouts/PageLayout";
 import Spinner from "../../../components/Spinner";
+import Button from "../../../components/ui/Button";
+import style from "../../../styles/ProfilesList.module.css";
 
 function Index() {
-  const { profiles, loading, error, user, selectProfile } = useProfiles("private");
+  const { user } = useContext(AuthContext);
+  const { profiles, loading, error } = useProfiles({ mine: true });
 
-  if (loading) return <div className={styles.sectionListProfiles}><Spinner /></div>;
-  if (error) return <p>Erreur : {error}</p>;
-  if (!user) return <p>Non connecté.</p>;
+  if (loading)
+    return (
+      <div className={style.sectionListProfiles}>
+        <Spinner />
+      </div>
+    );
+
+  if (error) return <p className="text-danger">Erreur : {error}</p>;
+  if (!user) return <p className="text-warning">Non connecté.</p>;
 
   return (
     <PageLayout>
-      <div className={styles.sectionListProfiles}>
-        <h2 className="mb-4">Vos profils</h2>
+      <div className={style.sectionListProfiles}>
+        <div className={style.profilesListContainer}>
+          <h2 className="h4 fw-bold text-uppercase mb-4">Vos profils</h2>
 
-        {profiles.length === 0 ? (
-          <p>Aucun profil trouvé.</p>
-        ) : (
-          <div className="row">
-            {profiles.map((profile) => (
-              <div className="col-md-4 mb-4" key={profile.id}>
-                <div className={styles.profileCardList}>
-                  <div className="card-body d-flex flex-column h-100">
-                    <h5 className="card-title">{profile.name}</h5>
-                    <h6 className="card-subtitle">{profile.title}</h6>
-                    <p className="card-text">{profile.bio}</p>
-                    <Link
-                      to={`/my/profiles/${profile.id}`}
-                      className="btn btn-primary mt-auto"
-                      onClick={() => selectProfile(profile.id)}
-                    >
+          {profiles.length === 0 ? (
+            <p>Aucun profil trouvé.</p>
+          ) : (
+            <div className="row g-4">
+              {profiles.map((profile) => (
+                <div className="col-12 col-md-6 col-lg-4" key={profile.id}>
+                  <div className={style.profileCardList}>
+                    <h5 className="fw-semibold">{profile.name}</h5>
+                    <h6 className="text-muted mb-2">{profile.title}</h6>
+                    <p className="flex-grow-1">{profile.bio}</p>
+                    <Button to={`/my/profiles/${profile.id}`}>
                       Voir le profil
-                    </Link>
+                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </PageLayout>
   );
