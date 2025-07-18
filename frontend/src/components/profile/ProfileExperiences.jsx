@@ -21,11 +21,11 @@ const ProfileExperience = ({ experiences, error }) => {
   };
 
   return (
-    <section className={styles.experienceSection}>
-      <h2 className={styles.title}>Expériences</h2>
+    <section className={`${styles.experienceSection} my-5 col-10`}>
+      <h2 className={`mb-4 display-4 ${styles.title}`}>Expériences</h2>
       {error && <p className={styles.error}>{error}</p>}
 
-      <div className={styles.cardContainer}>
+      <div className={` ${styles.cardContainer} `}>
         {experiences.map((experience, index) => {
           const slides = experience.images?.length > 0 ? experience.images : [{ name: "/assets/defaultImgageCode.jpg" }];
           const hasMultipleSlides = slides.length > 1;
@@ -39,7 +39,7 @@ const ProfileExperience = ({ experiences, error }) => {
                   loop={hasMultipleSlides}
                   speed={2500}
                   autoplay={hasMultipleSlides ? { delay: 3000, disableOnInteraction: false } : false}
-                  navigation={hasMultipleSlides}
+                  //navigation={hasMultipleSlides}
                   className={styles.swiper}
                 >
                   {slides.map((img, i) => (
@@ -47,6 +47,7 @@ const ProfileExperience = ({ experiences, error }) => {
                       <img
                         src={img.name || img.url || "/assets/defaultImgageCode.jpg"}
                         alt={`Expérience ${i}`}
+                        loading="lazy"
                         className={styles.image}
                       />
                     </SwiperSlide>

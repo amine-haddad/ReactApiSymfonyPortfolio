@@ -163,7 +163,15 @@ const CustomNavbar = () => {
             </Nav.Item>
 
             <Nav.Item>
-              <Nav.Link as={Link} to="/about" className={styles["nav-link"]}>
+              <Nav.Link
+                as={Link}
+                to={
+                  isProfilePage && profileId
+                    ? `/${isPrivateProfilePage ? "my/" : ""}profiles/${profileId}/about`
+                    : "/about"
+                }
+                className={styles["nav-link"]}
+              >
                 À propos
                 <DynamicLine />
               </Nav.Link>

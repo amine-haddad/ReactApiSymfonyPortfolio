@@ -24,17 +24,3 @@ a {
 a:hover {
   color: var(--accent-color-hover);
 }
-
-.profileTitle {
-  color: var(--title-color, var(--text-color));
-  font-family: var(--title-font, inherit);
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.profileSubtitle {
-  color: var(--subtitle-color, var(--text-color));
-  font-family: var(--subtitle-font, inherit);
-  font-style: italic;
-}

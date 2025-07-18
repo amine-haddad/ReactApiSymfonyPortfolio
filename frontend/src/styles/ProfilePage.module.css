@@ -28,3 +28,23 @@
   justify-content: center;
   align-items: center;
 }
+.profileTitle {
+  color: var(--text-color);
+  font-family: var(--font-family-title, inherit);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  text-align: center;
+}
+
+.profileSubtitle {
+  color: var(--text-color);
+  font-family: var(--font-family-body, inherit);
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.12em;
+}
+.profileContent {
+  padding: 2rem 1rem;
+  background: var(--background-color);
+}

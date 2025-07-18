@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import useExperience from "../../../../hooks/useExperience";
+import useProfiles from "../../../../hooks/useProfiles";
+import { AuthContext } from "../../../../contexts/AuthContext";
 import PageLayout from "../../../../layouts/PageLayout";
 import styles from "../../../../styles/ExperienceList.module.css";
 import Spinner from "../../../../components/Spinner";
@@ -14,22 +15,29 @@ const ExperienceList = () => {
   const { profileId } = useParams();
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { experiences, total, loading, error } = useExperience(profileId, page, limit);
+  const { user } = useContext(AuthContext);
+  const { profiles, loading, error } = useProfiles({ mine: !!user });
+
+  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  const experiences = profile?.experiences || [];
+  const total = experiences.length;
+  const paginatedExperiences = experiences.slice((page - 1) * limit, page * limit);
+
   const navigate = useNavigate();
 
   if (loading) return <p className={styles.loading}><Spinner /></p>;
   if (error) return <p className={styles.error}>Erreur : {error}</p>;
+  if (!profile) return <p className={styles.noData}>Profil non trouvé.</p>;
 
   return (
     <PageLayout>
       <div className={styles.experienceFrame}>
         <h1 className="text-center">Expériences</h1>
-
-        {experiences.length === 0 ? (
+        {paginatedExperiences.length === 0 ? (
           <p className={styles.noData}>Aucune expérience trouvée.</p>
         ) : (
           <div className={styles.experienceGrid}>
-            {experiences.map(e => (
+            {paginatedExperiences.map(e => (
               <div className={styles.experienceCard} key={e.id}>
                 <h3 className={styles.experienceTitle}>{e.role || "Titre non renseigné"}</h3>
                 <p className={styles.experienceRole}>
@@ -47,8 +55,6 @@ const ExperienceList = () => {
             ))}
           </div>
         )}
-
-        {/* Pagination */}
         <div className={styles.pagination}>
           <button disabled={page === 1} onClick={() => setPage(page - 1)}>
             Précédent
@@ -63,7 +69,6 @@ const ExperienceList = () => {
             Suivant
           </button>
         </div>
-
         <button
           className={styles["back-button"]}
           onClick={() => navigate(`/profiles/${profileId}`)}

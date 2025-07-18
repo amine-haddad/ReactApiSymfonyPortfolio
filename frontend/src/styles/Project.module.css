@@ -4,7 +4,20 @@
   padding-top: 80px;
   padding-bottom: 3vw;
 }
-
+.projectTitleH2 {
+  color: var(--text-color);
+  font-family: var(--font-family-Body, inherit);
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.12em;
+}
+.projectTitle {
+  color: var(--text-color);
+  font-family: var(--font-family-body, inherit);
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.12em;
+}
 .projectSwiper {
   width: 100%;
   height: auto;
@@ -16,8 +29,7 @@
   white-space: nowrap;
   gap: 20px;
   padding: 15px 0;
-  width: 90%;
-  max-width: 1920px;
+
   margin: 0 auto;
   justify-content: start;
   background-color: var(--background-color);

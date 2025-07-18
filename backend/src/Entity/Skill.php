@@ -32,7 +32,7 @@ class Skill
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:Skill','project:read', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
+    #[Groups(['read:Skill','read:User', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -41,11 +41,11 @@ class Skill
         max: 255,
         maxMessage: "Le nom de la compétence ne peut pas dépasser {{ limit }} caractères."
     )]
-    #[Groups(['read:Skill', 'write:Skill','project:read',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
+    #[Groups(['read:Skill','read:User', 'write:Skill',"read:Profile",'read:Project','read:ProfileSkills','read:User'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable:true)]
-    #[Groups(['read:Skill',"read:Profile",'read:Project','project:read'])]
+    #[Groups(['read:Skill','read:User',"read:Profile",'read:Project'])]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
@@ -66,14 +66,14 @@ class Skill
      * @var Collection<int, Image>
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Skill',"read:Profile",'read:Project','project:read'])]
+    #[Groups(['read:Skill','read:User',"read:Profile",'read:Project'])]
     private Collection $images;
 
     /**
      * @var Collection<int, ProfileSkill>
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
-    #[Groups(['read:Skill', 'write:Skill'])]
+    #[Groups(['read:Skill','read:User', 'write:Skill'])]
     #[ApiSubresource]
     private Collection $profileSkills;
 

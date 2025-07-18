@@ -1,24 +1,31 @@
 import { useParams, Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import useProfiles from "../../../../hooks/useProfiles";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
-import useSingleExperience from "../../../../hooks/useSingleExperience";
 import PageLayout from "../../../../layouts/PageLayout";
 import '../../../../styles/SwiperOverrides.css';
 import styles from "../../../../styles/ExperienceId.module.css";
 
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
-  const { experience, loading, error } = useSingleExperience(profileId, experienceId);
+  const { user } = useContext(AuthContext);
+  const { profiles, loading, error } = useProfiles({ mine: !!user });
 
   if (loading) return <div className={styles.spinner}></div>;
   if (error) return <p className={styles.error}>{error}</p>;
+
+  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
+
+  const experience = profile.experiences?.find((e) => String(e.id) === String(experienceId));
   if (!experience) return <p className={styles.notFound}>Expérience introuvable.</p>;
 
   const imageUrl = experience.images?.[0]?.name || "/assets/defaultImgageCode.jpg";
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "Date non renseignée";
     const date = new Date(dateStr);
@@ -46,7 +53,6 @@ const ExperienceId = () => {
     <PageLayout>
       <div className={styles.container}>
         <h1 className={styles.title}>{experience.role || "Titre non renseigné"}</h1>
-
         {experience.images?.length > 0 ? (
           <Swiper
             modules={[Navigation, Pagination]}
@@ -72,12 +78,9 @@ const ExperienceId = () => {
             }}
           />
         )}
-
-
         <p className={styles.meta}>
           <span className={styles.label}>Employeur:</span> {experience.compagny || "Aucune entreprise fournie."}
         </p>
-
         <div className={styles.description}>
           <div className={styles.label}>Descriptif :</div>
           <p>{experience.description || "Aucune description fournie."}</p>
@@ -89,7 +92,6 @@ const ExperienceId = () => {
           <span className={styles.label}>Fin :</span>{" "}
           {experience.endDate ? formatDate(experience.endDate) : "En cours"}
         </p>
-
         <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
           <Link to={`/profiles/${profileId}/experiences`} className={styles.backLink}>
             ← Retour aux expériences

@@ -41,6 +41,7 @@ const ProfileCarousel = ({ profile, error }) => {
             <img
               src={img.name}
               alt={`Profile image ${index + 1}`}
+              loading="lazy"
               className={styles.carouselImage}
             />
           </SwiperSlide>

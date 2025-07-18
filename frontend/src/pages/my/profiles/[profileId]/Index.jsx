@@ -49,9 +49,12 @@ const Index = () => {
       </div>
       <div className={styles.profileContent}>
         <div>
-          <h1 className="mb-5 underline uppercase text-center ">
-            Profil de {profile.name} – {profile.title} sur PortfolioHub
+          <h1 className={styles.profileTitle}>
+            {profile.title}
           </h1>
+          <h2 className={styles.profileSubtitle}>
+            {profile.name}
+          </h2>
         </div>
         <AnimatedSection>
           <Profile profile={profile} />

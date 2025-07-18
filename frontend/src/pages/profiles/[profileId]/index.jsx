@@ -1,14 +1,17 @@
+import React, { Suspense, lazy } from "react";
 import { useParams } from "react-router-dom";
 import useProfiles from "../../../hooks/useProfiles";
-import Profile from "../../../components/profile/Profile";
-import ProfileProjects from "../../../components/profile/ProfileProjects";
-import ProfileExperiences from "../../../components/profile/ProfileExperiences";
-import ProfileSkills from "../../../components/profile/ProfileSkills";
-import ProfileAbout from "../../../components/profile/ProfileAbout";
 import DynamicShapes from "../../../components/DynamicShapes";
 import TypingEffect from "../../../components/TypingEffect";
 import AnimatedSection from "../../../components/AnimatedSection";
 import styles from "../../../styles/ProfilePage.module.css";
+
+// Imports dynamiques pour code splitting (lazy loading)
+const Profile = lazy(() => import("../../../components/profile/Profile"));
+const ProfileProjects = lazy(() => import("../../../components/profile/ProfileProjects"));
+const ProfileExperiences = lazy(() => import("../../../components/profile/ProfileExperiences"));
+const ProfileSkills = lazy(() => import("../../../components/profile/ProfileSkills"));
+const ProfileAbout = lazy(() => import("../../../components/profile/ProfileAbout"));
 
 const Index = () => {
   const { profileId } = useParams();
@@ -19,6 +22,9 @@ const Index = () => {
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
   if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;
 
+  // Un fallback simple pour le lazy loading
+  const fallback = <p>Chargement...</p>;
+
   return (
     <div className={styles.profilePage}>
       <div className={styles.profileHeader}>
@@ -28,24 +34,38 @@ const Index = () => {
         </div>
       </div>
       <div className={styles.profileContent}>
-        <h1 className="mt-5 underline uppercase text-center font-title font-bold">
-          Profil de {profile.name} – {profile.title} sur PortfolioHub
-        </h1>
-        <AnimatedSection>
-          <Profile profile={profile} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <ProfileProjects projects={profile.projects || []} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <ProfileExperiences experiences={profile.experiences || []} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <ProfileSkills skills={profile.profileSkills || []} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <ProfileAbout profile={profile} />
-        </AnimatedSection>
+        <h1 className={styles.profileTitle}>{profile.title}</h1>
+        <h2 className={styles.profileSubtitle}>{profile.name}</h2>
+
+        <Suspense fallback={fallback}>
+          <AnimatedSection>
+            <Profile profile={profile} />
+          </AnimatedSection>
+        </Suspense>
+
+        <Suspense fallback={fallback}>
+          <AnimatedSection>
+            <ProfileProjects projects={profile.projects || []} />
+          </AnimatedSection>
+        </Suspense>
+
+        <Suspense fallback={fallback}>
+          <AnimatedSection>
+            <ProfileExperiences experiences={profile.experiences || []} />
+          </AnimatedSection>
+        </Suspense>
+
+        <Suspense fallback={fallback}>
+          <AnimatedSection>
+            <ProfileSkills skills={profile.profileSkills || []} />
+          </AnimatedSection>
+        </Suspense>
+
+        <Suspense fallback={fallback}>
+          <AnimatedSection>
+            <ProfileAbout profile={profile} />
+          </AnimatedSection>
+        </Suspense>
       </div>
     </div>
   );

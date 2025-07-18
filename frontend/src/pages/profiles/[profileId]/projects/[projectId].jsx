@@ -1,5 +1,8 @@
 // src/pages/profiles/[profileId]/projects/[projectId].jsx
 import { useParams, Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import useProfiles from "../../../../hooks/useProfiles";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -7,11 +10,22 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import DynamicShapes from "../../../../components/DynamicShapes";
 import styles from "../../../../styles/ProjectDetail.module.css";
-import useSingleProject from "../../../../hooks/useSingleProject";
 
 const ProjectDetail = () => {
   const { profileId, projectId } = useParams();
-  const { project, loading, error } = useSingleProject(profileId, projectId);
+  const { user } = useContext(AuthContext);
+  const { profiles, loading, error } = useProfiles({ mine: !!user });
+
+  if (loading) return <div className={styles.spinner}></div>;
+  if (error) return <p className={styles.error}>{error}</p>;
+
+  // Trouve le profil courant
+  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
+
+  // Trouve le projet dans le profil
+  const project = profile.projects?.find((p) => String(p.id) === String(projectId));
+  if (!project) return <p className={styles.notFound}>Projet introuvable.</p>;
 
   // Fonction utilitaire pour formater la date
   const formatDate = (dateStr) => {
@@ -23,10 +37,6 @@ const ProjectDetail = () => {
       day: "numeric",
     });
   };
-
-  if (loading) return <div className={styles.spinner}></div>;
-  if (error) return <p className={styles.error}>{error}</p>;
-  if (!project) return <p className={styles.notFound}>Projet introuvable.</p>;
 
   const imageUrl = project.image || "/assets/clavierFondBleuter.jpeg";
   const hasMultipleSlides = project.images?.length > 1;

@@ -10,8 +10,8 @@ const ProfileProjects = ({ projects }) => {
   if (!projects || projects.length === 0) return null;
 
   return (
-    <div className={`container-fluid ${styles["sectionProject"]}`}>
-      <h2 className={`text-center mb-2 col-10 mx-auto ${styles["titleH2"]} display-1`}>
+    <div className={`container-fluid ${styles["sectionProject"]} my-5 col-10`}>
+      <h2 className={`mb-4 ${styles["projectTitleH2"]} display-4`}>
         Projects
       </h2>
       <div className={styles["carouselWrapper"]}>
@@ -29,7 +29,7 @@ const ProfileProjects = ({ projects }) => {
                 modules={[Autoplay, Navigation, EffectFade]}
                 loop={hasMultipleSlides}
                 autoplay={hasMultipleSlides ? { delay: 3000, disableOnInteraction: false } : false}
-                navigation={hasMultipleSlides}
+
                 effect="fade"
                 fadeEffect={{ crossFade: true }}
                 speed={4000} // transition douce
@@ -42,6 +42,7 @@ const ProfileProjects = ({ projects }) => {
                     <img
                       src={image.name || image}
                       alt={`${project.title} image ${i}`}
+                      loading="lazy"
                       className={`card-img-top ${styles["projectImgTop"]}`}
                     />
                   </SwiperSlide>

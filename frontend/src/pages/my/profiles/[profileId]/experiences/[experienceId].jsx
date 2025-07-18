@@ -1,31 +1,41 @@
 import { useParams, Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../../../../../contexts/AuthContext";
+import useProfiles from "../../../../../hooks/useProfiles";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
-import useSingleExperience from "../../../../../hooks/useSingleExperience";
 import styles from "../../../../../styles/ExperienceId.module.css";
 import PageLayout from "../../../../../layouts/PageLayout";
 import Spinner from "../../../../../components/Spinner";
 
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
-  const { experience, loading, error } = useSingleExperience(profileId, experienceId);
+  const { user } = useContext(AuthContext);
+
+  // Choix du mode selon connexion
+  const { profiles, loading, error } = useProfiles({ mine: !!user });
 
   if (loading) return <div className={styles.container}><Spinner /></div>;
   if (error) return <p className={styles.error}>{error}</p>;
+
+  // Trouve le profil courant
+  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
+
+  // Trouve l'expérience dans le profil
+  const experience = profile.experiences?.find((e) => String(e.id) === String(experienceId));
   if (!experience) return <p className={styles.notFound}>Expérience introuvable.</p>;
 
   const imageUrl = experience.images?.[0]?.url || "/assets/defaultImgageCode.jpg";
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "Date non renseignée";
     const date = new Date(dateStr);
     return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
   };
-
-  const hasMultipleSlides = experience.images.length > 1;
+  const hasMultipleSlides = experience.images?.length > 1;
 
   return (
     <PageLayout>
@@ -45,7 +55,7 @@ const ExperienceId = () => {
             {experience.images.map((img, index) => (
               <SwiperSlide key={index}>
                 <img
-                  src={img.name}
+                  src={img.name || img.url || "/assets/defaultImgageCode.jpg"}
                   alt={`Image ${index + 1}`}
                   style={{
                     width: "100%",

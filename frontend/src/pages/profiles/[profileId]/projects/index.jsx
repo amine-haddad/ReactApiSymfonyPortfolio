@@ -1,9 +1,9 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext";
+import useProfiles from "../../../../hooks/useProfiles";
 import styles from "../../../../styles/ProjectList.module.css";
 import PageLayout from "../../../../layouts/PageLayout";
-import useProjects from "../../../../hooks/useProjects";
 import Spinner from "../../../../components/Spinner";
 
 const ProjectList = () => {
@@ -14,12 +14,19 @@ const ProjectList = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  const { projects, total, loading, error } = useProjects(profileId, page, limit);
+  // Utilise useProfiles pour récupérer tous les profils ou ceux du user connecté
+  const { profiles, loading, error } = useProfiles({ mine: !!user });
+
+  // Trouve le profil courant
+  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  const projects = profile?.projects || [];
+  const total = projects.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const paginatedProjects = projects.slice((page - 1) * limit, page * limit);
 
   if (loading) return <div className={styles["project-message"]}><Spinner /></div>;
   if (error) return <p className="project-error">Erreur : {error}</p>;
-
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (!profile) return <p className={styles["project-message"]}>Profil non trouvé.</p>;
 
   return (
     <PageLayout>
@@ -33,11 +40,11 @@ const ProjectList = () => {
           </p>
         </header>
 
-        {projects.length === 0 ? (
+        {paginatedProjects.length === 0 ? (
           <p className={styles["project-message"]}>Aucun projet trouvé.</p>
         ) : (
           <div className={styles["project-grid"]}>
-            {projects.map((project) => (
+            {paginatedProjects.map((project) => (
               <div key={project.id} className={styles["project-card"]}>
                 <h3>{project.title || project.name}</h3>
                 <p>{project.description ?? "Pas de description disponible."}</p>
