@@ -57,16 +57,41 @@ function Index() {
   return (
     <PageLayout>
       {/* Bouton retour en haut de page */}
-      <Link to="/" className="btn btn-outline-secondary mb-3 ms-2">
+      <Link to="/"
+
+        className="btn btn-outline-primary mb-3 ms-2"
+        style={{
+          backgroundColor: "var(--buton-bg)",
+          color: "var(--text-color)",
+          borderColor: "var(--accent-color)",
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--button-bg-hover)")
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--buton-bg)")
+        }
+      >
         ← Retour à l'accueil
       </Link>
       {/* Menu Burger pour petits écrans */}
       <button
-        className={style.burgerButton}
+        className={`btn btn-outline-dark mb-3 ms-2 ${style.burgerButton}`}
+        style={{
+          backgroundColor: "var(--buton-bg)",
+          color: "var(--text-color)",
+          borderColor: "var(--accent-color)",
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--button-bg-hover)")
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.backgroundColor = "var(--buton-bg)")
+        }
         onClick={() => setIsSidebarOpen(true)}
         aria-label="Ouvrir le menu"
       >
-        ☰
+        Filtrez votre recherche
       </button>
       <AsideMenu
         isOpen={isSidebarOpen}

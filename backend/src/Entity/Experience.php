@@ -10,11 +10,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ExperienceRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read:Experience']],
+    normalizationContext: [
+        'groups' => ['read:Experience'],
+        'enable_max_depth' => true
+    ],
     denormalizationContext: ['groups' => ['write:Experience']]
 )]
 #[ApiFilter(SearchFilter::class, properties: [
@@ -71,6 +75,7 @@ class Experience
 
     #[ORM\ManyToOne(inversedBy : 'experiences', cascade: ['persist', 'remove'])]
     #[Groups(['read:Experience', 'write:Experience'])]
+    #[MaxDepth(1)]
     private ?Profile $profile = null;
 
     /**
@@ -78,6 +83,7 @@ class Experience
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'experiences', cascade: ['persist', 'remove'])]
     #[Groups(['read:Experience', 'write:Experience','read:User','read:Profile'])]
+    #[MaxDepth(1)]
     private Collection $images;
 
     public function __construct()

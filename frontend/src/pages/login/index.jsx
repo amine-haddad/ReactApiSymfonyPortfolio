@@ -17,7 +17,7 @@ const Login = () => {
     setLoading(false);
 
     if (success) {
-      navigate("/my");
+      navigate("/admin/");
     }
   };
 

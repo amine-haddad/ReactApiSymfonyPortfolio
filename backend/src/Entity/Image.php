@@ -7,14 +7,18 @@ use App\Repository\ImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:Image', 'read:Profile']],
-    denormalizationContext: ['groups' => ['write:Image']]
-)]
+//#[ApiResource(
+//    normalizationContext: [
+//        'groups' => ['read:Image', 'read:Profile'],
+//        'enable_max_depth' => true
+//    ],
+//    denormalizationContext: ['groups' => ['write:Image']]
+//)]
 #[Vich\Uploadable]
 class Image
 {
@@ -30,6 +34,7 @@ class Image
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
     #[Groups(['read:Image', 'write:Image'])]
+    #[MaxDepth(1)]
     private ?Profile $profile = null;
 
     #[Vich\UploadableField(mapping: 'profile_file', fileNameProperty: 'name')]
@@ -37,6 +42,7 @@ class Image
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
     #[Groups(['read:Image', 'write:Image','read:Project'])]
+    #[MaxDepth(1)]
     private ?Project $project = null;
 
     #[Vich\UploadableField(mapping: 'project_file', fileNameProperty: 'name')]
@@ -44,6 +50,7 @@ class Image
 
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[Groups(['read:Image', 'write:Image','read:Skill'])]
+    #[MaxDepth(1)]
     private ?Skill $skills = null;
 
     #[Vich\UploadableField(mapping: 'skill_file', fileNameProperty: 'name')]
@@ -51,6 +58,7 @@ class Image
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
     #[Groups(['read:Image', 'write:Image','read:Experience'])]
+    #[MaxDepth(1)]
     private ?Experience $experiences = null;
 
     #[Vich\UploadableField(mapping: 'experience_file', fileNameProperty: 'name')]

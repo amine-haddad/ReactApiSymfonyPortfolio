@@ -13,13 +13,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:Skill']],
-    denormalizationContext: ['groups' => ['write:Skill']],
-)]
+// #[ApiResource(
+//     normalizationContext: [
+//         'groups' => ['read:Skill'],
+//         'enable_max_depth' => true
+//     ],
+//     denormalizationContext: ['groups' => ['write:Skill']],
+// )]
 #[ApiFilter(SearchFilter::class, properties: [
     'name' => 'partial',
     'projects.id' => 'exact',
@@ -60,6 +64,7 @@ class Skill
     #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'technologies', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private Collection $projects;
 
     /**
@@ -67,6 +72,7 @@ class Skill
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill','read:User',"read:Profile",'read:Project'])]
+    #[MaxDepth(1)]
     private Collection $images;
 
     /**
@@ -75,6 +81,7 @@ class Skill
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill','read:User', 'write:Skill'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private Collection $profileSkills;
 
     public function __construct()

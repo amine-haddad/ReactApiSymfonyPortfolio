@@ -17,8 +17,6 @@ services:
       MYSQL_DATABASE: symfonydb
       MYSQL_USER: symfony
       MYSQL_PASSWORD: symfony
-    
-
 
   # Serveur Nginx pour Symfony
   nginx:
@@ -53,17 +51,19 @@ services:
   react:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile.react  # Vérifie que ce fichier existe
+      dockerfile: ./frontend/Dockerfile.react # Vérifie que ce fichier existe
     container_name: react_frontend
     working_dir: /app
     volumes:
       - ./frontend:/app
     ports:
-      - "5173:5173"  # Port pour Vite (hot reload)
+      - "5173:5173" # Port pour Vite (hot reload)
     networks:
       - symfony_net
     depends_on:
-      - php  # Optionnel si tu as besoin de communiquer avec le backend Symfony
+      - php # Optionnel si tu as besoin de communiquer avec le backend Symfony
+    environment:
+      - VITE_API_PROXY_TARGET=http://nginx:80
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

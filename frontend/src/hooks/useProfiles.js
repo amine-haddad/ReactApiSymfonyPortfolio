@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
 function useProfiles({ mine = false } = {}) {
-  const { user, loading: authLoading } = useContext(AuthContext);
+  const { user, loading: authLoading, isAuthenticated } = useContext(AuthContext);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,13 +21,15 @@ function useProfiles({ mine = false } = {}) {
       return;
     }
 
-    // Sinon, requête API classique
+    // Choix de l'endpoint selon l'authentification
+    const endpoint = isAuthenticated ? "/api/profiles" : "/api/public/profiles";
+
     const fetchProfiles = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("/api/profiles", {
+        const response = await fetch(endpoint, {
           credentials: "include",
         });
 
@@ -36,7 +38,10 @@ function useProfiles({ mine = false } = {}) {
         }
 
         const data = await response.json();
-        const profilesArray = Array.isArray(data["hydra:member"])
+        // Pour API Platform ou ta structure custom
+        const profilesArray = Array.isArray(data.data)
+          ? data.data
+          : Array.isArray(data["hydra:member"])
           ? data["hydra:member"]
           : Array.isArray(data.member)
           ? data.member
@@ -51,7 +56,7 @@ function useProfiles({ mine = false } = {}) {
     };
 
     fetchProfiles();
-  }, [authLoading, user, mine]);
+  }, [authLoading, user, mine, isAuthenticated]);
 
   return { profiles, loading, error };
 }

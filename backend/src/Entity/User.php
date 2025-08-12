@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\ORM\Mapping\PrePersist;
@@ -19,10 +20,7 @@ use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity('email', message: 'Cet email est déjà utilisé.')]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:User','read:profile']],
-    denormalizationContext: ['groups' => ['write:User']],
-)]
+
 #[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -42,6 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['read:User', 'write:User'])]
     #[Assert\NotNull(message: "Les rôles ne doivent pas être nuls.")]
     private array $roles = [];
 
@@ -63,6 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Profile::class, mappedBy: 'user')]
     #[Groups(['read:User'])]
+    #[MaxDepth(1)]
     private Collection $userProfiles;
 
     #[ORM\Column(length: 255)]
@@ -85,7 +85,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 )]
     private ?string $last_name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
     #[Assert\NotBlank(message: "Le slug est obligatoire.")]
     #[Assert\Length(max: 255, maxMessage: "Le slug ne doit pas dépasser 255 caractères.")]
     #[Groups(['read:User'])]
@@ -248,5 +248,4 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
 }

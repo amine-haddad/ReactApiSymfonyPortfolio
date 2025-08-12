@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiSubresource;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 
 
@@ -18,10 +19,13 @@ use ApiPlatform\Metadata\ApiFilter;
     'profile.id' => 'exact',
     'skill.name' => 'partial'
 ])]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:ProfileSkills']],
-    denormalizationContext: ['groups' => ['write:ProfileSkills']]
-)]
+//#[ApiResource(
+//    normalizationContext: [
+//        'groups' => ['read:ProfileSkills'],
+//        'enable_max_depth' => true
+//    ],
+//    denormalizationContext: ['groups' => ['write:ProfileSkills']]
+//)]
 class ProfileSkill
 {
     #[ORM\Id]
@@ -33,12 +37,14 @@ class ProfileSkill
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
     #[Assert\NotNull]
     #[Groups(['read:ProfileSkills', 'write:ProfileSkills','read:Skill'])]
+    #[MaxDepth(1)]
     private ?Profile $profile = null;
 
     #[ORM\ManyToOne(inversedBy: 'profileSkills')]
     #[Assert\NotNull]
     #[Groups(['read:ProfileSkills','write:ProfileSkills','read:Profile','read:Skill','read:User'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private ?Skill $skill = null;
 
     #[ORM\Column]

@@ -16,7 +16,12 @@ const Index = () => {
   if (authLoading || profilesLoading) return <Spinner />;
 
   // Profils à afficher (max 4)
-  const profilesToShow = Array.isArray(profiles) ? profiles.slice(0, 4) : [];
+  const profilesToShow = Array.isArray(profiles)
+    ? profiles
+      .slice() // pour ne pas muter l'original
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 12)
+    : [];
 
   // Actions selon connexion
   const renderActionButtons = () => {

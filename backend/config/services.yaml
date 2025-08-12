@@ -31,8 +31,7 @@ services:
   App\EventSubscriber\SlugSubscriber:
     arguments:
       $slugger: '@App\Service\SluggerService' # service SluggerService dans le Subscriber
-    tags:
-      - { name: "doctrine.event_subscriber" } # event subscriber pour Doctrine
+    tags: ['doctrine.event_subscriber'] # event subscriber pour Doctrine
 
   App\EventListener\JWTCreatedListener:
     tags:

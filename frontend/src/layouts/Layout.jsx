@@ -4,6 +4,7 @@ import CustomNavbar from "../components/navbar/CustomNavBar.jsx";
 import Footer from "../components/footer/Footer.jsx";
 import { AuthContext } from "../contexts/AuthContext";
 import Spinner from "../components/Spinner";
+import ScrollToTop from "../components/ScrollToTop.jsx";
 
 function Layout() {
   const { loading } = useContext(AuthContext);
@@ -11,6 +12,7 @@ function Layout() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       <CustomNavbar />
       <main className="flex-grow">
         <Outlet />

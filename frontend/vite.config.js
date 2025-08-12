@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import Pages from "vite-plugin-pages";
 
+const apiProxyTarget =
+  process.env.VITE_API_PROXY_TARGET || "http://localhost:8000";
+
 // https://vite.dev/config/
 export default defineConfig({
   base: "/",
@@ -23,7 +26,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://nginx:80",
+        target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
       },

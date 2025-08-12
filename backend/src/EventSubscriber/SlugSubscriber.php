@@ -15,64 +15,63 @@ class SlugSubscriber implements EventSubscriber
         $this->slugger = $slugger;
     }
 
-    // Méthode qui retourne les événements que ce Subscriber écoute
     public function getSubscribedEvents(): array
     {
         return [Events::prePersist, Events::preUpdate];
     }
 
-    // Méthode qui s'exécute avant la persistance d'une entité
     public function prePersist(LifecycleEventArgs $args): void
     {
-        $entity = $args->getObject();
-        dump('SlugSubscriber triggered for:', $entity);
-        $this->handleEvent($args->getObject());
+        $this->handleEvent($args->getObject(), $args->getObjectManager());
     }
 
-    // Méthode qui s'exécute avant la mise à jour d'une entité
     public function preUpdate(LifecycleEventArgs $args): void
     {
-        $entityManager = $args->getObjectManager();
-        $entity        = $args->getObject();
-
-        $this->handleEvent($entity);
-
-        // Indique à Doctrine qu'un changement a été fait sur l'entité
-        $meta = $entityManager->getClassMetadata(get_class($entity));
-        $entityManager->getUnitOfWork()->recomputeSingleEntityChangeSet($meta, $entity);
+        $this->handleEvent($args->getObject(), $args->getObjectManager());
+        $meta = $args->getObjectManager()->getClassMetadata(get_class($args->getObject()));
+        $args->getObjectManager()->getUnitOfWork()->recomputeSingleEntityChangeSet($meta, $args->getObject());
     }
 
-    // Fonction qui traite l'entité, et gère la création du slug
-    private function handleEvent(object $entity): void
+    private function handleEvent(object $entity, $em): void
     {
-        // Vérifie si l'entité a bien la méthode `getSlug`
-        if (! method_exists($entity, 'getSlug')) {
+        dump('SlugSubscriber called for', get_class($entity));
+
+        if (!method_exists($entity, 'getSlug') || $entity->getSlug()) {
             return;
         }
 
-        if ($entity->getSlug()) {
-            return; // Ne change pas le slug s'il est déjà défini
+        // Détermine la base du slug selon les propriétés disponibles
+        $base = null;
+        if (method_exists($entity, 'getTitle') && $entity->getTitle()) {
+            $base = $entity->getTitle();
+        } elseif (method_exists($entity, 'getName') && $entity->getName()) {
+            $base = $entity->getName();
+        } elseif (
+            method_exists($entity, 'getFirstName') && $entity->getFirstName() &&
+            method_exists($entity, 'getLastName') && $entity->getLastName()
+        ) {
+            $base = $entity->getFirstName() . ' ' . $entity->getLastName();
+        } elseif (method_exists($entity, 'getRole') && $entity->getRole()) {
+            $base = $entity->getRole();
         }
 
-        // Cas où l'entité a une propriété 'name' (par exemple, une entité "Skill")
-        if (method_exists($entity, 'getName') && $entity->getName()) {
-            $slug = $this->slugger->generateSlug($entity->getName());
-            $entity->setSlug($slug);
+        if (!$base) {
+            return;
         }
-        // Cas où l'entité a une propriété 'title' (par exemple, une entité "Article")
-        elseif (method_exists($entity, 'getTitle') && $entity->getTitle()) {
-            $slug = $this->slugger->generateSlug($entity->getTitle());
-            $entity->setSlug($slug);
+
+        $baseSlug = $this->slugger->generateSlug($base);
+        $slug = $baseSlug;
+        $i = 1;
+        $repo = $em->getRepository(get_class($entity));
+
+        while (
+            ($existing = $repo->findOneBy(['slug' => $slug])) &&
+            ($entity->getId() === null || $existing->getId() !== $entity->getId())
+        ) {
+            $slug = $baseSlug . '-' . $i;
+            $i++;
         }
-        // Cas où l'entité a une propriété 'role' (par exemple, une entité "User")
-        elseif (method_exists($entity, 'getRole') && $entity->getRole()) {
-            $slug = $this->slugger->generateSlug($entity->getRole());
-            $entity->setSlug($slug);
-        }
-        // Cas par défaut : si aucune condition n'est remplie, on ne génère pas de slug
-        // ou tu peux définir un slug par défaut si nécessaire
-        else {
-            $entity->setSlug('default-slug');
-        }
+
+        $entity->setSlug($slug);
     }
 }

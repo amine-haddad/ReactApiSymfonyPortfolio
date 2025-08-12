@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
@@ -16,10 +17,13 @@ use ApiPlatform\Metadata\Get;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:Project']],
+/*#[ApiResource(
+    normalizationContext: [
+        'groups' => ['read:Project'],
+        'enable_max_depth' => true
+    ],
     denormalizationContext: ['groups' => ['write:Project']],
-)]
+)]*/
 #[ApiFilter(SearchFilter::class, properties: ['profile.id' => 'exact'])]
 #[UniqueEntity(fields: ['slug'], message: 'Ce slug est déjà utilisé.')]
 /*#[Get(
@@ -93,6 +97,7 @@ class Project
 
     #[ORM\ManyToOne(inversedBy: 'projects')]
     #[Groups(['read:Project', 'write:Project'])]
+    #[MaxDepth(1)]
     private ?Profile $profile = null;
 
     /**
@@ -100,6 +105,7 @@ class Project
      */
     #[ORM\ManyToMany(targetEntity: Skill::class, inversedBy: 'projects')]
     #[Groups(['read:Project', 'write:Project', 'read:Profile'])]
+    #[MaxDepth(1)]
     private Collection $technologies;
 
     /**
@@ -107,6 +113,7 @@ class Project
      */
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'project', cascade: ['persist', 'remove'])]
     #[Groups(['read:Project', 'write:Project', 'read:Profile', 'read:User'])]
+    #[MaxDepth(1)]
     private Collection $images;
 
     public function __construct()

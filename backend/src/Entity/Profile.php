@@ -17,28 +17,32 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
-#[ApiResource(
-    normalizationContext: ['groups' => ['read:Profile']],
-    denormalizationContext: ['groups' => ['write:Profile']],
-    paginationItemsPerPage: 10,
-    paginationEnabled: true,
-    paginationClientItemsPerPage: true,
-    security: "is_granted('IS_AUTHENTICATED_FULLY')", // Par défaut, pour toutes les opérations qui ne sont pas surchargées
-    operations: [
-        new GetCollection(
-            uriTemplate: '/profiles/light',
-            normalizationContext: ['groups' => ['read:Profile:light']],
-            security: "is_granted('true')" // ou "true" si accessible à tous
-        ),
-        new GetCollection(security: "true"), // accessible à tous, même visiteurs non connectés
-        new Get(security: "true"),           // accessible à tous, même visiteurs non connectés
-        new Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"), // création protégée
-        new Put(security: "object.getUser() == user"),              // mise à jour protégée au propriétaire
-        new Delete(security: "object.getUser() == user"),           // suppression protégée au propriétaire
-    ]
-)]
+//#[ApiResource(
+//    normalizationContext: [
+//        'groups' => ['read:Profile'],
+//        'enable_max_depth' => true
+//    ],
+//    denormalizationContext: ['groups' => ['write:Profile']],
+//    paginationItemsPerPage: 10,
+//    paginationEnabled: true,
+//    paginationClientItemsPerPage: true,
+//    security: "is_granted('IS_AUTHENTICATED_FULLY')", // Par défaut, pour toutes les opérations qui ne sont pas surchargées
+//    operations: [
+//        new GetCollection(
+//            uriTemplate: '/profiles/light',
+//            normalizationContext: ['groups' => ['read:Profile:light']],
+//            security: "is_granted('true')" // ou "true" si accessible à tous
+//        ),
+//        new GetCollection(security: "true"), // accessible à tous, même visiteurs non connectés
+//        new Get(security: "true"),           // accessible à tous, même visiteurs non connectés
+//        new Post(security: "is_granted('IS_AUTHENTICATED_FULLY')"), // création protégée
+//        new Put(security: "object.getUser() == user"),              // mise à jour protégée au propriétaire
+//        new Delete(security: "object.getUser() == user"),           // suppression protégée au propriétaire
+//    ]
+//)]
 #[ApiFilter(SearchFilter::class, properties: [
     'user.id' => 'exact',
     'slug' => 'exact',
@@ -135,6 +139,7 @@ class Profile
     #[ORM\OneToMany(targetEntity : Project::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private Collection $projects;
 
     /**
@@ -143,6 +148,7 @@ class Profile
     #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private Collection $experiences;
 
     /**
@@ -151,7 +157,7 @@ class Profile
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User', 'read:Image', 'read:Profile:light'])]
     #[ApiSubresource]
-    #[\Symfony\Component\Serializer\Annotation\MaxDepth(1)]
+    #[MaxDepth(1)]
     private Collection $images;
 
     /**
@@ -160,10 +166,12 @@ class Profile
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'profile', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile','read:User'])]
     #[ApiSubresource]
+    #[MaxDepth(1)]
     private Collection $profileSkills;
     
     #[ORM\ManyToOne(inversedBy: 'userProfiles', cascade: ['persist', 'remove'])]
     #[Groups(['read:Profile'])]
+    #[MaxDepth(1)]
     private ?User $user = null;
     public function __construct()
     {

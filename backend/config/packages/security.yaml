@@ -31,9 +31,9 @@ security:
         - App\Security\JwtCookieAuthenticator
 
   access_control:
-    - { path: ^/api/docs, roles: PUBLIC_ACCESS } # Accès sans authentification pour Swagger
-    - { path: ^/api/profiles$, roles: PUBLIC_ACCESS }
-    - { path: ^/api/login_check, roles: PUBLIC_ACCESS } # Accès sans authentification pour login_check
-    - { path: ^/api/register, roles: PUBLIC_ACCESS } # Accès sans authentification pour l'enregistrement
-    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY } # Toutes les autres routes de l'API nécessitent un JWT
+    - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+    - { path: ^/api/public/profiles, roles: PUBLIC_ACCESS }
+    - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
+    - { path: ^/api/register, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/me, roles: IS_AUTHENTICATED_FULLY }
