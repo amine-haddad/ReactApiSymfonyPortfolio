@@ -23,48 +23,55 @@ Assurez-vous que Docker est en cours d'exécution sur votre machine.
     cd ReactApiSymfonyPortfolio
     ```
 
-2. Allez dans le dossier **backend** (Symfony) et installez les dépendances PHP avec Composer :
-    ```bash
-    cd backend
-    composer install
-    ```
-
-3. Allez dans le dossier **frontend** (React) et installez les dépendances JavaScript avec npm :
-    ```bash
-    cd ../frontend
-    npm install
-    ```
-
-4. Créez un fichier `.env` à la racine du projet pour gérer la connexion à MySQL. Exemple de fichier `.env` :
+2. Créez un fichier `.env.local` dans le dossier **backend** pour gérer la connexion à MySQL. Exemple de contenu :
     ```env
-    DATABASE_URL="mysql://root:example@mysql:3306/my_database_name?serverVersion=5.7"
+    DATABASE_URL="mysql://symfony:symfony@mysql:3306/symfonydb?serverVersion=5.7"
     ```
 
-5. Retournez dans le dossier **backend** et exécutez la commande suivante pour créer la base de données et appliquer les migrations :
+3. Générez les clés JWT pour l’authentification (obligatoire pour chaque développeur) :
+    Après le clonage du projet, chaque développeur doit générer ses propres clés JWT dans le dossier `backend/config/jwt` (les clés ne sont pas versionnées pour des raisons de sécurité) :
+
     ```bash
-    symfony console doctrine:migrations:migrate
+    docker-compose exec php php bin/console lexik:jwt:generate-keypair
     ```
 
-6. Une fois la base de données prête, chargez les fixtures (données de test) :
-    ```bash
-    symfony console doctrine:fixtures:load
+    N’oubliez pas de définir la même passphrase dans le fichier `backend/.env.local` :
+
+    ```env
+    JWT_PASSPHRASE=ta_passphrase
     ```
 
-7. Construisez et démarrez les conteneurs Docker :
+4. Construisez et démarrez les conteneurs Docker :
     ```bash
     docker-compose up --build
     ```
 
-8. L'application est maintenant en cours d'exécution dans des conteneurs Docker. Vous pouvez accéder à l'application via les adresses suivantes :
+5. **Installez les dépendances dans les conteneurs Docker** (et non sur votre machine hôte) :
+    - Pour le backend Symfony :
+        ```bash
+        docker-compose exec php composer install
+        ```
+    - Pour le frontend React :
+        ```bash
+        docker-compose exec react npm install
+        ```
+
+6. Initialisez la base de données et chargez les fixtures (toujours dans le conteneur PHP) :
+    ```bash
+    docker-compose exec php symfony console doctrine:migrations:migrate
+    docker-compose exec php symfony console doctrine:fixtures:load
+    ```
+
+7. L'application est maintenant en cours d'exécution dans des conteneurs Docker. Vous pouvez accéder à l'application via les adresses suivantes :
     - **Frontend React** : [http://localhost:5173](http://localhost:5173)
     - **Backend Symfony** : [http://localhost:8000](http://localhost:8000)
     - **API Symfony** : [http://localhost:8000/api](http://localhost:8000/api)
     - **PHPMyAdmin** : [http://localhost:8081](http://localhost:8081) (pour accéder à la base de données via l'interface web)
 
-9. Pour accéder à la base de données MySQL via **PHPMyAdmin**, vous pouvez vous connecter avec les identifiants suivants :
+8. Pour accéder à la base de données MySQL via **PHPMyAdmin**, vous pouvez vous connecter avec les identifiants suivants :
     - **Hôte** : `mysql`
-    - **Utilisateur** : `root`
-    - **Mot de passe** : `example`
+    - **Utilisateur** : `symfony`
+    - **Mot de passe** : `symfony`
 
 ## Interaction avec les conteneurs
 
@@ -74,18 +81,6 @@ Pour interagir avec les conteneurs Docker, vous pouvez utiliser les commandes su
     ```bash
     docker exec -it symfony_php bash
     ```
-
-    Pour réinitialiser la base de données et relancer les fixtures, procédez comme suit :
-    - `symfony console doctrine:database:drop --force`
-    - `symfony console doctrine:database:create`
-    - `symfony console doctrine:migration:migrate`
-    - `symfony console doctrine:fixtures:load`
-
-    Ou en une seule commande :
-    - `symfony console d:d:d --force`
-    - `symfony console d:d:c`
-    - `symfony console d:m:m`
-    - `symfony console d:f:l`
 
 - **Frontend React** :
     ```bash
@@ -118,9 +113,57 @@ Les configurations de Nginx sont gérées via le fichier `nginx.conf` dans le co
 Pour arrêter les conteneurs Docker et nettoyer l'environnement, utilisez la commande suivante :
 ```bash
 docker-compose down
+```
 
+---
 
+> **Important :**  
+> Toutes les commandes Docker doivent être lancées à la racine du projet.
 
-Licence
+---
 
-Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
+### 🔑 Génération des clés JWT avec passphrase (sécurité et droits)
+
+Après avoir cloné le projet, chaque développeur doit générer ses propres clés JWT pour l’authentification.  
+**Pour plus de sécurité, il est recommandé de protéger la clé privée avec une passphrase.**
+
+1. **Supprime les anciennes clés si elles existent** (dans `backend/config/jwt/`) :
+    ```bash
+    rm -f backend/config/jwt/private.pem backend/config/jwt/public.pem
+    ```
+
+2. **Génère une nouvelle paire de clés dans le conteneur PHP** :
+    ```bash
+    docker-compose exec php mkdir -p config/jwt
+    docker-compose exec php openssl genrsa -aes256 -out config/jwt/private.pem 4096
+    # → Saisissez une passphrase de votre choix (ex : Arsenal_1977)
+    docker-compose exec php openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
+    ```
+
+3. **Assurez-vous que les fichiers sont lisibles par le serveur** :
+    ```bash
+    docker-compose exec php chmod 644 config/jwt/private.pem config/jwt/public.pem
+    ```
+
+4. **Ajoutez la même passphrase dans le fichier `backend/.env.local`** :
+    ```env
+    JWT_PASSPHRASE=VotrePassphraseIci
+    ```
+    *(Remplacez `VotrePassphraseIci` par la passphrase que vous avez choisie à l’étape précédente)*
+
+**Conseils pour la passphrase :**
+- Utilisez une phrase secrète difficile à deviner, avec lettres, chiffres et caractères spéciaux.
+- Exemple : `Arsenal_1977`, `MaPhraseSecrète2025!`, `jwt-Secret_#42!`
+- Gardez-la confidentielle et ne la partagez pas publiquement.
+
+5. **Redémarrez le conteneur PHP pour prendre en compte la passphrase** :
+    ```bash
+    docker-compose restart php
+    ```
+
+---
+
+**Remarque :**  
+- Chaque développeur doit générer ses propres clés JWT et définir sa propre passphrase locale.
+- Ne versionnez jamais les fichiers `private.pem` et `public.pem` dans le dépôt Git.
+- Vérifiez que les fichiers sont bien présents dans `backend/config/jwt/` et lisibles dans le conteneur PHP.

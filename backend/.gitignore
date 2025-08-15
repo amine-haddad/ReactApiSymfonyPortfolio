@@ -29,5 +29,8 @@
 /uploads/
 ###< symfony/public-uploads ###
 ###> lexik/jwt-authentication-bundle ###
+/config/jwt/private.pem
+/config/jwt/public.pem
+/backend/config/jwt/*.pem
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
