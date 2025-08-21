@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import useProfiles from "../../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../../hooks/useSingleProfile";
 import PageLayout from "../../../../../layouts/PageLayout";
 import styles from "../../../../../styles/ExperienceList.module.css";
 import Spinner from "../../../../../components/Spinner";
@@ -14,11 +14,9 @@ const ExperienceList = () => {
   const { profileId } = useParams();
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { profiles, loading, error } = useProfiles({ mine: true });
+  const { profile, loading, error } = useSingleProfile(profileId);
   const navigate = useNavigate();
 
-  // Trouve le profil courant
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   const experiences = profile?.experiences || [];
   const total = experiences.length;
 

@@ -24,7 +24,7 @@ const CustomNavbar = () => {
   const currentProfile = profileId != null ? profiles.find((p) => p.id === profileId) : null;
 
   const displayName = isProfilePage
-    ? currentProfile?.name || "Profil Inconnu"
+    ? currentProfile?.name || "PortfolioHub"
     : user?.last_name || "Utilisateur";
 
   const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");

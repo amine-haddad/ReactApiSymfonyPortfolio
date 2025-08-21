@@ -1,7 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../../../contexts/AuthContext";
-import useProfiles from "../../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../../hooks/useSingleProfile";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -13,16 +11,10 @@ import Spinner from "../../../../../components/Spinner";
 
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
-  const { user } = useContext(AuthContext);
-
-  // Choix du mode selon connexion
-  const { profiles, loading, error } = useProfiles({ mine: !!user });
+  const { profile, loading, error } = useSingleProfile(profileId);
 
   if (loading) return <div className={styles.container}><Spinner /></div>;
   if (error) return <p className={styles.error}>{error}</p>;
-
-  // Trouve le profil courant
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
 
   // Trouve l'expérience dans le profil

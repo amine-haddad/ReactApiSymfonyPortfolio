@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Profile;
 use App\Entity\Project;
 use App\Entity\Image;
+use App\Entity\Skill;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

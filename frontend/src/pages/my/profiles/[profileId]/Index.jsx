@@ -1,24 +1,26 @@
 import { useContext } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
-import useProfiles from "../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../hooks/useSingleProfile";
 import Profile from "../../../../components/profile/Profile";
 import ProfileProjects from "../../../../components/profile/ProfileProjects";
 import ProfileExperiences from "../../../../components/profile/ProfileExperiences";
 import ProfileSkills from "../../../../components/profile/ProfileSkills";
 import ProfileAbout from "../../../../components/profile/ProfileAbout";
 import DynamicShapes from "../../../../components/DynamicShapes";
-import TypingEffect from "../../../../components/TypingEffect";
+import TypingEffectPersonalisable from "../../../../components/TypingEffectPersonalisable";
 import Spinner from "../../../../components/Spinner";
 import AnimatedSection from "../../../../components/AnimatedSection";
 import styles from "../../../../styles/ProfilePage.module.css";
 
 const Index = () => {
   const { profileId } = useParams();
+  console.log("profileId:", profileId, "type:", typeof profileId);
   const { user } = useContext(AuthContext);
-  const { profiles, loading, error } = useProfiles({ mine: true });
+  // Utilisation du hook unique, sans option forcePublic ici (profil privé)
+  const { profile, loading, error } = useSingleProfile(profileId);
 
-  if (loading || !user || !Array.isArray(user.userProfiles) || profiles.length === 0) {
+  if (loading || !user) {
     return (
       <div className="text-center text-xl text-blue-500/40 mt-8">
         <Spinner />
@@ -34,8 +36,7 @@ const Index = () => {
     );
   }
 
-  const profile = profiles.find((p) => p.id === Number(profileId));
-  const isOwner = user.userProfiles.some((p) => p.id === Number(profileId));
+  const isOwner = user && profile && profile.user === user.id;
 
   if (!profile || !isOwner) return <Navigate to="/NotFound" replace />;
 
@@ -44,7 +45,7 @@ const Index = () => {
       <div className={styles.profileHeader}>
         <DynamicShapes />
         <div className={styles.profileOverlay}>
-          <TypingEffect />
+          <TypingEffectPersonalisable name={profile.name} title={profile.title} />
         </div>
       </div>
       <div className={styles.profileContent}>

@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../../../../contexts/AuthContext";
-import useProfiles from "../../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../../hooks/useSingleProfile";
 import styles from "../../../../../styles/ProjectList.module.css";
 import PageLayout from "../../../../../layouts/PageLayout";
 import Spinner from "../../../../../components/Spinner";
@@ -14,10 +14,8 @@ const ProjectList = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Utilise useProfiles pour récupérer les profils de l'utilisateur connecté
-  const { profiles, loading, error } = useProfiles({ mine: true });
-
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
+  // Récupère le profil courant par son ID
+  const { profile, loading, error } = useSingleProfile(profileId);
   const projects = profile?.projects || [];
   const total = projects.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));

@@ -36,3 +36,42 @@
   flex-direction: column;
   height: 100%;
 }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.col-12 {
+  flex: 1 1 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+.colLg4 {
+  flex: 1 1 320px;
+  max-width: 400px;
+  min-width: 260px;
+  display: flex;
+}
+@media (max-width: 600px) {
+  .colLg4 {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+.singleCardRow {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.badge.rounded-pill {
+  border-radius: 50px;
+  padding: 0.4em 1em;
+  margin-bottom: 0.2em;
+}

@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { useParams } from "react-router-dom";
-import useProfiles from "../../../hooks/useProfiles";
+import useSingleProfile from "../../../hooks/useSingleProfile";
 import DynamicShapes from "../../../components/DynamicShapes";
 import TypingEffect from "../../../components/TypingEffect";
 import AnimatedSection from "../../../components/AnimatedSection";
@@ -15,14 +15,13 @@ const ProfileAbout = lazy(() => import("../../../components/profile/ProfileAbout
 
 const Index = () => {
   const { profileId } = useParams();
-  const { profiles, loading, error } = useProfiles();
-  const profile = profiles?.find((p) => String(p.id) === String(profileId));
+  // Utilisation du hook unique en mode public
+  const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
   if (loading) return <p className={styles.profileLoading}>Chargement...</p>;
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
   if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;
 
-  // Un fallback simple pour le lazy loading
   const fallback = <p>Chargement...</p>;
 
   return (
@@ -42,25 +41,21 @@ const Index = () => {
             <Profile profile={profile} />
           </AnimatedSection>
         </Suspense>
-
         <Suspense fallback={fallback}>
           <AnimatedSection>
             <ProfileProjects projects={profile.projects || []} />
           </AnimatedSection>
         </Suspense>
-
         <Suspense fallback={fallback}>
           <AnimatedSection>
             <ProfileExperiences experiences={profile.experiences || []} />
           </AnimatedSection>
         </Suspense>
-
         <Suspense fallback={fallback}>
           <AnimatedSection>
             <ProfileSkills skills={profile.profileSkills || []} />
           </AnimatedSection>
         </Suspense>
-
         <Suspense fallback={fallback}>
           <AnimatedSection>
             <ProfileAbout profile={profile} />

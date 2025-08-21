@@ -8,38 +8,38 @@ import useProfiles from "../hooks/useProfiles";
 
 const Index = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
+  const { profiles, loading: profilesLoading } = useProfiles();
 
-  // Récupère les profils selon l’état de connexion
-  const { profiles, loading: profilesLoading } = useProfiles({ mine: !!user });
-
-  // Loading global (auth ou profils)
   if (authLoading || profilesLoading) return <Spinner />;
 
-  // Profils à afficher (max 4)
-  const profilesToShow = Array.isArray(profiles)
+  const isAdmin = user?.roles?.includes("ROLE_ADMIN");
+
+  // Sépare les profils
+  const myProfiles = Array.isArray(profiles)
+    ? profiles.filter(p => p.user === user?.id)
+    : [];
+  const otherProfiles = Array.isArray(profiles)
+    ? profiles.filter(p => p.user !== user?.id)
+    : [];
+
+  // 3 derniers portfolios de l'utilisateur connecté
+  const myLastProfiles = myProfiles
+    .slice()
+    .sort((a, b) => new Date(b.modifieLe || b.creeLe) - new Date(a.modifieLe || a.creeLe))
+    .slice(0, 3);
+
+  // 12 derniers portfolios publics (pour les visiteurs)
+  const publicProfiles = Array.isArray(profiles)
     ? profiles
-      .slice() // pour ne pas muter l'original
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice()
+      .sort((a, b) => new Date(b.modifieLe || b.creeLe) - new Date(a.modifieLe || a.creeLe))
       .slice(0, 12)
     : [];
 
-  // Actions selon connexion
-  const renderActionButtons = () => {
-    if (!isAuthenticated) {
-      return (
-        <>
-          <Button to="/profiles/">Explorer les portfolios</Button>
-          <Button to="/register/">Créer un compte</Button>
-        </>
-      );
-    }
-    return <Button to="/my/messages/">Voir vos messages</Button>;
-  };
-
   // Grille des profils
-  const renderProfileGrid = () => (
+  const renderProfileGrid = (list) => (
     <div className={`row g-5 ${styles.cardGrid}`}>
-      {profilesToShow.map(({ id, title, profileSkills, name }) => (
+      {list.map(({ id, title, profileSkills, name }) => (
         <div key={id} className="col-md-4">
           <div className={`h-100 ${styles.card} d-flex flex-column`}>
             <h3 className={styles.cardTitle}>{title || "Profil sans nom"}</h3>
@@ -98,13 +98,39 @@ const Index = () => {
                 </ul>
               </div>
               <div className={`${styles.buttonGroup} justify-content-between`}>
-                {renderActionButtons()}
+                {isAuthenticated ? (
+                  <>
+                      <Button to="/my">Dashboard</Button>
+                      <Button to="/admin/profiles/create">Créer un profil</Button>
+                      <Button to="/my/messages/">Lire vos messages</Button>
+                    </>
+                ) : (
+                  <>
+                    <Button to="/profiles/">Explorer les portfolios</Button>
+                    <Button to="/register/">Créer un compte</Button>
+                  </>
+                )}
               </div>
               <section className={styles.previewSection}>
                 <h2 className={`text-uppercase ${styles.previewTitle}`}>
-                  {isAuthenticated ? "Vos 3 derniers portfolios" : "Portfolios récents mis en ligne"}
+                  {isAuthenticated
+                    ? isAdmin
+                      ? "Vos 3 derniers portfolios"
+                      : "Vos 3 derniers portfolios"
+                    : "Portfolios récents mis en ligne"}
                 </h2>
-                {renderProfileGrid()}
+                {isAuthenticated
+                  ? renderProfileGrid(myLastProfiles)
+                  : renderProfileGrid(publicProfiles)}
+                {/* Si admin, affiche aussi les autres */}
+                {isAuthenticated && isAdmin && (
+                  <>
+                    <h2 className={`text-uppercase ${styles.previewTitle}`}>
+                      Autres portfolios
+                    </h2>
+                    {renderProfileGrid(otherProfiles)}
+                  </>
+                )}
               </section>
             </div>
           </div>

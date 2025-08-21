@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
-function useProfiles({ mine = false } = {}) {
-  const { user, loading: authLoading, isAuthenticated } = useContext(AuthContext);
+function useProfiles() {
+  const { loading: authLoading, isAuthenticated } = useContext(AuthContext);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,18 +10,6 @@ function useProfiles({ mine = false } = {}) {
   useEffect(() => {
     if (authLoading) return;
 
-    if (mine) {
-      if (user && Array.isArray(user.userProfiles)) {
-        setProfiles(user.userProfiles);
-        setLoading(false);
-      } else {
-        setProfiles([]);
-        setLoading(false);
-      }
-      return;
-    }
-
-    // Choix de l'endpoint selon l'authentification
     const endpoint = isAuthenticated ? "/api/profiles" : "/api/public/profiles";
 
     const fetchProfiles = async () => {
@@ -38,16 +26,14 @@ function useProfiles({ mine = false } = {}) {
         }
 
         const data = await response.json();
-        // Pour API Platform ou ta structure custom
-        const profilesArray = Array.isArray(data.data)
-          ? data.data
-          : Array.isArray(data["hydra:member"])
-          ? data["hydra:member"]
-          : Array.isArray(data.member)
-          ? data.member
-          : [];
-
-        setProfiles(profilesArray);
+        console.log("Réponse API profiles:", data);
+        if (Array.isArray(data)) {
+          setProfiles(data);
+        } else if (data && Array.isArray(data.data)) {
+          setProfiles(data.data);
+        } else {
+          setProfiles([]);
+        }
       } catch (err) {
         setError("Impossible de charger les profils.");
       } finally {
@@ -56,7 +42,7 @@ function useProfiles({ mine = false } = {}) {
     };
 
     fetchProfiles();
-  }, [authLoading, user, mine, isAuthenticated]);
+  }, [authLoading, isAuthenticated]);
 
   return { profiles, loading, error };
 }

@@ -14,13 +14,13 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ExperienceRepository::class)]
-#[ApiResource(
-    normalizationContext: [
-        'groups' => ['read:Experience'],
-        'enable_max_depth' => true
-    ],
-    denormalizationContext: ['groups' => ['write:Experience']]
-)]
+//#[ApiResource(
+//    normalizationContext: [
+//        'groups' => ['read:Experience'],
+//        'enable_max_depth' => true
+//    ],
+//    denormalizationContext: ['groups' => ['write:Experience']]
+//)]
 #[ApiFilter(SearchFilter::class, properties: [
     'profile.id' => 'exact',
     'profile.slug' => 'exact'
