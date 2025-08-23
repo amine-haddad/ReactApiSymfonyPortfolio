@@ -158,7 +158,7 @@ class Skill
     {
         if (!$this->projects->contains($project)) {
             $this->projects->add($project);
-            $project->addTechnologies($this);
+            $project->addTechnology($this);
         }
 
         return $this;
@@ -167,7 +167,7 @@ class Skill
     public function removeProject(Project $project): static
     {
         if ($this->projects->removeElement($project)) {
-            $project->removeTechnologies($this);
+            $project->removeTechnology($this);
         }
 
         return $this;

@@ -1,20 +1,15 @@
 import { useParams } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../../contexts/AuthContext";
-import useProfiles from "../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../hooks/useSingleProfile";
 import PageLayout from "../../../../layouts/PageLayout";
 import styles from "../../../../styles/ProfileAbout.module.css";
 import Spinner from "../../../../components/Spinner";
 
 const ProfileAbout = () => {
   const { profileId } = useParams();
-  const { user } = useContext(AuthContext);
-  const { profiles, loading, error } = useProfiles({ mine: !!user });
+  const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
   if (loading) return <div className={styles.container}><Spinner /></div>;
   if (error) return <p className={styles.error}>{error}</p>;
-
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
 
   return (

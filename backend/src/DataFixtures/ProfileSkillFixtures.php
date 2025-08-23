@@ -15,10 +15,12 @@ class ProfileSkillFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        // Charger toutes les compétences
+        // Charger toutes les compétences existantes
         $skills = [];
-        for ($i = 0; $i < 10; $i++) {
-            $skills[] = $this->getReference(SkillFixtures::SKILL_REFERENCE . $i, Skill::class);
+        $skillIndex = 0;
+        while ($this->hasReference(SkillFixtures::SKILL_REFERENCE . $skillIndex, Skill::class)) {
+            $skills[] = $this->getReference(SkillFixtures::SKILL_REFERENCE . $skillIndex, Skill::class);
+            $skillIndex++;
         }
 
         // Itérer sur tous les profils

@@ -1,7 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
-import { AuthContext } from "../../../../contexts/AuthContext";
-import useProfiles from "../../../../hooks/useProfiles";
+import { useState } from "react";
+import useSingleProfile from "../../../../hooks/useSingleProfile";
 import styles from "../../../../styles/ProjectList.module.css";
 import PageLayout from "../../../../layouts/PageLayout";
 import Spinner from "../../../../components/Spinner";
@@ -9,16 +8,11 @@ import Spinner from "../../../../components/Spinner";
 const ProjectList = () => {
   const { profileId } = useParams();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Utilise useProfiles pour récupérer tous les profils ou ceux du user connecté
-  const { profiles, loading, error } = useProfiles({ mine: !!user });
+  const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
-  // Trouve le profil courant
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   const projects = profile?.projects || [];
   const total = projects.length;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -32,11 +26,9 @@ const ProjectList = () => {
     <PageLayout>
       <div className={styles["project-container"]}>
         <header className={styles["project-header"]}>
-          <h1 className={styles["project-title"]}>Mes Projets</h1>
+          <h1 className={styles["project-title"]}>Projets publics</h1>
           <p className={styles["project-subtitle"]}>
-            {user
-              ? `Bienvenue, ${user.first_name} ${user.last_name} (${user.email})`
-              : "Projets publics du profil"}
+            Projets visibles du profil {profile.name}
           </p>
         </header>
 

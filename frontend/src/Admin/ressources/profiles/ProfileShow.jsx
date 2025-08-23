@@ -6,7 +6,7 @@ import {
   EmailField,
   DateField,
   ArrayField,
-  SingleFieldList,
+  Datagrid,
   ChipField,
   ImageField,
 } from "react-admin";
@@ -25,32 +25,53 @@ const ProfileShow = (props) => (
       <DateField source="creeLe" label="Créé le" />
       <DateField source="modifieLe" label="Modifié le" />
 
-      {/* Projets liés */}
-      <ArrayField source="projects">
-        <SingleFieldList>
-          <ChipField source="title" />
-        </SingleFieldList>
+      {/* Projets liés avec détails */}
+      <ArrayField source="projects" label="Projets">
+        <Datagrid bulkActionButtons={false}>
+          <TextField source="title" label="Titre" />
+          <TextField source="description" label="Description" />
+          <TextField source="project_url" label="URL" />
+          <TextField source="slug" label="Slug" />
+          {/* Images du projet */}
+          <ArrayField source="images" label="Images">
+            <Datagrid bulkActionButtons={false}>
+              <ImageField source="url" label="Aperçu" />
+              <TextField source="name" label="Nom du fichier" />
+            </Datagrid>
+          </ArrayField>
+          {/* Technologies du projet */}
+          <ArrayField source="technologies" label="Technologies">
+            <Datagrid bulkActionButtons={false}>
+              <TextField source="name" label="Nom" />
+              <TextField source="slug" label="Slug" />
+            </Datagrid>
+          </ArrayField>
+        </Datagrid>
       </ArrayField>
 
-      {/* Expériences liées */}
-      <ArrayField source="experiences">
-        <SingleFieldList>
-          <ChipField source="title" />
-        </SingleFieldList>
+      {/* Expériences liées avec détails */}
+      <ArrayField source="experiences" label="Expériences">
+        <Datagrid bulkActionButtons={false}>
+          <TextField source="role" label="Poste" />
+          <TextField source="compagny" label="Entreprise" />
+          <TextField source="description" label="Description" />
+        </Datagrid>
       </ArrayField>
 
-      {/* Images liées */}
-      <ArrayField source="images">
-        <SingleFieldList>
-          <ImageField source="url" title="alt" />
-        </SingleFieldList>
+      {/* Images du profil */}
+      <ArrayField source="images" label="Images du profil">
+        <Datagrid bulkActionButtons={false}>
+          <ImageField source="url" label="Aperçu" />
+          <TextField source="name" label="Nom du fichier" />
+        </Datagrid>
       </ArrayField>
 
-      {/* Compétences liées */}
-      <ArrayField source="profileSkills">
-        <SingleFieldList>
-          <ChipField source="skill.name" />
-        </SingleFieldList>
+      {/* Compétences liées avec niveau */}
+      <ArrayField source="profileSkills" label="Compétences">
+        <Datagrid bulkActionButtons={false}>
+          <TextField source="skill.name" label="Compétence" />
+          <TextField source="level" label="Niveau" />
+        </Datagrid>
       </ArrayField>
     </SimpleShowLayout>
   </Show>

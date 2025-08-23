@@ -1,8 +1,6 @@
 // src/pages/profiles/[profileId]/projects/[projectId].jsx
 import { useParams, Link } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../../contexts/AuthContext";
-import useProfiles from "../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../hooks/useSingleProfile";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -13,21 +11,15 @@ import styles from "../../../../styles/ProjectDetail.module.css";
 
 const ProjectDetail = () => {
   const { profileId, projectId } = useParams();
-  const { user } = useContext(AuthContext);
-  const { profiles, loading, error } = useProfiles({ mine: !!user });
+  const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
   if (loading) return <div className={styles.spinner}></div>;
   if (error) return <p className={styles.error}>{error}</p>;
-
-  // Trouve le profil courant
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
 
-  // Trouve le projet dans le profil
   const project = profile.projects?.find((p) => String(p.id) === String(projectId));
   if (!project) return <p className={styles.notFound}>Projet introuvable.</p>;
 
-  // Fonction utilitaire pour formater la date
   const formatDate = (dateStr) => {
     if (!dateStr) return "Non renseignée";
     const date = new Date(dateStr);

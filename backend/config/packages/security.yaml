@@ -13,6 +13,11 @@ security:
       pattern: ^/(_(profiler|wdt)|css|images|js)/
       security: false
 
+
+    public_api:
+      pattern: ^/api/public
+      stateless: true
+
     login:
       pattern: ^/api/login_check
       stateless: true

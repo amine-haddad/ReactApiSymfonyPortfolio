@@ -25,7 +25,7 @@ class SkillController extends AbstractController
         // Récupère toutes les skills liées à ces profils (ManyToMany)
         $qb = $em->createQueryBuilder()
             ->select('s')
-            ->from(\App\Entity\Skill::class, 's')
+            ->from(Skill::class, 's')
             ->join('s.profileSkills', 'ps')
             ->join('ps.profile', 'p')
             ->where('ps.profile IN (:profileIds)')
@@ -77,7 +77,7 @@ class SkillController extends AbstractController
         // Compte total pour la pagination
         $totalQb = $em->createQueryBuilder()
             ->select('COUNT(DISTINCT s.id)')
-            ->from(\App\Entity\Skill::class, 's')
+            ->from(Skill::class, 's')
             ->join('s.profileSkills', 'ps')
             ->where('ps.profile IN (:profileIds)')
             ->setParameter('profileIds', $profileIds);
@@ -124,7 +124,10 @@ class SkillController extends AbstractController
     #[Route('/api/skills/{id}', name: 'api_skill_show', methods: ['GET'])]
     public function show(Skill $skill): JsonResponse
     {
-        $user = $this->getUser(); // Ajoute cette ligne
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw new \LogicException('User not found or not the right type');
+        }
         $profiles = [];
         foreach ($skill->getProfileSkills() as $ps) {
             $profile = $ps->getProfile();
@@ -317,5 +320,38 @@ class SkillController extends AbstractController
         $em->remove($skill);
         $em->flush();
         return new JsonResponse(null, 204);
+    }
+
+    #[Route('/api/skills/all', name: 'api_skills_all', methods: ['GET'])]
+    public function all(EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw new \LogicException('User not found or not the right type');
+        }
+
+        $profiles = $em->getRepository(\App\Entity\Profile::class)->findBy(['user' => $user]);
+        $profileIds = array_map(fn($p) => $p->getId(), $profiles);
+
+        $skills = $em->createQueryBuilder()
+            ->select('s')
+            ->from(Skill::class, 's')
+            ->join('s.profileSkills', 'ps')
+            ->join('ps.profile', 'p')
+            ->where('ps.profile IN (:profileIds)')
+            ->setParameter('profileIds', $profileIds)
+            ->getQuery()
+            ->getResult();
+
+        $data = [];
+        foreach ($skills as $skill) {
+            $data[] = [
+                'id' => $skill->getId(),
+                'name' => $skill->getName(),
+                'slug' => $skill->getSlug(),
+            ];
+        }
+
+        return new JsonResponse($data);
     }
 }

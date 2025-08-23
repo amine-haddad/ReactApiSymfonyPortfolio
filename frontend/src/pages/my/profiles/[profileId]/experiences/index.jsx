@@ -40,7 +40,7 @@ const ExperienceList = () => {
                 <h3 className={styles.experienceTitle}>{e.role || "Titre non renseigné"}</h3>
                 <p className={styles.experienceRole}>
                   {(`company: ${e.compagny}` || "Entreprise non renseignée")}<br />
-                  {e.start_date ? formatDate(e.start_date) : "Date début inconnue"} – {e.end_date ? formatDate(e.end_date) : "Date fin inconnue"}
+                  {e.startDate ? formatDate(e.startDate) : "Date début inconnue"} – {e.endDate ? formatDate(e.endDate) : "Date fin inconnue"}
                 </p>
                 <p className={styles.experienceDescription}>{e.description || "Description non renseignée"}</p>
                 <Link

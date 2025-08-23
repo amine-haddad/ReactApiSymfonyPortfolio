@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { useParams } from "react-router-dom";
 import useSingleProfile from "../../../hooks/useSingleProfile";
 import DynamicShapes from "../../../components/DynamicShapes";
-import TypingEffect from "../../../components/TypingEffect";
+import TypingEffectPersonalisable from "../../../components/TypingEffectPersonalisable";
 import AnimatedSection from "../../../components/AnimatedSection";
 import styles from "../../../styles/ProfilePage.module.css";
 
@@ -29,7 +29,7 @@ const Index = () => {
       <div className={styles.profileHeader}>
         <DynamicShapes />
         <div className={styles.profileOverlay}>
-          <TypingEffect />
+          <TypingEffectPersonalisable name={profile.name} title={profile.title} />
         </div>
       </div>
       <div className={styles.profileContent}>

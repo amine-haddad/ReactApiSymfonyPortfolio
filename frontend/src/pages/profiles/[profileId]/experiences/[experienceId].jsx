@@ -1,7 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../../contexts/AuthContext";
-import useProfiles from "../../../../hooks/useProfiles";
+import useSingleProfile from "../../../../hooks/useSingleProfile";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -11,15 +9,13 @@ import PageLayout from "../../../../layouts/PageLayout";
 import '../../../../styles/SwiperOverrides.css';
 import styles from "../../../../styles/ExperienceId.module.css";
 
+
 const ExperienceId = () => {
   const { profileId, experienceId } = useParams();
-  const { user } = useContext(AuthContext);
-  const { profiles, loading, error } = useProfiles({ mine: !!user });
+  const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
   if (loading) return <div className={styles.spinner}></div>;
   if (error) return <p className={styles.error}>{error}</p>;
-
-  const profile = profiles.find((p) => String(p.id) === String(profileId));
   if (!profile) return <p className={styles.notFound}>Profil introuvable.</p>;
 
   const experience = profile.experiences?.find((e) => String(e.id) === String(experienceId));

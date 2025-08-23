@@ -4,6 +4,23 @@ const provider = simpleRestProvider("/api");
 const wrappedProvider = {
   ...provider,
   getList: async (resource, params) => {
+    if (resource === "skills") {
+      // Appel standard pour récupérer tous les skills
+      const response = await fetch("/api/skills");
+      const data = await response.json();
+      // API Platform retourne souvent {hydra:member: [...], hydra:totalItems: N}
+      if (data["hydra:member"]) {
+        return {
+          data: data["hydra:member"],
+          total: data["hydra:totalItems"] || data["hydra:member"].length,
+        };
+      }
+      // fallback si ce n'est pas hydra
+      return {
+        data,
+        total: data.length,
+      };
+    }
     const result = await provider.getList(resource, params);
     if (result.data && result.data.data && Array.isArray(result.data.data)) {
       return {
