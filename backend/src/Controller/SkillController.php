@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Skill;
-use App\Repository\SkillRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -11,70 +10,54 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
+/**
+ * Contrôleur API pour la gestion des compétences (skills) côté admin.
+ * Gère la liste, la création, la mise à jour, la suppression et l'affichage détaillé.
+ */
 class SkillController extends AbstractController
 {
+    /**
+     * Liste paginée des skills de l'utilisateur connecté, avec profils et images associés.
+     */
     #[Route('/api/skills', name: 'api_skills_list', methods: ['GET'])]
-    public function list(Request $request, SkillRepository $repository, EntityManagerInterface $em): JsonResponse
+    public function list(Request $request, EntityManagerInterface $em): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw new \LogicException('User not found or not the right type');
+        }
 
-        // Récupère tous les profils de l'utilisateur connecté
+        // Récupère les profils de l'utilisateur
         $profiles = $em->getRepository(\App\Entity\Profile::class)->findBy(['user' => $user]);
         $profileIds = array_map(fn($p) => $p->getId(), $profiles);
 
-        // Récupère toutes les skills liées à ces profils (ManyToMany)
-        $qb = $em->createQueryBuilder()
-            ->select('s')
-            ->from(Skill::class, 's')
-            ->join('s.profileSkills', 'ps')
-            ->join('ps.profile', 'p')
-            ->where('ps.profile IN (:profileIds)')
-            ->setParameter('profileIds', $profileIds);
-
+        // Pagination (React Admin)
         $range = $request->query->get('range');
         if ($range) {
             $range = json_decode($range, true);
             $start = $range[0];
             $end = $range[1];
             $limit = $end - $start + 1;
-            $page = floor($start / $limit) + 1;
-            $qb->setFirstResult($start)
-               ->setMaxResults($limit);
         } else {
-            $page = max(1, (int)$request->query->get('page', 1));
-            $limit = max(1, (int)$request->query->get('limit', 10));
-            $qb->setFirstResult(($page - 1) * $limit)
-               ->setMaxResults($limit);
+            $start = 0;
+            $limit = 10;
+            $end = $start + $limit - 1;
         }
 
-        // Tri des résultats
-        $sortParam = $request->query->get('sort', $request->query->get('_sort', 'id'));
-        $orderParam = $request->query->get('order', $request->query->get('_order', 'ASC'));
-
-        // Si le tri est envoyé sous forme de tableau JSON (ex: ["slug","DESC"])
-        if (is_string($sortParam) && str_starts_with($sortParam, '[')) {
-            $sortArray = json_decode($sortParam, true);
-            $sort = $sortArray[0] ?? 'id';
-            $order = strtoupper($sortArray[1] ?? 'ASC');
-        } else {
-            $sort = $sortParam;
-            $order = strtoupper($orderParam);
-        }
-
-        if (!in_array($order, ['ASC', 'DESC'])) {
-            $order = 'ASC';
-        }
-        // Retire le tri sur 'profiles'
-        if ($sort === 'profiles') {
-            // Ne rien faire, ou trier par défaut sur 's.id'
-            $qb->orderBy('s.id', $order);
-        } else {
-            $qb->orderBy('s.' . $sort, $order);
-        }
+        // Récupère les skills liés à ces profils
+        $qb = $em->createQueryBuilder()
+            ->select('DISTINCT s')
+            ->from(Skill::class, 's')
+            ->join('s.profileSkills', 'ps')
+            ->join('ps.profile', 'p')
+            ->where('ps.profile IN (:profileIds)')
+            ->setParameter('profileIds', $profileIds)
+            ->setFirstResult($start)
+            ->setMaxResults($limit);
 
         $skills = $qb->getQuery()->getResult();
 
-        // Compte total pour la pagination
+        // Calcule le total pour la pagination
         $totalQb = $em->createQueryBuilder()
             ->select('COUNT(DISTINCT s.id)')
             ->from(Skill::class, 's')
@@ -83,8 +66,10 @@ class SkillController extends AbstractController
             ->setParameter('profileIds', $profileIds);
         $total = $totalQb->getQuery()->getSingleScalarResult();
 
+        $backendHost = 'http://localhost:8000';
         $data = [];
         foreach ($skills as $skill) {
+            // Liste des profils associés à ce skill pour l'utilisateur courant
             $profiles = [];
             foreach ($skill->getProfileSkills() as $ps) {
                 $profile = $ps->getProfile();
@@ -92,59 +77,243 @@ class SkillController extends AbstractController
                     $profiles[] = [
                         'id' => $profile->getId(),
                         'name' => $profile->getName(),
-                        'user' => $profile->getUser()->getId(),
+                        'level' => $ps->getLevel(),
+                        'profileSkillId' => $ps->getId(),
                     ];
                 }
             }
+            // Images associées
             $images = [];
             foreach ($skill->getImages() as $img) {
+                $imgName = $img->getImageName();
+                $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/skills/' . ltrim($imgName, '/');
                 $images[] = [
                     'id' => $img->getId(),
-                    'name' => $img->getName(),
-                    'url' => method_exists($img, 'getUrl') ? $img->getUrl() : $img->getName(),
+                    'imageName' => $imgName,
+                    'url' => $url,
                 ];
             }
             $data[] = [
                 'id' => $skill->getId(),
                 'name' => $skill->getName(),
                 'slug' => $skill->getSlug(),
-                'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'), // Ajoute cette ligne
-                'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'), // Ajoute cette ligne
+                'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
+                'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
                 'profiles' => $profiles,
                 'images' => $images,
             ];
         }
-
         $response = new JsonResponse($data);
-        $response->headers->set('Content-Range', 'skills ' . (($page - 1) * $limit) . '-' . (($page - 1) * $limit + count($data) - 1) . '/' . $total);
+        $response->headers->set('Content-Range', 'skills ' . $start . '-' . ($start + count($data) - 1) . '/' . $total);
         $response->headers->set('Access-Control-Expose-Headers', 'Content-Range');
         return $response;
     }
 
-    #[Route('/api/skills/{id}', name: 'api_skill_show', methods: ['GET'])]
-    public function show(Skill $skill): JsonResponse
+    /**
+     * Création d'une nouvelle compétence (skill) avec profils et images associés.
+     */
+    #[Route('/api/skills', name: 'api_skill_create', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): JsonResponse
     {
-        $user = $this->getUser();
-        if (!$user instanceof \App\Entity\User) {
-            throw new \LogicException('User not found or not the right type');
+        $name = trim($request->request->get('name', ''));
+        if (empty($name)) {
+            return new JsonResponse(['error' => 'Le nom de la compétence est obligatoire'], 400);
         }
+
+        $em->getConnection()->beginTransaction();
+        try {
+            $currentUser = $this->getUser();
+
+            // Vérifie si le skill existe déjà
+            $skill = $em->getRepository(Skill::class)->findOneBy(['name' => $name]);
+            if (!$skill) {
+                $skill = new Skill();
+                $skill->setName($name);
+                $slug = $request->request->get('slug') ?: $slugger->slug($name)->lower();
+                $skill->setSlug($slug);
+                $skill->setCreatedAt(new \DateTime());
+                $skill->setUpdatedAt(new \DateTime());
+                $em->persist($skill);
+            }
+
+            // Associe les profils avec leur niveau
+            $profiles = $request->request->all('profiles');
+            foreach ($profiles as $profileData) {
+                if (is_string($profileData)) {
+                    $profileData = json_decode($profileData, true);
+                }
+                if (!isset($profileData['id'])) continue;
+                $profile = $em->getRepository(\App\Entity\Profile::class)->find($profileData['id']);
+                if ($profile) {
+                    $profileSkill = new \App\Entity\ProfileSkill();
+                    $profileSkill->setProfile($profile);
+                    $profileSkill->setSkill($skill);
+                    $level = isset($profileData['level']) ? (int)$profileData['level'] : 1;
+                    $profileSkill->setLevel($level);
+                    $em->persist($profileSkill);
+                }
+            }
+
+            // Ajoute les images uploadées
+            foreach ($request->files->get('images', []) as $uploadedFile) {
+                $image = new \App\Entity\Image();
+                $image->setSkillFile($uploadedFile);
+                $image->setSkills($skill);
+                $skill->addImage($image);
+                $em->persist($image);
+            }
+
+            $em->flush();
+            $em->getConnection()->commit();
+
+            $requestSchemeAndHost = $request->getSchemeAndHttpHost();
+            $responseData = [
+                'id' => $skill->getId(),
+                'name' => $skill->getName(),
+                'slug' => $skill->getSlug(),
+                'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
+                'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
+                'profiles' => array_map(function($ps) {
+                    return [
+                        'id' => $ps->getProfile()->getId(),
+                        'name' => $ps->getProfile()->getName(),
+                        'level' => $ps->getLevel(),
+                    ];
+                }, $skill->getProfileSkills()->toArray()),
+                'images' => array_map(function($img) use ($requestSchemeAndHost) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute ? $imgName : $requestSchemeAndHost . '/uploads/images/skills/' . ltrim($imgName, '/');
+                    return [
+                        'id' => $img->getId(),
+                        'imageName' => $imgName,
+                        'url' => $url,
+                    ];
+                }, $skill->getImages()->toArray()),
+            ];
+            return new JsonResponse($responseData, 201);
+        } catch (\Throwable $e) {
+            $em->getConnection()->rollBack();
+            return new JsonResponse(['error' => 'Erreur lors de la création de la compétence : ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Mise à jour d'une compétence (skill) : profils, niveaux, images, nom, slug.
+     */
+    #[Route('/api/skills/{id}', name: 'api_skill_update', methods: ['PUT', 'PATCH', 'POST'])]
+    public function update(Request $request, Skill $skill, EntityManagerInterface $em, SluggerInterface $slugger): JsonResponse
+    {
+        $data = $request->request->all();
+        $deletedImageIds = array_map('intval', $request->get('deletedImageIds', []));
+        $existingImages = $request->get('existingImages', []);
+        $uploadedFiles = $request->files->get('images', []);
+
+        // 1. Supprime les images demandées
+        foreach ($deletedImageIds as $imgId) {
+            $img = $em->getRepository(\App\Entity\Image::class)->find($imgId);
+            if ($img && $img->getSkills() === $skill) {
+                $em->remove($img);
+            }
+        }
+
+        // 2. Met à jour les noms des images existantes
+        foreach ($existingImages as $imgData) {
+            if (is_string($imgData)) $imgData = json_decode($imgData, true);
+            if (!isset($imgData['id'])) continue;
+            $img = $em->getRepository(\App\Entity\Image::class)->find((int)$imgData['id']);
+            if (!$img || in_array($img->getId(), $deletedImageIds, true)) continue;
+            $imgName = $imgData['imageName'] ?? $img->getImageName();
+            $img->setImageName($imgName);
+            $em->persist($img);
+        }
+
+        // 3. Ajoute les nouveaux fichiers uploadés
+        foreach ($uploadedFiles as $idx => $file) {
+            $img = new \App\Entity\Image();
+            $img->setSkillFile($file);
+            $img->setSkills($skill);
+            $imgName = $request->get('imageNames', [])[$idx] ?? $file->getClientOriginalName();
+            $img->setImageName($imgName);
+            $em->persist($img);
+            $skill->addImage($img);
+        }
+
+        // 4. Met à jour les champs du skill (nom, slug)
+        if (isset($data['name'])) {
+            $skill->setName($data['name']);
+            $skill->setSlug($slugger->slug($data['name'])->lower());
+        }
+
+        // 5. Gère les profils associés et leur niveau
+        if (isset($data['profiles']) && is_array($data['profiles'])) {
+            foreach ($data['profiles'] as $profileData) {
+                if (is_string($profileData)) {
+                    $profileData = json_decode($profileData, true);
+                }
+                // Si profileSkillId existe, on l'utilise pour la mise à jour
+                if (isset($profileData['profileSkillId'])) {
+                    $profileSkill = $em->getRepository(\App\Entity\ProfileSkill::class)
+                        ->find($profileData['profileSkillId']);
+                } else {
+                    // Sinon, recherche par profile_id et skill_id
+                    if (!isset($profileData['id'])) continue;
+                    $profileSkill = $em->getRepository(\App\Entity\ProfileSkill::class)
+                        ->findOneBy([
+                            'profile' => $profileData['id'],
+                            'skill' => $skill->getId()
+                        ]);
+                }
+                // Met à jour le niveau si la jointure existe
+                if ($profileSkill && isset($profileData['level'])) {
+                    $profileSkill->setLevel((int)$profileData['level']);
+                    $em->persist($profileSkill);
+                }
+                // Crée la jointure si elle n'existe pas
+                if (!$profileSkill && isset($profileData['id']) && isset($profileData['level'])) {
+                    $profile = $em->getRepository(\App\Entity\Profile::class)->find($profileData['id']);
+                    if ($profile) {
+                        $profileSkill = new \App\Entity\ProfileSkill();
+                        $profileSkill->setProfile($profile);
+                        $profileSkill->setSkill($skill);
+                        $profileSkill->setLevel((int)$profileData['level']);
+                        $em->persist($profileSkill);
+                    }
+                }
+            }
+        }
+
+        $em->flush();
+
+        // Prépare la réponse avec profils et images à jour
+        $backendHost = 'http://localhost:8000';
         $profiles = [];
         foreach ($skill->getProfileSkills() as $ps) {
             $profile = $ps->getProfile();
-            // Filtre : n’ajoute que les profils de l’utilisateur connecté
-            if ($profile && $profile->getUser()?->getId() === $user->getId()) {
+            $profileUser = $profile ? $profile->getUser() : null;
+            $currentUser = $this->getUser();
+            if (
+                $profileUser instanceof \App\Entity\User &&
+                $currentUser instanceof \App\Entity\User &&
+                $profileUser->getId() === $currentUser->getId()
+            ) {
                 $profiles[] = [
                     'id' => $profile->getId(),
                     'name' => $profile->getName(),
+                    'level' => $ps->getLevel(),
                 ];
             }
         }
         $images = [];
         foreach ($skill->getImages() as $img) {
+            $imgName = $img->getImageName();
+            $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+            $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/skills/' . ltrim($imgName, '/');
             $images[] = [
                 'id' => $img->getId(),
-                'name' => $img->getName(),
-                'url' => method_exists($img, 'getUrl') ? $img->getUrl() : $img->getName(),
+                'imageName' => $imgName,
+                'url' => $url,
             ];
         }
         $data = [
@@ -154,162 +323,14 @@ class SkillController extends AbstractController
             'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
             'profiles' => $profiles,
-            'images' => array_map(function($img) {
-                return [
-                    'id' => $img->getId(),
-                    'name' => $img->getName(),
-                    'url' => method_exists($img, 'getUrl') ? $img->getUrl() : $img->getName(),
-                ];
-            }, $skill->getImages()->toArray()),
+            'images' => $images,
         ];
-        return new JsonResponse($data);
+        return new JsonResponse($data, 200);
     }
 
-    #[Route('/api/skills', name: 'api_skill_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-
-        $skill = new Skill();
-        $name = $data['name'] ?? '';
-        $skill->setName($name);
-
-        // Utilise le slugger pour générer le slug
-        $slug = !empty($data['slug']) ? $data['slug'] : $slugger->slug($name)->lower();
-        $skill->setSlug($slug);
-
-        $skill->setCreatedAt(new \DateTime());
-        $skill->setUpdatedAt(new \DateTime());
-
-        // Associe le profil
-        if (!empty($data['profile'])) {
-            $profile = $em->getRepository(\App\Entity\Profile::class)->find($data['profile']);
-            if ($profile) {
-                $profileSkill = new \App\Entity\ProfileSkill();
-                $profileSkill->setProfile($profile);
-                $profileSkill->setSkill($skill);
-                $profileSkill->setLevel($data['level'] ?? 1); // valeur par défaut si non renseignée
-                $em->persist($profileSkill);
-            }
-        }
-
-        // Associe les images existantes (si tu utilises ReferenceArrayInput)
-        if (!empty($data['images']) && is_array($data['images'])) {
-            foreach ($data['images'] as $imgData) {
-                if (isset($imgData['id'])) {
-                    $img = $em->getRepository(\App\Entity\Image::class)->find($imgData['id']);
-                    if ($img) {
-                        $skill->addImage($img);
-                    }
-                }
-            }
-        }
-        if (!empty($data['images']) && is_array($data['images'])) {
-            foreach ($data['images'] as $imgData) {
-                if (isset($imgData['src'])) {
-                    $base64 = $imgData['src'];
-                    // Si c'est une URL externe (ex: picsum)
-                    if (filter_var($base64, FILTER_VALIDATE_URL)) {
-                        $image = new \App\Entity\Image();
-                        $image->setName($base64); // stocke l'URL
-                        $image->setSkills($skill);
-                        $skill->addImage($image);
-                        $em->persist($image);
-                    } else {
-                        // Sinon, c'est du base64, donc upload local
-                        $parts = explode(',', $base64);
-                        $decoded = base64_decode(end($parts));
-                        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/images/skills/';
-                        if (!is_dir($uploadDir)) {
-                            mkdir($uploadDir, 0777, true);
-                        }
-                        $filename = uniqid().'.jpg';
-                        $filepath = $uploadDir . $filename;
-                        file_put_contents($filepath, $decoded);
-
-                        $image = new \App\Entity\Image();
-                        $image->setName('/uploads/images/skills/' . $filename); // chemin relatif
-                        $image->setSkills($skill);
-                        $skill->addImage($image);
-                        $em->persist($image);
-                    }
-                }
-            }
-        }
-
-        $em->persist($skill);
-        $em->flush();
-
-        $responseData = [
-            'id' => $skill->getId(),
-            'name' => $skill->getName(),
-            'slug' => $skill->getSlug(),
-            'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
-            'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
-            'profiles' => isset($profile) ? [
-                [
-                    'id' => $profile->getId(),
-                    'name' => $profile->getName(),
-                ]
-            ] : [],
-            'images' => array_map(function($img) {
-                return [
-                    'id' => $img->getId(),
-                    'name' => $img->getName(),
-                    'url' => method_exists($img, 'getUrl') ? $img->getUrl() : $img->getName(),
-                ];
-            }, $skill->getImages()->toArray()),
-        ];
-        return new JsonResponse($responseData, 201);
-    }
-
-    #[Route('/api/skills/{id}', name: 'api_skill_update', methods: ['PUT', 'PATCH'])]
-    public function update(int $id, Request $request, EntityManagerInterface $em): JsonResponse
-    {
-        $skill = $em->getRepository(Skill::class)->find($id);
-        if (!$skill) {
-            return new JsonResponse(['error' => 'Not found'], 404);
-        }
-
-        // Mise à jour des champs simples
-        $skill->setName($request->get('name', $skill->getName()));
-        $skill->setSlug($request->get('slug', $skill->getSlug()));
-        $skill->setUpdatedAt(new \DateTime());
-
-        // Mise à jour des images existantes (si payload JSON)
-        $data = json_decode($request->getContent(), true);
-        if (isset($data['images']) && is_array($data['images'])) {
-            foreach ($skill->getImages() as $img) {
-                $skill->removeImage($img);
-            }
-            foreach ($data['images'] as $imgData) {
-                if (isset($imgData['id'])) {
-                    $img = $em->getRepository(\App\Entity\Image::class)->find($imgData['id']);
-                    if ($img) {
-                        $skill->addImage($img);
-                    }
-                }
-            }
-        }
-
-        // Gestion des fichiers uploadés (si multipart)
-        if ($request->files->has('images')) {
-            foreach ($request->files->get('images') as $uploadedFile) {
-                $image = new \App\Entity\Image();
-                $image->setName($uploadedFile->getClientOriginalName());
-                $filename = uniqid().'.'.$uploadedFile->guessExtension();
-                $uploadedFile->move('/chemin/vers/tes/images/', $filename);
-                $image->setUrl('/chemin/vers/tes/images/' . $filename);
-                $image->setSkills($skill);
-                $skill->addImage($image);
-                $em->persist($image);
-            }
-        }
-
-        $em->flush();
-        return new JsonResponse(['id' => $skill->getId()]);
-    }
-
+    /**
+     * Suppression d'une compétence (skill) par son id.
+     */
     #[Route('/api/skills/{id}', name: 'api_skill_delete', methods: ['DELETE'])]
     public function delete(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -322,6 +343,9 @@ class SkillController extends AbstractController
         return new JsonResponse(null, 204);
     }
 
+    /**
+     * Liste simple de tous les skills de l'utilisateur (id, name, slug).
+     */
     #[Route('/api/skills/all', name: 'api_skills_all', methods: ['GET'])]
     public function all(EntityManagerInterface $em): JsonResponse
     {
@@ -352,6 +376,51 @@ class SkillController extends AbstractController
             ];
         }
 
+        return new JsonResponse($data);
+    }
+
+    /**
+     * Affichage détaillé d'une compétence (skill) avec profils et images associés.
+     */
+    #[Route('/api/skills/{id}', name: 'api_skill_show', methods: ['GET'])]
+    public function show(Skill $skill): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw new \LogicException('User not found or not the right type');
+        }
+        $backendHost = 'http://localhost:8000';
+        $profiles = [];
+        foreach ($skill->getProfileSkills() as $ps) {
+            $profile = $ps->getProfile();
+            if ($profile && $profile->getUser()?->getId() === $user->getId()) {
+                $profiles[] = [
+                    'id' => $profile->getId(),
+                    'name' => $profile->getName(),
+                    'level' => $ps->getLevel(),
+                ];
+            }
+        }
+        $images = [];
+        foreach ($skill->getImages() as $img) {
+            $imgName = $img->getImageName();
+            $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+            $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/skills/' . ltrim($imgName, '/');
+            $images[] = [
+                'id' => $img->getId(),
+                'imageName' => $imgName,
+                'url' => $url,
+            ];
+        }
+        $data = [
+            'id' => $skill->getId(),
+            'name' => $skill->getName(),
+            'slug' => $skill->getSlug(),
+            'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
+            'profiles' => $profiles,
+            'images' => $images,
+        ];
         return new JsonResponse($data);
     }
 }

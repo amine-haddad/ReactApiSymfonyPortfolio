@@ -63,14 +63,13 @@ class Skill
      */
     #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'technologies', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill'])]
-    #[ApiSubresource]
     #[MaxDepth(1)]
     private Collection $projects;
 
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'skills', cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[Groups(['read:Skill','read:User',"read:Profile",'read:Project'])]
     #[MaxDepth(1)]
     private Collection $images;
@@ -80,7 +79,6 @@ class Skill
      */
     #[ORM\OneToMany(targetEntity: ProfileSkill::class, mappedBy: 'skill', cascade: ['persist', 'remove'])]
     #[Groups(['read:Skill','read:User', 'write:Skill'])]
-    #[ApiSubresource]
     #[MaxDepth(1)]
     private Collection $profileSkills;
 

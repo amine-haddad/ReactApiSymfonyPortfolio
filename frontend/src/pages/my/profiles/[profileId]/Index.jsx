@@ -1,7 +1,6 @@
-import { useContext } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
-import useSingleProfile from "../../../../hooks/useSingleProfile";
 import Profile from "../../../../components/profile/Profile";
 import ProfileProjects from "../../../../components/profile/ProfileProjects";
 import ProfileExperiences from "../../../../components/profile/ProfileExperiences";
@@ -14,11 +13,29 @@ import AnimatedSection from "../../../../components/AnimatedSection";
 import styles from "../../../../styles/ProfilePage.module.css";
 
 const Index = () => {
-  const { profileId } = useParams();
-  console.log("profileId:", profileId, "type:", typeof profileId);
   const { user } = useContext(AuthContext);
-  // Utilisation du hook unique, sans option forcePublic ici (profil privé)
-  const { profile, loading, error } = useSingleProfile(profileId);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const isPrivate = true;
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const url = isPrivate
+      ? "/api/my/profile"
+      : "/api/public/profiles/";
+
+    fetch(url, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur API");
+        return res.json();
+      })
+      .then(data => setProfile(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [isPrivate]);
 
   if (loading || !user) {
     return (
@@ -36,9 +53,7 @@ const Index = () => {
     );
   }
 
-  const isOwner = user && profile && profile.user === user.id;
-
-  if (!profile || !isOwner) return <Navigate to="/NotFound" replace />;
+  if (!profile) return <Navigate to="/NotFound" replace />;
 
   return (
     <div className={styles.profilePage}>

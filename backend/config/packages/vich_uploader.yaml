@@ -6,18 +6,18 @@ vich_uploader:
 
     mappings:
         profile_file:
-            uri_prefix: /images/profiles
+            uri_prefix: /uploads/images/profiles
             upload_destination: '%upload_profiles%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         project_file:
-            uri_prefix: /images/projects
+            uri_prefix: /uploads/images/projects
             upload_destination: '%upload_projects%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         skill_file:
-            uri_prefix: /images/skills
+            uri_prefix: /uploads/images/skills
             upload_destination: '%upload_skills%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         experience_file:
-            uri_prefix: /images/experiences
+            uri_prefix: /uploads/images/experiences
             upload_destination: '%upload_experiences%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

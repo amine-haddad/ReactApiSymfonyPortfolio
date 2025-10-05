@@ -18,6 +18,8 @@ const Index = () => {
   // Utilisation du hook unique en mode public
   const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
 
+  console.log("profile privé", profile, "error", error);
+
   if (loading) return <p className={styles.profileLoading}>Chargement...</p>;
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;
   if (!profile) return <p className={styles.profileNotFound}>Profil non trouvé</p>;

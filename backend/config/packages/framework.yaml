@@ -10,6 +10,9 @@ framework:
   #esi: true
   #fragments: true
 
+  router:
+    default_uri: 'http://localhost:8000'
+
 when@test:
   framework:
     test: true

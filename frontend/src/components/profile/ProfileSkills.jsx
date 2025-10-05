@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { Autoplay, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
@@ -18,15 +18,19 @@ const ProfileSkills = ({ skills, error }) => {
     <div className={styles.skillFrame}>
       <div className={`my-5 col-10 mx-auto`}>
         <h2 className={`mb-2 display-4 ${styles.titleH2}`}>Compétences</h2>
-        <div className={`${styles.skillsContainer}`}>
+        <div className={styles.skillsContainer}>
           {skills.map((skill, index) => {
-            const images = skill.skill?.images?.length
-              ? skill.skill.images
-              : [{ url: "/assets/defaultImgageCode.jpg" }];
+            // On récupère les images valides (url non vide)
+            let images = Array.isArray(skill.skill?.images)
+              ? skill.skill.images.filter(img => img.url && img.url.trim() !== "")
+              : [];
+            // Si aucune image valide, on met l'image par défaut
+            if (images.length === 0) {
+              images = [{ url: "/assets/defaultImgageCode.jpg" }];
+            }
 
             const hasMultipleSlides = images.length > 1;
-            console.log("skil", skills)
-            console.log("skilmage", images)
+
             return (
               <a
                 key={skill.id || `${skill.name}-${index}`}
@@ -44,7 +48,7 @@ const ProfileSkills = ({ skills, error }) => {
                     effect="fade"
                     fadeEffect={{ crossFade: true }}
                     loop={hasMultipleSlides}
-                    speed={5000} // transition douce
+                    speed={5000}
                     autoplay={
                       hasMultipleSlides
                         ? { delay: 3000, disableOnInteraction: false }
@@ -55,7 +59,7 @@ const ProfileSkills = ({ skills, error }) => {
                     {images.map((img, i) => (
                       <SwiperSlide key={i}>
                         <img
-                          src={img.name || img.url || "/assets/defaultImgageCode.jpg"}
+                          src={img.url || "/assets/defaultImgageCode.jpg"}
                           alt={`${skill.skill.name} ${i}`}
                           loading="lazy"
                           className={styles.skillImage}

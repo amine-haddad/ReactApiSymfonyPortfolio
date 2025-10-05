@@ -28,16 +28,16 @@ class Image
     #[Groups(['read:Image','read:User','read:Profile', 'read:Experience','read:Project','read:Skill'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['read:Image', 'write:Image','read:User','read:Profile', 'read:Experience','read:Project','read:Skill'])]
-    private ?string $name = null;
+    private ?string $imageName = null;
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
     #[Groups(['read:Image', 'write:Image'])]
     #[MaxDepth(1)]
     private ?Profile $profile = null;
 
-    #[Vich\UploadableField(mapping: 'profile_file', fileNameProperty: 'name')]
+    #[Vich\UploadableField(mapping: 'profile_file', fileNameProperty: 'imageName')]
     private ?File $profileFile = null;
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
@@ -45,7 +45,7 @@ class Image
     #[MaxDepth(1)]
     private ?Project $project = null;
 
-    #[Vich\UploadableField(mapping: 'project_file', fileNameProperty: 'name')]
+    #[Vich\UploadableField(mapping: 'project_file', fileNameProperty: 'imageName')]
     private ?File $projectFile = null;
 
     #[ORM\ManyToOne(inversedBy: 'images')]
@@ -53,7 +53,7 @@ class Image
     #[MaxDepth(1)]
     private ?Skill $skills = null;
 
-    #[Vich\UploadableField(mapping: 'skill_file', fileNameProperty: 'name')]
+    #[Vich\UploadableField(mapping: 'skill_file', fileNameProperty: 'imageName')]
     private ?File $skillFile = null;
 
     #[ORM\ManyToOne(inversedBy: 'images', cascade: ['persist', 'remove'])]
@@ -61,25 +61,28 @@ class Image
     #[MaxDepth(1)]
     private ?Experience $experiences = null;
 
-    #[Vich\UploadableField(mapping: 'experience_file', fileNameProperty: 'name')]
+    #[Vich\UploadableField(mapping: 'experience_file', fileNameProperty: 'imageName')]
     private ?File $experienceFile = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?DateTimeImmutable $updated_at = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getImageName(): ?string
     {
-        return $this->name;
+        return $this->imageName;
     }
 
-    public function setName(string $name): static
+    public function setImageName(?string $imageName): static
     {
-        $this->name = $name;
+        if (!$imageName || !is_string($imageName) || trim($imageName) === '') {
+            $imageName = 'image_' . ($this->id ?? uniqid());
+        }
+        $this->imageName = $imageName;
         return $this;
     }
 
@@ -185,12 +188,12 @@ class Image
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(?DateTimeImmutable $updated_at): static
     {
         $this->updated_at = $updated_at;
         return $this;
