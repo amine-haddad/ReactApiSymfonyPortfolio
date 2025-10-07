@@ -16,19 +16,20 @@ function ProfileEdit(props) {
   const controllerProps = useEditController(props);
   const record = controllerProps.record;
 
-  // Afficher un loader tant que les données ne sont pas prêtes
-  if (!record || !record.profileSkills) {
-    return <div>Chargement des données du profil...</div>;
-  }
-
-  // Filtrer les skills connus du profil pour les selects de projets
+  // Toujours appeler les hooks AVANT tout return ou condition
   const profileSkillsChoices = useMemo(() => {
+    if (!record || !record.profileSkills) return [];
     return record.profileSkills.map(ps => ({
       id: ps.skill.id,
       name: ps.skill.name,
       slug: ps.skill.slug,
     }));
   }, [record]);
+
+  // Afficher un loader tant que les données ne sont pas prêtes
+  if (!record || !record.profileSkills) {
+    return <div>Chargement des données du profil...</div>;
+  }
 
   return (
     <Edit {...props} {...controllerProps}>

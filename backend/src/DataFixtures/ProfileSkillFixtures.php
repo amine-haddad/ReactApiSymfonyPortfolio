@@ -50,9 +50,12 @@ class ProfileSkillFixtures extends Fixture implements DependentFixtureInterface
                 $skill = $skills[$skillKey];
 
                 $profileSkill = new ProfileSkill();
-                $profileSkill->setLevel(random_int(50, 100))
+                $profileSkill
+                    ->setLevel(random_int(50, 100))
                     ->setProfile($profile)
-                    ->setSkill($skill);
+                    ->setSkill($skill)
+                    ->setCreatedAt(new \DateTime())
+                    ->setUpdatedAt(new \DateTime()); // <-- AJOUTE CETTE LIGNE
 
                 $manager->persist($profileSkill);
                 $this->addReference(self::PROFILE_SKILL_REFERENCE . $skillReferenceIndex, $profileSkill);

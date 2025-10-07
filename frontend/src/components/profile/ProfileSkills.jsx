@@ -19,28 +19,26 @@ const ProfileSkills = ({ skills, error }) => {
       <div className={`my-5 col-10 mx-auto`}>
         <h2 className={`mb-2 display-4 ${styles.titleH2}`}>Compétences</h2>
         <div className={styles.skillsContainer}>
-          {skills.map((skill, index) => {
-            // On récupère les images valides (url non vide)
-            let images = Array.isArray(skill.skill?.images)
-              ? skill.skill.images.filter(img => img.url && img.url.trim() !== "")
+          {skills.map((profileSkill, index) => {
+            // profileSkill est un objet { id, level, skill: { ... }, pictures: [...] }
+            let images = Array.isArray(profileSkill.pictures)
+              ? profileSkill.pictures.filter(img => img.url && img.url.trim() !== "")
               : [];
-            // Si aucune image valide, on met l'image par défaut
             if (images.length === 0) {
               images = [{ url: "/assets/defaultImgageCode.jpg" }];
             }
-
             const hasMultipleSlides = images.length > 1;
 
             return (
               <a
-                key={skill.id || `${skill.name}-${index}`}
-                href={`/skills/${skill.id || skill.name}`}
+                key={profileSkill.id}
+                href={`/skills/${profileSkill.skill?.id || profileSkill.skill?.name}`}
                 className={styles.skillMedallionLink}
               >
                 <div
                   className={styles.skillMedallion}
                   style={{
-                    backgroundImage: `conic-gradient(rgba(101, 119, 253, 0.61) 0% ${skill.level}%, rgba(244, 237, 212, 0.75) ${skill.level}% 100%)`,
+                    backgroundImage: `conic-gradient(rgba(101, 119, 253, 0.61) 0% ${profileSkill.level}%, rgba(244, 237, 212, 0.75) ${profileSkill.level}% 100%)`,
                   }}
                 >
                   <Swiper
@@ -60,16 +58,17 @@ const ProfileSkills = ({ skills, error }) => {
                       <SwiperSlide key={i}>
                         <img
                           src={img.url || "/assets/defaultImgageCode.jpg"}
-                          alt={`${skill.skill.name} ${i}`}
+                          alt={`${profileSkill.skill?.name || ""} ${i}`}
                           loading="lazy"
                           className={styles.skillImage}
                         />
                       </SwiperSlide>
                     ))}
                   </Swiper>
-
-                  <p className={styles.skillName}>{skill.skill.name}</p>
-                  <span className={styles.skillLevel}>{skill.level}%</span>
+                  <p className={styles.skillName}>
+                    {profileSkill.skill?.name}
+                  </p>
+                  <span className={styles.skillLevel}>{profileSkill.level}%</span>
                 </div>
               </a>
             );

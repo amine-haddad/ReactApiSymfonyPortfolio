@@ -107,11 +107,13 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
     // Génération d'une URL d'image valide et unique
     $imageUrl = "https://picsum.photos/seed/" . uniqid() . "/640/480.webp";
 
-    $image->setName($imageUrl)
+    $image->setImageName($imageUrl)
           ->setProfile($profile)
           ->setProject($project)
           ->setSkills($skill)
-          ->setExperiences($experience);
+          ->setExperiences($experience)
+          ->setCreatedAt(new \DateTime())
+          ->setUpdatedAt(new \DateTime());
 
     $manager->persist($image);
 }

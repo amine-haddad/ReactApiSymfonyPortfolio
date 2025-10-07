@@ -21,3 +21,7 @@ vich_uploader:
             uri_prefix: /uploads/images/experiences
             upload_destination: '%upload_experiences%'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        profile_skill_file:
+            uri_prefix: /uploads/images/profileskills
+            upload_destination: '%kernel.project_dir%/public/uploads/images/profileskills'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

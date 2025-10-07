@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ImageRepository;
+use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -64,8 +66,17 @@ class Image
     #[Vich\UploadableField(mapping: 'experience_file', fileNameProperty: 'imageName')]
     private ?File $experienceFile = null;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?DateTimeImmutable $updated_at = null;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?DateTime $updated_at = null;
+
+    #[ORM\ManyToOne(inversedBy: 'pictures', cascade: ['persist', 'remove'])]
+    private ?ProfileSkill $profileSkill = null;
+
+    #[Vich\UploadableField(mapping: 'profile_skill_file', fileNameProperty: 'imageName')]
+    private ?File $profileSkillFile = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?DateTime $created_at = null;
 
     public function getId(): ?int
     {
@@ -141,7 +152,7 @@ class Image
     {
         $this->profileFile = $file;
         if ($file) {
-            $this->updated_at = new DateTimeImmutable();
+            $this->updated_at = new DateTime();
         }
         return $this;
     }
@@ -155,7 +166,7 @@ class Image
     {
         $this->projectFile = $file;
         if ($file) {
-            $this->updated_at = new DateTimeImmutable();
+            $this->updated_at = new DateTime();
         }
         return $this;
     }
@@ -169,7 +180,7 @@ class Image
     {
         $this->skillFile = $file;
         if ($file) {
-            $this->updated_at = new DateTimeImmutable();
+            $this->updated_at = new DateTime();
         }
         return $this;
     }
@@ -183,19 +194,63 @@ class Image
     {
         $this->experienceFile = $file;
         if ($file) {
-            $this->updated_at = new DateTimeImmutable();
+            $this->updated_at = new DateTime();
         }
         return $this;
     }
 
-    public function getUpdatedAt(): ?DateTimeImmutable
+    public function getUpdatedAt(): ?DateTime
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(?DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(?DateTime $updated_at): static
     {
         $this->updated_at = $updated_at;
+        return $this;
+    }
+
+    public function getProfileSkill(): ?ProfileSkill
+    {
+        return $this->profileSkill;
+    }
+
+    public function setProfileSkill(?ProfileSkill $profileSkill): static
+    {
+        $this->profileSkill = $profileSkill;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of profileSkillFile
+     */ 
+    public function getProfileSkillFile()
+    {
+        return $this->profileSkillFile;
+    }
+
+    /**
+     * Set the value of profileSkillFile
+     *
+     * @return  self
+     */ 
+    public function setProfileSkillFile($profileSkillFile)
+    {
+        $this->profileSkillFile = $profileSkillFile;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?DateTime
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(DateTime $created_at): static
+    {
+        $this->created_at = $created_at;
+
         return $this;
     }
 }

@@ -302,7 +302,7 @@ class ProjectController extends AbstractController
             foreach ($data['images'] as $imgData) {
                 if (isset($imgData['url'])) {
                     $image = new Image();
-                    $image->setName($imgData['url']); // ou setUrl si tu ajoutes ce champ
+                    $image->setImageName($imgData['url']); // ou setUrl si tu ajoutes ce champ
                     $image->setProject($project);
                     $project->addImage($image);
                     $this->entityManager->persist($image);

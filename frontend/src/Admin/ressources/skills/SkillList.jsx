@@ -33,17 +33,38 @@ const imageStyle = {
 };
 
 /**
- * Colonne personnalisée pour afficher les profils associés et leur niveau.
- * Affiche chaque profil sous la forme "Nom : niveau X".
+ * Colonne personnalisée pour afficher les images des profils associés.
  */
-const ProfilesLevelField = ({ record }) => {
-  if (!record || !Array.isArray(record.profiles) || record.profiles.length === 0) return <span>-</span>;
+const ProfilePicturesField = ({ record }) => {
+  if (!record || !Array.isArray(record.profiles)) return null;
+  // Fusionne toutes les images des profils dans un seul tableau
+  const allPictures = record.profiles
+    .filter(profile => Array.isArray(profile.pictures) && profile.pictures.length > 0)
+    .flatMap(profile => profile.pictures.map(pic => ({
+      ...pic,
+      profileName: profile.name,
+    })));
+
+  if (allPictures.length === 0) return null;
+
+  // Utilise ArrayField comme pour les images du skill
   return (
-    <span>
-      {record.profiles.map(
-        p => `${p.name || "Profil"} : niveau ${p.level}`
-      ).join(" | ")}
-    </span>
+    <ArrayField record={{ pictures: allPictures }} source="pictures">
+      <SingleFieldList>
+        <ImageField
+          source="url"
+          title="profileName"
+          sx={{
+            width: 64,
+            height: 64,
+            objectFit: "cover",
+            borderRadius: 4,
+            border: "1px solid #eee",
+            marginRight: 8,
+          }}
+        />
+      </SingleFieldList>
+    </ArrayField>
   );
 };
 
@@ -73,6 +94,34 @@ const CustomDatagrid = () => (
         <ImageField source="url" title="imageName" sx={imageStyle} />
       </SingleFieldList>
     </ArrayField>
+    {/* Images des ProfileSkill */}
+    <FunctionField
+      label="Images profils"
+      render={record => {
+        // Fusionne toutes les images des profils dans un seul tableau
+        const allPictures = record.profiles
+          ?.filter(profile => Array.isArray(profile.pictures) && profile.pictures.length > 0)
+          .flatMap(profile => profile.pictures.map(pic => ({
+            ...pic,
+            profileName: profile.name,
+          }))) || [];
+
+        if (allPictures.length === 0) return null;
+
+        // Utilise ArrayField comme pour les images du skill
+        return (
+          <ArrayField record={{ pictures: allPictures }} source="pictures">
+            <SingleFieldList>
+              <ImageField
+                source="url"
+                title="imageName"
+                sx={imageStyle}
+              />
+            </SingleFieldList>
+          </ArrayField>
+        );
+      }}
+    />
     <DateField source="created_at" label="Créé le" />
     <DateField source="updated_at" label="Modifié le" />
     <EditButton />

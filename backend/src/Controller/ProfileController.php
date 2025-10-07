@@ -88,39 +88,7 @@ class ProfileController extends AbstractController
         // Formatage des données pour la réponse
         $data = [];
         foreach ($profiles as $profile) {
-            $data[] = [
-                'id'        => $profile->getId(),
-                'name'      => $profile->getName(),
-                'title'     => $profile->getTitle(),
-                'slug'      => $profile->getSlug(),
-                'email'     => $profile->getEmail(),
-                'creeLe'    => $profile->getCreatedAt()->format('Y-m-d H:i:s'),
-                'modifieLe' => $profile->getUpdatedAt() ? $profile->getUpdatedAt()->format('Y-m-d H:i:s') : null,
-                'user'      => $profile->getUser()?->getId(),
-                // AJOUTE CECI :
-                'profileSkills' => array_map(fn($ps) => [
-                    'id'    => $ps->getId(),
-                    'level' => $ps->getLevel(),
-                    'skill' => $ps->getSkill() ? [
-                        'id'   => $ps->getSkill()->getId(),
-                        'name' => $ps->getSkill()->getName(),
-                        'slug' => $ps->getSkill()->getSlug(),
-                        // AJOUTE ICI LES IMAGES DU SKILL :
-                        'images' => array_map(function($img) {
-                            $imgName = $img->getImageName();
-                            $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
-                            $url = $isAbsolute
-                                ? $imgName
-                                : 'http://localhost:8000/uploads/images/skills/' . ltrim($imgName, '/');
-                            return [
-                                'id' => $img->getId(),
-                                'name' => $imgName,
-                                'url' => $url,
-                            ];
-                        }, $ps->getSkill()->getImages()->toArray()),
-                    ] : null,
-                ], $profile->getProfileSkills()->toArray()),
-            ];
+            $data[] = $this->serializeProfileShort($profile);
         }
 
         $response = new JsonResponse($data);
@@ -274,28 +242,16 @@ class ProfileController extends AbstractController
     public function publicList(ProfileRepository $repository): JsonResponse
     {
         $profiles = $repository->findAll();
-
         $data = [];
         foreach ($profiles as $profile) {
-            $data[] = [
-                'id'        => $profile->getId(),
-                'name'      => $profile->getName(),
-                'title'     => $profile->getTitle(),
-                'slug'      => $profile->getSlug(),
-                'email'     => $profile->getEmail(),
-                'creeLe'    => $profile->getCreatedAt()->format('Y-m-d H:i:s'),
-                'modifieLe' => $profile->getUpdatedAt() ? $profile->getUpdatedAt()->format('Y-m-d H:i:s') : null,
-                // Ajoute ici les champs publics que tu veux exposer
-            ];
+            $data[] = $this->serializeProfileShort($profile);
         }
-
         $response = new JsonResponse([
             'data'  => $data,
             'total' => count($data),
         ]);
         $response->headers->set('Content-Range', "profiles 0-" . (count($data) - 1) . "/" . count($data));
         $response->headers->set('Access-Control-Expose-Headers', 'Content-Range');
-
         return $response;
     }
 
@@ -306,7 +262,6 @@ class ProfileController extends AbstractController
         if (! $profile) {
             return $this->json(['error' => 'Not found'], 404);
         }
-
         return $this->json($this->serializePublicProfile($profile));
     }
 
@@ -325,7 +280,43 @@ class ProfileController extends AbstractController
         return $this->json($this->serializeProfile($profile));
     }
 
-    // Sérialisation complète d'un profil (pour l'admin ou le propriétaire)
+    // Version courte pour les listes
+    private function serializeProfileShort(Profile $profile): array
+    {
+        return [
+            'id'        => $profile->getId(),
+            'name'      => $profile->getName(),
+            'title'     => $profile->getTitle(),
+            'slug'      => $profile->getSlug(),
+            'email'     => $profile->getEmail(),
+            'creeLe'    => $profile->getCreatedAt()->format('Y-m-d H:i:s'),
+            'modifieLe' => $profile->getUpdatedAt() ? $profile->getUpdatedAt()->format('Y-m-d H:i:s') : null,
+            'user'      => $profile->getUser()?->getId(),
+            'profileSkills' => array_map(fn($ps) => [
+                'id'    => $ps->getId(),
+                'level' => $ps->getLevel(),
+                'skill' => $ps->getSkill() ? [
+                    'id'   => $ps->getSkill()->getId(),
+                    'name' => $ps->getSkill()->getName(),
+                    'slug' => $ps->getSkill()->getSlug(),
+                ] : null,
+                'pictures' => array_map(function($img) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute
+                        ? $imgName
+                        : 'http://localhost:8000/uploads/images/profileskills/' . ltrim($imgName, '/');
+                    return [
+                        'id' => $img->getId(),
+                        'name' => $imgName,
+                        'url' => $url,
+                    ];
+                }, $ps->getPictures()->toArray()),
+            ], $profile->getProfileSkills()->toArray()),
+        ];
+    }
+
+    // Version complète pour la fiche profil
     private function serializeProfile(Profile $profile): array
     {
         return [
@@ -340,8 +331,6 @@ class ProfileController extends AbstractController
             'user'          => $profile->getUser()?->getId(),
             'creeLe'        => $profile->getCreatedAt()?->format('Y-m-d H:i:s'),
             'modifieLe'     => $profile->getUpdatedAt()?->format('Y-m-d H:i:s'),
-
-            // Projets liés
             'projects'      => array_map(fn($p) => [
                 'id'           => $p->getId(),
                 'title'        => $p->getTitle(),
@@ -358,12 +347,10 @@ class ProfileController extends AbstractController
                     'id'   => $img->getId(),
                     'name' => $img->getImageName(),
                     'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                    ? $img->getImageName()
-                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                        ? $img->getImageName()
+                        : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 ], $p->getImages()->toArray()),
             ], $profile->getProjects()->toArray()),
-
-            // Expériences liées
             'experiences'   => array_map(fn($e) => [
                 'id'          => $e->getId(),
                 'role'        => $e->getRole(),
@@ -376,22 +363,18 @@ class ProfileController extends AbstractController
                     'id'   => $img->getId(),
                     'name' => $img->getImageName(),
                     'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                    ? $img->getImageName()
-                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                        ? $img->getImageName()
+                        : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 ], $e->getImages()->toArray()),
             ], $profile->getExperiences()->toArray()),
-
-            // Images liées au profil
             'images'        => array_map(fn($img) => [
                 'id'   => $img->getId(),
                 'name' => $img->getImageName(),
                 'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                ? $img->getImageName()
-                : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                    ? $img->getImageName()
+                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 'alt'  => $img->getImageName(),
             ], $profile->getImages()->toArray()),
-
-            // Compétences liées (ProfileSkill)
             'profileSkills' => array_map(fn($ps) => [
                 'id'    => $ps->getId(),
                 'level' => $ps->getLevel(),
@@ -399,25 +382,24 @@ class ProfileController extends AbstractController
                     'id'   => $ps->getSkill()->getId(),
                     'name' => $ps->getSkill()->getName(),
                     'slug' => $ps->getSkill()->getSlug(),
-                    // Images du skill avec URL absolue :
-                    'images' => array_map(function($img) {
-                        $imgName = $img->getImageName();
-                        $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
-                        $url = $isAbsolute
-                            ? $imgName
-                            : 'http://localhost:8000/uploads/images/skills/' . ltrim($imgName, '/');
-                        return [
-                            'id' => $img->getId(),
-                            'name' => $imgName,
-                            'url' => $url,
-                        ];
-                    }, $ps->getSkill()->getImages()->toArray()),
                 ] : null,
+                'pictures' => array_map(function($img) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute
+                        ? $imgName
+                        : 'http://localhost:8000/uploads/images/profileskills/' . ltrim($imgName, '/');
+                    return [
+                        'id' => $img->getId(),
+                        'name' => $imgName,
+                        'url' => $url,
+                    ];
+                }, $ps->getPictures()->toArray()),
             ], $profile->getProfileSkills()->toArray()),
         ];
     }
 
-    // Sérialisation publique d'un profil (pour la partie publique)
+    // Version publique pour la partie publique
     private function serializePublicProfile(Profile $profile): array
     {
         return [
@@ -431,8 +413,6 @@ class ProfileController extends AbstractController
             'slug'          => $profile->getSlug(),
             'creeLe'        => $profile->getCreatedAt()?->format('Y-m-d H:i:s'),
             'modifieLe'     => $profile->getUpdatedAt()?->format('Y-m-d H:i:s'),
-
-            // Projets liés
             'projects'      => array_map(fn($p) => [
                 'id'           => $p->getId(),
                 'title'        => $p->getTitle(),
@@ -449,12 +429,10 @@ class ProfileController extends AbstractController
                     'id'   => $img->getId(),
                     'name' => $img->getImageName(),
                     'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                    ? $img->getImageName()
-                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                        ? $img->getImageName()
+                        : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 ], $p->getImages()->toArray()),
             ], $profile->getProjects()->toArray()),
-
-            // Expériences liées
             'experiences'   => array_map(fn($e) => [
                 'id'          => $e->getId(),
                 'role'        => $e->getRole(),
@@ -467,22 +445,18 @@ class ProfileController extends AbstractController
                     'id'   => $img->getId(),
                     'name' => $img->getImageName(),
                     'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                    ? $img->getImageName()
-                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                        ? $img->getImageName()
+                        : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 ], $e->getImages()->toArray()),
             ], $profile->getExperiences()->toArray()),
-
-            // Images liées au profil
             'images'        => array_map(fn($img) => [
                 'id'   => $img->getId(),
                 'name' => $img->getImageName(),
                 'url'  => (filter_var($img->getImageName(), FILTER_VALIDATE_URL))
-                ? $img->getImageName()
-                : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
+                    ? $img->getImageName()
+                    : ($img->getImageName() ? '/uploads/images/' . $img->getImageName() : null),
                 'alt'  => $img->getImageName(),
             ], $profile->getImages()->toArray()),
-
-            // Compétences liées (ProfileSkill)
             'profileSkills' => array_map(fn($ps) => [
                 'id'    => $ps->getId(),
                 'level' => $ps->getLevel(),
@@ -490,20 +464,19 @@ class ProfileController extends AbstractController
                     'id'   => $ps->getSkill()->getId(),
                     'name' => $ps->getSkill()->getName(),
                     'slug' => $ps->getSkill()->getSlug(),
-                    // AJOUTE ICI LES IMAGES DU SKILL :
-                    'images' => array_map(function($img) {
-                        $imgName = $img->getImageName();
-                        $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
-                        $url = $isAbsolute
-                            ? $imgName
-                            : 'http://localhost:8000/uploads/images/skills/' . ltrim($imgName, '/');
-                        return [
-                            'id' => $img->getId(),
-                            'name' => $imgName,
-                            'url' => $url,
-                        ];
-                    }, $ps->getSkill()->getImages()->toArray()),
                 ] : null,
+                'pictures' => array_map(function($img) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute
+                        ? $imgName
+                        : 'http://localhost:8000/uploads/images/profileskills/' . ltrim($imgName, '/');
+                    return [
+                        'id' => $img->getId(),
+                        'name' => $imgName,
+                        'url' => $url,
+                    ];
+                }, $ps->getPictures()->toArray()),
             ], $profile->getProfileSkills()->toArray()),
         ];
     }

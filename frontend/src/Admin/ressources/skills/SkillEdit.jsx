@@ -7,96 +7,119 @@ import {
   useNotify,
   useEditController,
   useGetList,
+  ImageField,
+  ImageInput,
 } from "react-admin";
-import { ImageInput, ImageField } from "react-admin";
-import { useFormContext, Controller, useFieldArray } from "react-hook-form";
+import { useFormContext, Controller, useFieldArray, useWatch } from "react-hook-form";
 
-/**
- * Affiche les images déjà enregistrées pour la skill,
- * permet de les supprimer côté front avant envoi.
- */
-const ExistingImages = ({ existingImages, deletedImageIds, setDeletedImageIds }) => {
-  const { setValue, trigger } = useFormContext();
-
-  const handleDelete = (id) => {
-    setDeletedImageIds(ids => {
-      const newIds = [...ids, id];
-      setValue("deletedImageIds", newIds, { shouldDirty: true });
-      trigger("deletedImageIds");
-      return newIds;
-    });
-  };
-
+// Composant pour uploader de nouvelles images pour un profil
+const ProfilePictureInput = ({ index }) => {
+  const { setValue } = useFormContext();
   return (
-    <div style={{ marginBottom: 16 }}>
-      <label>Images existantes :</label>
-      {existingImages.length === 0 && <div>Aucune image</div>}
-      {existingImages
-        .filter(img => !deletedImageIds.includes(img.id))
-        .map(img => (
-          <div key={img.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 16 }}>
-            <ImageField record={img} source={img.url ? "url" : "src"} title="imageName" sx={{ width: 80 }} />
-            <button
-              type="button"
-              style={{ marginTop: 8 }}
-              onClick={() => handleDelete(img.id)}
-            >
-              Supprimer
-            </button>
-          </div>
-        ))}
-    </div>
+    <Controller
+      name={`profilesWithLevel.${index}.newPictures`}
+      defaultValue={[]}
+      render={({ field }) => (
+        <ImageInput
+          label="Ajouter des images"
+          accept="image/*"
+          multiple
+          {...field}
+          onChange={e => {
+            const files = Array.from(e.target.files || []);
+            setValue(
+              `profilesWithLevel.${index}.newPictures`,
+              [
+                ...(field.value || []),
+                ...files.map(f => ({ rawFile: f, imageName: f.name }))
+              ]
+            );
+          }}
+        >
+          <ImageField source="src" title="imageName" sx={{ width: 60 }} />
+        </ImageInput>
+      )}
+    />
   );
 };
 
-/**
- * Permet d'ajouter/retirer des profils associés à la skill,
- * et de saisir/modifier leur niveau.
- */
+// Composant pour gérer la liste des profils associés à la compétence
 const ProfilesWithLevelInput = () => {
   const { data: profiles } = useGetList("profiles");
-  const { control } = useFormContext();
+  const { control, setValue } = useFormContext();
+  const deletedProfilePictureIds = useWatch({ name: "deletedProfilePictureIds", control });
   const { fields, append, remove } = useFieldArray({
     control,
     name: "profilesWithLevel",
+    keyName: "fieldKey",
   });
 
-  // Pour éviter d'ajouter deux fois le même profil
-  const selectedIds = fields.map(f => Number(f.id));
+  const selectedIds = fields.map((f) => Number(f.id));
 
   return (
     <div>
       <select
-        onChange={e => {
+        onChange={(e) => {
           const selectedId = parseInt(e.target.value, 10);
-          const selectedProfile = profiles.find(p => p.id === selectedId);
-          if (
-            selectedProfile &&
-            !selectedIds.includes(selectedId)
-          ) {
-            append({ id: selectedId, level: 1, name: selectedProfile.name });
+          const selectedProfile = profiles.find((p) => p.id === selectedId);
+          if (selectedProfile && !selectedIds.includes(selectedId)) {
+            append({
+              id: selectedId,
+              level: 1,
+              name: selectedProfile.name,
+              pictures: [],
+              newPictures: [],
+            });
           }
         }}
       >
         <option value="">Ajouter un profil...</option>
         {profiles &&
-          profiles.map(profile => (
+          profiles.map((profile) => (
             <option key={profile.id} value={profile.id}>
               {profile.name}
             </option>
           ))}
       </select>
       {fields.map((item, index) => (
-        <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div key={item.fieldKey} style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ minWidth: 120 }}>{item.name}</span>
           <Controller
             name={`profilesWithLevel.${index}.level`}
             control={control}
             defaultValue={item.level}
             render={({ field }) => (
-              <input type="number" min={0} max={100} {...field} style={{ width: 80 }} />
+              <input
+                type="number"
+                min={0}
+                max={100}
+                {...field}
+                style={{ width: 80 }}
+              />
             )}
           />
+          {/* Images existantes */}
+          {item.pictures && item.pictures
+            .filter(pic => Array.isArray(deletedProfilePictureIds) ? !deletedProfilePictureIds.includes(pic.id) : true)
+            .map(pic => (
+              <div key={pic.id}>
+                <ImageField record={pic} source="url" title="imageName" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue(
+                      "deletedProfilePictureIds",
+                      [...(deletedProfilePictureIds || []), pic.id],
+                      { shouldDirty: true }
+                    );
+                  }}
+                >
+                  Supprimer
+                </button>
+              </div>
+            ))}
+          {/* Upload nouvelles images */}
+          <ProfilePictureInput index={index} />
           <button type="button" onClick={() => remove(index)}>
             Retirer
           </button>
@@ -106,80 +129,57 @@ const ProfilesWithLevelInput = () => {
   );
 };
 
-/**
- * Composant principal d'édition d'une compétence (skill) :
- * - Nom
- * - Images (ajout/suppression)
- * - Profils associés + niveau pour chaque profil
- */
 const SkillEdit = (props) => {
   const { record } = useEditController(props);
-  const [existingImages, setExistingImages] = React.useState([]);
-  const [deletedImageIds, setDeletedImageIds] = React.useState([]);
   const notify = useNotify();
-
-  // Charge les images existantes à l'ouverture
-  React.useEffect(() => {
-    if (record?.images) setExistingImages(record.images);
-  }, [record]);
-
-  // S'assure que chaque image a un nom cohérent
-  const ensureImageNames = (images) => {
-    if (!Array.isArray(images)) return [];
-    return images.map(img => {
-      if (img.imageName && img.imageName.trim() !== "") return img;
-      if (img.rawFile && img.rawFile.name) {
-        return { ...img, imageName: img.rawFile.name };
-      }
-      return { ...img, imageName: `image_${Date.now()}` };
-    });
-  };
 
   return (
     <Edit {...props} title="Modifier une compétence">
       <SimpleForm
+        record={record}
+        key={record?.id}
         defaultValues={{
-          profilesWithLevel: record?.profiles?.map(p => ({
-            id: p.id,
-            level: p.level ?? 1,
-            name: p.name,
-          })) || [],
+          deletedProfilePictureIds: [],
+          profilesWithLevel:
+            record?.profiles?.map((p) => ({
+              id: p.id,
+              level: p.level ?? 1,
+              name: p.name,
+              pictures: p.pictures || [],
+              newPictures: [],
+            })) || [],
         }}
-        transform={data => {
-          // Prépare les données à envoyer à l'API
-          const images = ensureImageNames(data.images);
-          const keptExisting = existingImages
-            .filter(img => !deletedImageIds.includes(img.id))
-            .map(img => ({ id: img.id, imageName: img.imageName }));
-
-          const profiles = (data.profilesWithLevel || []).map(({ id, level }) => ({ id, level }));
-
+        transform={(data) => {
+          const profiles = (data.profilesWithLevel || []).map(
+            ({ id, level }) => ({ id, level })
+          );
+          const profilePictures = {};
+          (data.profilesWithLevel || []).forEach((profile) => {
+            if (profile.newPictures && profile.newPictures.length > 0) {
+              profilePictures[profile.id] = profile.newPictures.filter(
+                (pic) => pic.rawFile
+              );
+            }
+          });
           return {
             ...data,
             profiles,
-            images,
-            deletedImageIds,
-            existingImages: keptExisting,
+            profileSkillPictures: profilePictures,
           };
         }}
-        onSubmitError={error => {
-          notify(error?.body?.error || "Erreur lors de la mise à jour", { type: "error" });
+        onSubmitError={(error) => {
+          notify(error?.body?.error || "Erreur lors de la mise à jour", {
+            type: "error",
+          });
         }}
       >
         <TextInput source="name" label="Nom" validate={required()} fullWidth />
-
-        <ImageInput source="images" label="Ajouter des images" accept="image/*" multiple>
-          <ImageField source="src" title="imageName" sx={{ width: 80 }} />
-        </ImageInput>
-
-        <ExistingImages
-          existingImages={existingImages}
-          deletedImageIds={deletedImageIds}
-          setDeletedImageIds={setDeletedImageIds}
+        <Controller
+          name="deletedProfilePictureIds"
+          defaultValue={[]}
+          render={({ field }) => <input type="hidden" {...field} />}
         />
-
         <ProfilesWithLevelInput />
-
       </SimpleForm>
     </Edit>
   );

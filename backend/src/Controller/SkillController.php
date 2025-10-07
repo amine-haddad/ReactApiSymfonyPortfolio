@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Contrôleur API pour la gestion des compétences (skills) côté admin.
@@ -69,30 +70,29 @@ class SkillController extends AbstractController
         $backendHost = 'http://localhost:8000';
         $data = [];
         foreach ($skills as $skill) {
-            // Liste des profils associés à ce skill pour l'utilisateur courant
             $profiles = [];
             foreach ($skill->getProfileSkills() as $ps) {
                 $profile = $ps->getProfile();
                 if ($profile && $profile->getUser()?->getId() === $user->getId()) {
+                    $pictures = [];
+                    foreach ($ps->getPictures() as $img) {
+                        $imgName = $img->getImageName();
+                        $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                        $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/profileskills/' . ltrim($imgName, '/');
+                        $pictures[] = [
+                            'id' => $img->getId(),
+                            'imageName' => $imgName,
+                            'url' => $url,
+                        ];
+                    }
                     $profiles[] = [
                         'id' => $profile->getId(),
                         'name' => $profile->getName(),
                         'level' => $ps->getLevel(),
                         'profileSkillId' => $ps->getId(),
+                        'pictures' => $pictures,
                     ];
                 }
-            }
-            // Images associées
-            $images = [];
-            foreach ($skill->getImages() as $img) {
-                $imgName = $img->getImageName();
-                $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
-                $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/skills/' . ltrim($imgName, '/');
-                $images[] = [
-                    'id' => $img->getId(),
-                    'imageName' => $imgName,
-                    'url' => $url,
-                ];
             }
             $data[] = [
                 'id' => $skill->getId(),
@@ -101,7 +101,6 @@ class SkillController extends AbstractController
                 'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
                 'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
                 'profiles' => $profiles,
-                'images' => $images,
             ];
         }
         $response = new JsonResponse($data);
@@ -151,7 +150,28 @@ class SkillController extends AbstractController
                     $profileSkill->setSkill($skill);
                     $level = isset($profileData['level']) ? (int)$profileData['level'] : 1;
                     $profileSkill->setLevel($level);
+                    $profileSkill->setCreatedAt(new \DateTime());
+                    $profileSkill->setUpdatedAt(new \DateTime());
                     $em->persist($profileSkill);
+
+                    // Ajoute l'image du profile-skill si présente
+                    $profilePictures = $request->files->get('profilePictures', []);
+                    $profilePictureFiles = $profilePictures[$profile->getId()] ?? [];
+                    // Si un seul fichier, transforme en tableau
+                    if ($profilePictureFiles instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                        $profilePictureFiles = [$profilePictureFiles];
+                    }
+                    foreach ($profilePictureFiles as $profilePictureFile) {
+                        if ($profilePictureFile) {
+                            $image = new \App\Entity\Image();
+                            $image->setProfileSkillFile($profilePictureFile); // 1. Setter AVANT persist
+                            $image->setProfileSkill($profileSkill);           // 2. Associe au ProfileSkill
+                            $image->setCreatedAt(new \DateTime());
+                            $image->setUpdatedAt(new \DateTime());
+                            $em->persist($image);                             // 3. Persist APRÈS le setter
+                            $profileSkill->addPicture($image);
+                        }
+                    }
                 }
             }
 
@@ -160,6 +180,8 @@ class SkillController extends AbstractController
                 $image = new \App\Entity\Image();
                 $image->setSkillFile($uploadedFile);
                 $image->setSkills($skill);
+                $image->setCreatedAt(new \DateTime());    // <-- AJOUTE ICI
+                $image->setUpdatedAt(new \DateTime());    // <-- AJOUTE ICI
                 $skill->addImage($image);
                 $em->persist($image);
             }
@@ -168,17 +190,30 @@ class SkillController extends AbstractController
             $em->getConnection()->commit();
 
             $requestSchemeAndHost = $request->getSchemeAndHttpHost();
+            $backendHost = 'http://localhost:8000';
             $responseData = [
                 'id' => $skill->getId(),
                 'name' => $skill->getName(),
                 'slug' => $skill->getSlug(),
                 'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
                 'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
-                'profiles' => array_map(function($ps) {
+                'profiles' => array_map(function($ps) use ($backendHost) {
+                    $pictures = [];
+                    foreach ($ps->getPictures() as $img) {
+                        $imgName = $img->getImageName();
+                        $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                        $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/profileskills/' . ltrim($imgName, '/');
+                        $pictures[] = [
+                            'id' => $img->getId(),
+                            'imageName' => $imgName,
+                            'url' => $url,
+                        ];
+                    }
                     return [
                         'id' => $ps->getProfile()->getId(),
                         'name' => $ps->getProfile()->getName(),
                         'level' => $ps->getLevel(),
+                        'pictures' => $pictures,
                     ];
                 }, $skill->getProfileSkills()->toArray()),
                 'images' => array_map(function($img) use ($requestSchemeAndHost) {
@@ -203,8 +238,13 @@ class SkillController extends AbstractController
      * Mise à jour d'une compétence (skill) : profils, niveaux, images, nom, slug.
      */
     #[Route('/api/skills/{id}', name: 'api_skill_update', methods: ['PUT', 'PATCH', 'POST'])]
-    public function update(Request $request, Skill $skill, EntityManagerInterface $em, SluggerInterface $slugger): JsonResponse
+    public function update(Request $request, Skill $skill, EntityManagerInterface $em, SluggerInterface $slugger, LoggerInterface $logger): JsonResponse
     {
+        $logger->debug('Payload reçu pour update skill', [
+            'POST' => $request->request->all(),
+            'FILES' => $request->files->all(),
+        ]);
+
         $data = $request->request->all();
         $deletedImageIds = array_map('intval', $request->get('deletedImageIds', []));
         $existingImages = $request->get('existingImages', []);
@@ -229,13 +269,15 @@ class SkillController extends AbstractController
             $em->persist($img);
         }
 
-        // 3. Ajoute les nouveaux fichiers uploadés
+        // 3. Ajoute les nouveaux fichiers uploadés (images du skill)
         foreach ($uploadedFiles as $idx => $file) {
             $img = new \App\Entity\Image();
             $img->setSkillFile($file);
             $img->setSkills($skill);
             $imgName = $request->get('imageNames', [])[$idx] ?? $file->getClientOriginalName();
             $img->setImageName($imgName);
+            $img->setCreatedAt(new \DateTime());    // <-- AJOUTE ICI
+            $img->setUpdatedAt(new \DateTime());    // <-- AJOUTE ICI
             $em->persist($img);
             $skill->addImage($img);
         }
@@ -278,9 +320,65 @@ class SkillController extends AbstractController
                         $profileSkill->setProfile($profile);
                         $profileSkill->setSkill($skill);
                         $profileSkill->setLevel((int)$profileData['level']);
+                        $profileSkill->setCreatedAt(new \DateTime());   // <-- AJOUTE ICI
+                        $profileSkill->setUpdatedAt(new \DateTime());   // <-- AJOUTE ICI
                         $em->persist($profileSkill);
                     }
                 }
+            }
+        }
+
+        // Gestion des images des ProfileSkill
+        $profilePictures = $request->files->get('profilePictures', []);
+        if (isset($data['profiles']) && is_array($data['profiles'])) {
+            foreach ($data['profiles'] as $profileData) {
+                if (is_string($profileData)) {
+                    $profileData = json_decode($profileData, true);
+                }
+                // Récupère la jointure ProfileSkill
+                $profileSkill = null;
+                if (isset($profileData['profileSkillId'])) {
+                    $profileSkill = $em->getRepository(\App\Entity\ProfileSkill::class)
+                        ->find($profileData['profileSkillId']);
+                } elseif (isset($profileData['id'])) {
+                    $profileSkill = $em->getRepository(\App\Entity\ProfileSkill::class)
+                        ->findOneBy([
+                            'profile' => $profileData['id'],
+                            'skill' => $skill->getId()
+                        ]);
+                }
+                if ($profileSkill) {
+                    // Ajoute les nouvelles images uploadées pour ce profileSkill
+                    $profilePictureFiles = $profilePictures[$profileSkill->getProfile()->getId()] ?? [];
+                    if ($profilePictureFiles instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                        $profilePictureFiles = [$profilePictureFiles];
+                    }
+                    foreach ($profilePictureFiles as $profilePictureFile) {
+                        if ($profilePictureFile) {
+                            $image = new \App\Entity\Image();
+                            $image->setProfileSkillFile($profilePictureFile); // 1. Setter AVANT persist
+                            $image->setProfileSkill($profileSkill);           // 2. Associe au ProfileSkill
+                            $image->setCreatedAt(new \DateTime());
+                            $image->setUpdatedAt(new \DateTime());
+                            $em->persist($image);                             // 3. Persist APRÈS le setter
+                            $profileSkill->addPicture($image);
+                        }
+                    }
+                    // (Optionnel) Ici tu peux aussi gérer la suppression d'anciennes images si besoin
+                }
+            }
+        }
+
+        // Ajoute ce bloc pour supprimer les images des profileSkill
+        $deletedProfilePictureIds = $request->get('deletedProfilePictureIds', []);
+        foreach ($deletedProfilePictureIds as $imgId) {
+            $img = $em->getRepository(\App\Entity\Image::class)->find($imgId);
+            if ($img && $img->getProfileSkill()) {
+                $profileSkill = $img->getProfileSkill();
+                if ($profileSkill) {
+                    $profileSkill->removePicture($img); // retire la relation côté objet
+                }
+                $em->remove($img); // supprime l'image
             }
         }
 
@@ -298,10 +396,23 @@ class SkillController extends AbstractController
                 $currentUser instanceof \App\Entity\User &&
                 $profileUser->getId() === $currentUser->getId()
             ) {
+                // Ajoute les images du profileSkill
+                $pictures = [];
+                foreach ($ps->getPictures() as $img) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/profileskills/' . ltrim($imgName, '/');
+                    $pictures[] = [
+                        'id' => $img->getId(),
+                        'imageName' => $imgName,
+                        'url' => $url,
+                    ];
+                }
                 $profiles[] = [
                     'id' => $profile->getId(),
                     'name' => $profile->getName(),
                     'level' => $ps->getLevel(),
+                    'pictures' => $pictures, // <-- AJOUTE CETTE LIGNE
                 ];
             }
         }
@@ -323,7 +434,6 @@ class SkillController extends AbstractController
             'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
             'profiles' => $profiles,
-            'images' => $images,
         ];
         return new JsonResponse($data, 200);
     }
@@ -394,10 +504,24 @@ class SkillController extends AbstractController
         foreach ($skill->getProfileSkills() as $ps) {
             $profile = $ps->getProfile();
             if ($profile && $profile->getUser()?->getId() === $user->getId()) {
+                // Récupère la première image associée au ProfileSkill
+                $pictures = [];
+                foreach ($ps->getPictures() as $img) {
+                    $imgName = $img->getImageName();
+                    $isAbsolute = preg_match('/^https?:\/\//i', $imgName);
+                    $url = $isAbsolute ? $imgName : $backendHost . '/uploads/images/profileskills/' . ltrim($imgName, '/');
+                    $pictures[] = [
+                        'id' => $img->getId(),
+                        'imageName' => $imgName,
+                        'url' => $url,
+                    ];
+                }
                 $profiles[] = [
                     'id' => $profile->getId(),
                     'name' => $profile->getName(),
                     'level' => $ps->getLevel(),
+                    'profileSkillId' => $ps->getId(),
+                    'pictures' => $pictures, // <-- toujours un tableau
                 ];
             }
         }
@@ -419,7 +543,6 @@ class SkillController extends AbstractController
             'created_at' => $skill->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updated_at' => $skill->getUpdatedAt()?->format('Y-m-d H:i:s'),
             'profiles' => $profiles,
-            'images' => $images,
         ];
         return new JsonResponse($data);
     }
