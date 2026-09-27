@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 
 #[ORM\Entity(repositoryClass: ProfileSkillRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 #[ApiFilter(SearchFilter::class, properties: [
     'profile.id' => 'exact',
     'skill.name' => 'partial'
@@ -72,6 +73,20 @@ class ProfileSkill
     public function __construct()
     {
         $this->pictures = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function initializeTimestamps(): void
+    {
+        $now = new \DateTime();
+        $this->created_at ??= $now;
+        $this->updated_at ??= $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function updateTimestamp(): void
+    {
+        $this->updated_at = new \DateTime();
     }
 
     public function getId(): ?int

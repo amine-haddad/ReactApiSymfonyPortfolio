@@ -14,6 +14,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ImageRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 //#[ApiResource(
 //    normalizationContext: [
 //        'groups' => ['read:Image', 'read:Profile'],
@@ -81,6 +82,14 @@ class Image
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    #[ORM\PrePersist]
+    public function initializeTimestamps(): void
+    {
+        $now = new DateTime();
+        $this->created_at ??= $now;
+        $this->updated_at ??= $now;
     }
 
     public function getImageName(): ?string
