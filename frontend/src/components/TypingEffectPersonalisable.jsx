@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import PropTypes from "prop-types";
 import styles from "../styles/TypingEffect.module.css";
 
 // Génère une faute de frappe aléatoire sur une lettre du texte
@@ -136,11 +137,16 @@ const TypingEffectPersonalisable = ({ name = "John Doe", title = "Web Developer"
         <p
           className={`${styles.secondPhrase} ${animateSecondPhrase ? styles.visible : ""}`}
         >
-          Let's create something amazing together!
+          Let&apos;s create something amazing together!
         </p>
       )}
     </div>
   );
+};
+
+TypingEffectPersonalisable.propTypes = {
+  name: PropTypes.string,
+  title: PropTypes.string,
 };
 
 export default TypingEffectPersonalisable;

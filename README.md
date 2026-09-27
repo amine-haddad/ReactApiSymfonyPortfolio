@@ -71,7 +71,7 @@ Assurez-vous que Docker est en cours d'exécution sur votre machine.
 
 ---
 
-> **Important :**  
+> **Important :**
 > Toutes les commandes Docker doivent être lancées à la racine du projet.
 
 ---

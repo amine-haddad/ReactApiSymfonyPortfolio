@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { useParams } from "react-router-dom";
 import useSingleProfile from "../../../hooks/useSingleProfile";
 import DynamicShapes from "../../../components/DynamicShapes";
@@ -17,8 +17,6 @@ const Index = () => {
   const { profileId } = useParams();
   // Utilisation du hook unique en mode public
   const { profile, loading, error } = useSingleProfile(profileId, { forcePublic: true });
-
-  console.log("profile privé", profile, "error", error);
 
   if (loading) return <p className={styles.profileLoading}>Chargement...</p>;
   if (error) return <p className={styles.profileError}>Erreur : {error}</p>;

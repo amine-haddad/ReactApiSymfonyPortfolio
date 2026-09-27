@@ -1,4 +1,5 @@
 .env
+/vendor/
 /backend/config/jwt/private.pem
 /backend/config/jwt/public.pem
 /backend/config/jwt/*.pem

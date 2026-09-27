@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import PageLayout from "../layouts/PageLayout";
 import Spinner from "../components/Spinner";

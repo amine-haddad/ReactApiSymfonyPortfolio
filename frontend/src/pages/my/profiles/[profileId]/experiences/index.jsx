@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import useSingleProfile from "../../../../../hooks/useSingleProfile";
 import PageLayout from "../../../../../layouts/PageLayout";
@@ -39,7 +39,7 @@ const ExperienceList = () => {
               <div className={styles.experienceCard} key={e.id}>
                 <h3 className={styles.experienceTitle}>{e.role || "Titre non renseigné"}</h3>
                 <p className={styles.experienceRole}>
-                  {(`company: ${e.compagny}` || "Entreprise non renseignée")}<br />
+                  {e.compagny ? `company: ${e.compagny}` : "Entreprise non renseignée"}<br />
                   {e.startDate ? formatDate(e.startDate) : "Date début inconnue"} – {e.endDate ? formatDate(e.endDate) : "Date fin inconnue"}
                 </p>
                 <p className={styles.experienceDescription}>{e.description || "Description non renseignée"}</p>

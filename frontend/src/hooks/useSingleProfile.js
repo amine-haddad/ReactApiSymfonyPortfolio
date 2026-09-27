@@ -19,10 +19,10 @@ function useSingleProfile(profileId, options = {}) {
     if (!options.forcePublic && authLoading) return;
 
     let endpoint;
-    let fetchOptions = {};
+    let fetchOptions;
     if (options.forcePublic || isAuthenticated === undefined) {
       endpoint = `/api/public/profiles/${profileId}`;
-      fetchOptions = {}; // Pas de credentials
+      fetchOptions = {};
     } else {
       endpoint = isAuthenticated
         ? `/api/profiles/${profileId}`
@@ -36,7 +36,6 @@ function useSingleProfile(profileId, options = {}) {
     fetch(endpoint, fetchOptions)
       .then(async (res) => {
         if (!res.ok && endpoint.startsWith("/api/profiles") && (res.status === 401 || res.status === 403)) {
-          // Token expiré, tente le mode public
           const publicRes = await fetch(`/api/public/profiles/${profileId}`);
           if (!publicRes.ok) throw new Error("Erreur HTTP " + publicRes.status);
           return publicRes.json();

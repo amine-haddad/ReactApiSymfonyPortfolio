@@ -42,7 +42,7 @@ function useProfiles() {
         } else {
           setProfiles([]);
         }
-      } catch (err) {
+      } catch {
         setError("Impossible de charger les profils.");
       } finally {
         setLoading(false);
@@ -50,7 +50,7 @@ function useProfiles() {
     };
 
     fetchProfiles();
-  }, [authLoading, isAuthenticated]);
+  }, [authLoading, isAuthenticated, logout]);
 
   return { profiles, loading, error };
 }

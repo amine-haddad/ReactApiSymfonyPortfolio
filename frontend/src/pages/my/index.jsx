@@ -1,7 +1,6 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import useProfiles from "../../hooks/useProfiles";
-import { Link } from "react-router-dom";
 import PageLayout from "../../layouts/PageLayout";
 import Spinner from "../../components/Spinner";
 import ProtectedRoute from "../../components/ProtectedRoute";
@@ -155,7 +154,7 @@ function AdminDashboard() {
   );
 }
 
-export default function () {
+export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <AdminDashboard />

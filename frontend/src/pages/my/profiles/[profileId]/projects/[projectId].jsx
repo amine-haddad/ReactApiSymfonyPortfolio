@@ -1,7 +1,5 @@
 // src/pages/profiles/[profileId]/projects/[projectId].jsx
 import { useParams, Link } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../../../../../contexts/AuthContext";
 import useSingleProfile from "../../../../../hooks/useSingleProfile";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -15,7 +13,6 @@ import styles from "../../../../../styles/ProjectDetail.module.css";
 
 const ProjectDetail = () => {
   const { profileId, projectId } = useParams();
-  const { user } = useContext(AuthContext);
   const { profile, loading, error } = useSingleProfile(profileId);
 
   if (loading) return <div className={styles.container}><Spinner /></div>;
@@ -36,7 +33,6 @@ const ProjectDetail = () => {
     });
   };
 
-  const imageUrl = project.image || "/assets/clavierFondBleuter.jpeg";
   const hasMultipleSlides = project.images?.length > 1;
 
   return (
